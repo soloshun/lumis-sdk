@@ -1,0 +1,18 @@
+# Maintainer-only sprint tracker. Keep it available locally for review, but out of the public repository.
+SPRINTS.md
+
+# Python and local OpenARIA state
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+dist/
+build/
+*.egg-info/
+.openaria/
+
+.env
