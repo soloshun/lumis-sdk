@@ -2,6 +2,7 @@
 SPRINTS.md
 
 # Python and local OpenARIA state
+.env
 .venv/
 __pycache__/
 *.py[cod]

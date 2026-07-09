@@ -1,4 +1,6 @@
-"""Tests for the Sprint 0 command-line interface."""
+"""Tests for the OpenARIA command-line interface."""
+
+from pathlib import Path
 
 from typer.testing import CliRunner
 
@@ -22,3 +24,24 @@ def test_version_is_available() -> None:
 
     assert result.exit_code == 0
     assert result.output.strip() == "0.1.0"
+
+
+def test_diagnose_writes_an_evidence_grounded_report(tmp_path: Path) -> None:
+    """The first synthetic failure produces a local Markdown report."""
+    log_path = Path("examples/simple-log-diagnosis/failure.log")
+    output_path = tmp_path / "incident-report.md"
+
+    result = runner.invoke(
+        app,
+        ["diagnose", "--log", str(log_path), "--output", str(output_path)],
+    )
+
+    assert result.exit_code == 0
+    assert output_path.exists()
+
+    report = output_path.read_text(encoding="utf-8")
+    assert "Classification: schema_change" in report
+    assert "KeyError: 'Close'" in report
+    assert "Likely Root Cause (Hypothesis)" in report
+    assert "not a confirmed cause" in report
+    assert "has not executed a remediation action" in report

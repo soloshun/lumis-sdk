@@ -1,14 +1,14 @@
 # OpenARIA
 
-**Agentic Recovery and Incident Automation for self-healing pipelines.**
+**Vendor-agnostic, guarded self-healing for data, ML, and software delivery pipelines.**
 
-OpenARIA is an open-source, clean-room proof of concept for turning failed data, machine learning, and software delivery pipelines into structured incident reports, evidence-grounded diagnoses, safe recommended next steps, and reusable operational memory.
+OpenARIA is an open-source, clean-room framework for turning failed data, machine learning, and software delivery pipelines into structured incident reports, evidence-grounded diagnoses, safe recommended next steps, and reusable operational memory.
 
 OpenARIA v0.1 focuses on **Diagnosis-as-Code**. It does not perform automatic production remediation.
 
 ## Status
 
-OpenARIA is in its foundation sprint. The first public proof will be a local command that diagnoses a synthetic pipeline failure and produces a Markdown incident report.
+OpenARIA is an early proof of concept. The first public proof is a local command that diagnoses a synthetic pipeline failure and produces a Markdown incident report.
 
 ## Development
 
@@ -19,6 +19,17 @@ uv sync --all-groups
 uv run openaria --help
 uv run pytest
 ```
+
+## First deterministic diagnosis
+
+Sprint 1 contains one intentionally narrow, offline proof. It recognizes a synthetic schema-mismatch log and writes an evidence-grounded report:
+
+```bash
+uv run openaria diagnose \
+  --log examples/simple-log-diagnosis/failure.log
+```
+
+The command writes `.openaria/reports/incident-report.md` by default. It uses no network service, LLM, database, or remediation action.
 
 ## Safety and clean-room policy
 
