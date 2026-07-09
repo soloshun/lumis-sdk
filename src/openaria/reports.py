@@ -58,3 +58,10 @@ Confidence: {diagnosis.confidence:.0%}. This is a hypothesis, not a confirmed ca
 
 This report recommends investigation steps only. OpenARIA has not executed a remediation action.
 """
+
+
+def append_resolution(report_markdown: str, resolution: str | None) -> str:
+    """Append a final human resolution when one has been recorded."""
+    if resolution is None:
+        return report_markdown
+    return f"{report_markdown.rstrip()}\n\n## Final Resolution\n\n{resolution}\n"

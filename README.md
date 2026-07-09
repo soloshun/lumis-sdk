@@ -31,6 +31,18 @@ uv run openaria diagnose \
 
 The command writes `.openaria/reports/incident-report.md` by default. It uses no network service, LLM, database, or remediation action.
 
+## Local incident memory
+
+Sprint 2 saves each diagnosis in local SQLite memory at `.openaria/incidents.db`. The command prints an incident ID that can be used to retrieve the report, save a final resolution, or find matching past incidents:
+
+```bash
+uv run openaria report <incident-id>
+uv run openaria resolve <incident-id> --resolution "The source renamed Close to closing_price."
+uv run openaria memory search "KeyError Close"
+```
+
+Search is local, transparent keyword matching. It does not send incident data anywhere.
+
 ## Safety and clean-room policy
 
 Use only public knowledge, original code, public documentation, and synthetic examples. Do not contribute employer/client code, credentials, logs, runbooks, datasets, or architecture material.
