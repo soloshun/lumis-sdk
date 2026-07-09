@@ -1,6 +1,6 @@
 # Simple log diagnosis
 
-This synthetic example demonstrates the first OpenARIA proof: a local pipeline log becomes a structured Markdown incident report.
+This synthetic example demonstrates a local pipeline log becoming a structured Markdown incident report.
 
 ```bash
 uv run openaria diagnose --log examples/simple-log-diagnosis/failure.log

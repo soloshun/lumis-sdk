@@ -6,9 +6,9 @@ import typer
 
 from openaria import __version__
 from openaria.incidents import incident_from_log
+from openaria.llm import diagnose_with_optional_model
 from openaria.memory import IncidentNotFoundError, SQLiteIncidentStore, search_incidents
 from openaria.reports import append_resolution, render_markdown_report
-from openaria.triage import diagnose_log
 
 app = typer.Typer(
     name="openaria",
@@ -66,7 +66,7 @@ def diagnose(
     """Diagnose a local log with deterministic, evidence-only rules."""
     log_text = log.read_text(encoding="utf-8")
     incident = incident_from_log(log_text, str(log))
-    diagnosis = diagnose_log(log_text)
+    diagnosis = diagnose_with_optional_model(log_text)
     report = render_markdown_report(incident, diagnosis)
 
     output.parent.mkdir(parents=True, exist_ok=True)
