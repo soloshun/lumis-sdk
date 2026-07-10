@@ -36,7 +36,15 @@ export OPENARIA_DEMO_MODEL="openai/gpt-4o-mini"
 uv run python run_agent.py
 ```
 
-The agent should inspect the synthetic incident, telemetry, schema, lineage, and verification information; read the separate runbook and allowlisted playbook; record the validated deterministic diagnosis in local OpenARIA memory; propose the configured playbook; and leave approval pending for a human. It cannot execute a remediation.
+For `schema-drift-001`, the cookbook's configured deterministic rule matches first. OpenARIA saves that deterministic report locally and does not call the LLM. For an unknown incident, the agent inspects telemetry and project knowledge; reads code when relevant; and must export its final Markdown through the explicit `export_analysis` tool.
+
+For the intentionally unfamiliar incident, run:
+
+```bash
+uv run python run_agent.py --incident-id code-error-001
+```
+
+This incident does not match the cookbook's deterministic rule. The agent can call `read_synthetic_code` to inspect the synthetic source file, then must call `export_analysis` exactly once to save its final Markdown analysis under `.openaria/reports/` and local incident memory.
 
 ## Knowledge library
 

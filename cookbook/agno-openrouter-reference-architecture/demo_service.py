@@ -7,13 +7,23 @@ from fastapi import FastAPI, HTTPException
 app = FastAPI(title="OpenARIA synthetic incident estate", version="0.1.0")
 
 INCIDENT_ID = "schema-drift-001"
+UNSEEN_INCIDENT_ID = "code-error-001"
 
-_INCIDENT = {
-    "id": INCIDENT_ID,
-    "source_tool": "synthetic_prefect",
-    "pipeline_name": "stock_feature_pipeline",
-    "environment": "demo",
-    "status": "open",
+_INCIDENTS = {
+    INCIDENT_ID: {
+        "id": INCIDENT_ID,
+        "source_tool": "synthetic_prefect",
+        "pipeline_name": "stock_feature_pipeline",
+        "environment": "demo",
+        "status": "open",
+    },
+    UNSEEN_INCIDENT_ID: {
+        "id": UNSEEN_INCIDENT_ID,
+        "source_tool": "synthetic_prefect",
+        "pipeline_name": "adjusted_price_pipeline",
+        "environment": "demo",
+        "status": "open",
+    },
 }
 
 _CONTEXT = {
@@ -30,11 +40,20 @@ _CONTEXT = {
     "verification": {"status": "not_run", "notes": "No remediation is available in this cookbook."},
 }
 
+_UNSEEN_CONTEXT = {
+    "logs": ["calculate_price_adjustment failed with KeyError: 'adjusted_price'"],
+    "metrics": {"failure_count": 1, "last_success_age_minutes": 60},
+    "lineage": {"upstream": ["price_source"], "downstream": ["adjusted_price_dashboard"]},
+    "schema": {"current": ["Date", "Close", "Volume"]},
+    "verification": {"status": "not_run", "notes": "No remediation is available in this cookbook."},
+}
+
 _KNOWLEDGE_ROOT = Path(__file__).parent / "knowledge"
+_CODE_ROOT = Path(__file__).parent / "synthetic_project"
 
 
 def _require_incident(incident_id: str) -> None:
-    if incident_id != INCIDENT_ID:
+    if incident_id not in _INCIDENTS:
         raise HTTPException(status_code=404, detail="Synthetic incident not found")
 
 
@@ -42,16 +61,26 @@ def _require_incident(incident_id: str) -> None:
 def get_incident(incident_id: str) -> dict[str, object]:
     """Return the normalized synthetic incident."""
     _require_incident(incident_id)
-    return _INCIDENT
+    return _INCIDENTS[incident_id]
 
 
 @app.get("/incidents/{incident_id}/context/{context_name}")
 def get_context(incident_id: str, context_name: str) -> object:
     """Return one bounded synthetic context item for an agent tool."""
     _require_incident(incident_id)
-    if context_name not in _CONTEXT:
+    context = _CONTEXT if incident_id == INCIDENT_ID else _UNSEEN_CONTEXT
+    if context_name not in context:
         raise HTTPException(status_code=404, detail="Synthetic context item not found")
-    return _CONTEXT[context_name]
+    return context[context_name]
+
+
+@app.get("/code/{file_path:path}")
+def read_code(file_path: str) -> dict[str, str]:
+    """Return one safe, cookbook-owned synthetic source file."""
+    candidate = (_CODE_ROOT / file_path).resolve()
+    if _CODE_ROOT not in candidate.parents or not candidate.is_file():
+        raise HTTPException(status_code=404, detail="Synthetic code file not found")
+    return {"path": file_path, "content": candidate.read_text(encoding="utf-8")}
 
 
 @app.get("/knowledge/{knowledge_type}/{document_name}")

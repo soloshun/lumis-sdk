@@ -1,5 +1,6 @@
 """Run an opt-in Agno/OpenRouter investigation over the synthetic FastAPI estate."""
 
+import argparse
 import os
 from pathlib import Path
 
@@ -46,6 +47,12 @@ def build_agent(base_url: str, model_id: str):
         assert isinstance(knowledge, dict)
         return {str(key): str(value) for key, value in knowledge.items()}
 
+    def read_synthetic_code(file_path: str) -> dict[str, str]:
+        """Read one bounded synthetic code file for an unfamiliar incident."""
+        code = _get_json(base_url, f"/code/{file_path}")
+        assert isinstance(code, dict)
+        return {str(key): str(value) for key, value in code.items()}
+
     def record_framework_diagnosis(incident_id: str) -> dict[str, str]:
         """Store the configured OpenARIA diagnosis in this cookbook's local SQLite memory."""
         incident_data = get_incident(incident_id)
@@ -80,6 +87,22 @@ def build_agent(base_url: str, model_id: str):
             "reason": "Schema-related changes require an explicit human decision.",
         }
 
+    def export_analysis(incident_id: str, markdown: str) -> dict[str, str]:
+        """Save the final LLM Markdown analysis to local OpenARIA memory and a report file."""
+        logs = get_context(incident_id, "logs")
+        log_text = "\n".join(logs) if isinstance(logs, list) else str(logs)
+        incident = incident_from_log(
+            log_text, f"fastapi://{incident_id}/logs", project_config.project
+        )
+        fallback_diagnosis = diagnose_text(log_text, project_config.rules)
+        report_path = cookbook_dir / project_config.reports.output_dir / f"{incident_id}-llm.md"
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(markdown, encoding="utf-8")
+        stored = SQLiteIncidentStore(cookbook_dir / project_config.memory.path).save(
+            incident, fallback_diagnosis, markdown, report_path
+        )
+        return {"report_path": str(report_path), "incident_id": stored.id}
+
     return Agent(
         model=OpenRouter(id=model_id),
         tools=[
@@ -88,10 +111,18 @@ def build_agent(base_url: str, model_id: str):
             get_framework_diagnosis,
             read_runbook,
             read_playbook,
+            read_synthetic_code,
             record_framework_diagnosis,
             propose_playbook,
             request_approval,
+            export_analysis,
         ],
+        system_message=(
+            "You are the OpenARIA cookbook investigation agent. Use only the supplied tools and "
+            "synthetic context. Never claim an action was executed. If deterministic diagnosis is "
+            "unknown, investigate the available context and code, then you MUST call "
+            "export_analysis exactly once with your final human-readable Markdown report."
+        ),
         instructions=[
             "Investigate only the supplied synthetic incident.",
             (
@@ -121,16 +152,47 @@ def _get_json(base_url: str, path: str) -> object:
     return response.json()
 
 
+def save_deterministic_result_if_matched(base_url: str, incident_id: str) -> bool:
+    """Save and print a deterministic result, returning false only for unknown incidents."""
+    cookbook_dir = Path(__file__).parent
+    project_config = load_config(cookbook_dir / "openaria.yml")
+    logs = _get_json(base_url, f"/incidents/{incident_id}/context/logs")
+    log_text = "\n".join(logs) if isinstance(logs, list) else str(logs)
+    diagnosis = diagnose_text(log_text, project_config.rules)
+    if diagnosis.triage.classification == "unknown":
+        return False
+
+    incident = incident_from_log(log_text, f"fastapi://{incident_id}/logs", project_config.project)
+    report = render_markdown_report(incident, diagnosis)
+    report_path = (
+        cookbook_dir / project_config.reports.output_dir / f"{incident_id}-deterministic.md"
+    )
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(report, encoding="utf-8")
+    stored = SQLiteIncidentStore(cookbook_dir / project_config.memory.path).save(
+        incident, diagnosis, report, report_path
+    )
+    print(f"Deterministic report written to {report_path}")
+    print(f"Incident ID: {stored.id}")
+    return True
+
+
 def main() -> None:
     """Start a one-shot agent investigation after explicit user configuration."""
-    if not os.getenv("OPENROUTER_API_KEY"):
-        raise SystemExit("Set OPENROUTER_API_KEY before running the live cookbook agent.")
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--incident-id", default="schema-drift-001")
+    args = parser.parse_args()
     base_url = os.getenv("OPENARIA_DEMO_URL", "http://127.0.0.1:8000")
-    model_id = os.getenv("OPENARIA_DEMO_MODEL", "openai/gpt-4o-mini")
+    if save_deterministic_result_if_matched(base_url, args.incident_id):
+        return
+    if not os.getenv("OPENROUTER_API_KEY"):
+        raise SystemExit(
+            "Deterministic diagnosis was unknown. Set OPENROUTER_API_KEY to run the live agent."
+        )
+    model_id = os.getenv("OPENARIA_DEMO_MODEL", "deepseek/deepseek-v4-flash")
     agent = build_agent(base_url, model_id)
     agent.print_response(
-        "Investigate synthetic incident schema-drift-001 and produce a concise incident report.",
+        f"Investigate synthetic incident {args.incident_id} and produce a concise incident report.",
         stream=True,
     )
 
