@@ -7,6 +7,7 @@ All notable changes to OpenARIA are recorded here. The project follows the spiri
 ### Added
 
 - `ml-regression-monitoring`, a synthetic housing-regression cookbook covering deterministic feature drift, unfamiliar feature-contract failures, and candidate-model quality regression.
+- `software-delivery-ci-investigation`, a synthetic CI cookbook covering deterministic lockfile mismatch, workflow-permission, and infrastructure-reference incidents.
 - A cookbook-local `openaria/` configuration layout and teaching material that explains the human-authored meaning of rule confidence.
 - This changelog.
 

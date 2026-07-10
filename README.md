@@ -190,6 +190,7 @@ Available examples:
 - [Recording a resolution](cookbook/recording-resolution/README.md) - human-confirmed outcome in local memory.
 - [Data pipeline investigation](cookbook/data-pipeline-investigation/README.md) - schema drift, unfamiliar transformation failures, and redacted telemetry through an opt-in bounded agent.
 - [ML regression monitoring](cookbook/ml-regression-monitoring/README.md) - feature drift, feature-contract failures, and candidate-model quality investigation through an opt-in bounded agent.
+- [Software delivery CI investigation](cookbook/software-delivery-ci-investigation/README.md) - CI lockfile, workflow permission, and infrastructure-reference investigation through an opt-in bounded agent.
 
 See the [cookbook catalog](cookbook/README.md) for the domain boundaries and shared layout.
 

@@ -1,0 +1,10 @@
+project: synthetic_checkout_service
+environment: demo
+
+memory:
+  path: ../.openaria/incidents.db
+
+reports:
+  output_dir: ../.openaria/reports
+
+rules_file: rules.yml

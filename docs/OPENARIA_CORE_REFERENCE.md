@@ -296,6 +296,7 @@ Current cookbooks:
 | [`recording-resolution`](../cookbook/recording-resolution/README.md) | Recording a human-confirmed resolution against local incident memory. |
 | [`data-pipeline-investigation`](../cookbook/data-pipeline-investigation/README.md) | A separate opt-in application for synthetic data-pipeline context, bounded tools, explicit export, and redaction. |
 | [`ml-regression-monitoring`](../cookbook/ml-regression-monitoring/README.md) | A separate opt-in application for feature drift, feature contracts, and candidate-model quality in a synthetic regression pipeline. |
+| [`software-delivery-ci-investigation`](../cookbook/software-delivery-ci-investigation/README.md) | A separate opt-in application for synthetic CI lockfile, workflow-permission, and infrastructure-reference incidents. |
 
 The optional Agno/OpenRouter examples are intentionally not core dependencies. They prove that OpenARIA can be used below provider- and agent-specific applications without forcing that stack on every framework user.
 

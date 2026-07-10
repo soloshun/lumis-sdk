@@ -10,6 +10,7 @@ Cookbooks are small, runnable teaching projects that use OpenARIA core in a spec
 | [recording-resolution](recording-resolution/README.md) | Save a human-confirmed outcome to local incident memory. | None |
 | [data-pipeline-investigation](data-pipeline-investigation/README.md) | Schema drift, unfamiliar transformation failure, and telemetry redaction in a data pipeline. | Agno + OpenRouter |
 | [ml-regression-monitoring](ml-regression-monitoring/README.md) | Feature drift, feature contracts, and candidate-model quality in one regression pipeline. | Agno + OpenRouter |
+| [software-delivery-ci-investigation](software-delivery-ci-investigation/README.md) | CI lockfiles, workflow permissions, and Terraform references in one delivery pipeline. | Agno + OpenRouter |
 
 ## Shared structure
 
@@ -31,4 +32,4 @@ This organization keeps configuration easy to find without mixing it with source
 
 Start with one bounded incident class and synthetic inputs. Explain the domain, the signals being tested, deterministic and unknown paths, safety boundary, and exact commands in the cookbook README. Keep optional providers and frameworks inside the cookbook. Add core functionality only when it is vendor-agnostic and useful to more than one cookbook.
 
-The next planned domain is a software-delivery pipeline cookbook. It is not implemented yet.
+The three initial domains now cover data pipelines, ML regression monitoring, and software delivery. They are synthetic proof-of-concept cookbooks, not production integrations.
