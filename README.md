@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="assets/openaria-mark.svg" width="112" alt="OpenARIA mark: an open signal surrounding a guarded incident loop">
+  <img src="assets/openaria-logo.svg" width="310" alt="OpenARIA">
 </p>
 
 <h1 align="center">OpenARIA</h1>
 
 <p align="center">
-  <strong>Diagnosis-as-Code for vendor-agnostic pipeline reliability.</strong>
+  <strong>A vendor-agnostic framework for guarded pipeline recovery.</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@ OpenARIA is the open-source Python implementation companion to **ARIA** - **Agen
 
 It is the implementation companion to the ARIA reference architecture proposed in *Agentic Self-Healing for Data & AI Pipelines: An Affordable Vendor-Agnostic Architecture Using Open-Source Software*. The project starts with the smallest useful, reviewable loop: local telemetry in, structured diagnosis out, with no required cloud account, model provider, or production access.
 
-> **Status: pre-alpha research proof of concept.** OpenARIA v0.1 implements **Diagnosis-as-Code**. It does not autonomously remediate production systems.
+> **Status: pre-alpha research proof of concept.** OpenARIA v0.1 delivers the **diagnosis phase** of the roadmap. The destination is Healing-as-Code: a guarded, human-governed recovery loop. It does not autonomously remediate production systems.
 
 ## Why OpenARIA
 
@@ -28,7 +28,13 @@ Pipeline incidents are rarely a single-tool problem. A failure may begin with a 
 
 OpenARIA provides a portable diagnosis layer that a project can configure around its own estate. It does not replace monitoring, orchestration, lineage, or incident-management systems. Instead, it gives a project a common way to normalize an incident, apply reviewable rules, capture evidence, state uncertainty, record safe next steps, and retain the result locally.
 
-## The core idea: Diagnosis-as-Code
+## From diagnosis to Healing-as-Code
+
+OpenARIA's long-term direction is **Healing-as-Code**: teams should be able to declare policies, playbooks, approval requirements, and safe recovery behavior as reviewable configuration. That direction includes the full guarded loop: detect, triage, diagnose, plan, approve, remediate, verify, and learn.
+
+The current implementation begins with **Diagnosis-as-Code**, the necessary first milestone. A system should not attempt to heal a pipeline until it can produce a reviewable diagnosis, show its evidence, state uncertainty, and retain what humans ultimately confirmed. This is a stage of the roadmap, not the product's entire identity.
+
+## The current capability: Diagnosis-as-Code
 
 **Diagnosis-as-Code** is OpenARIA's name for making incident diagnosis reproducible, inspectable, and structured instead of leaving it as scattered log reading or tribal knowledge.
 

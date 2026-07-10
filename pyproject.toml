@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "openaria"
 version = "0.1.0"
-description = "Vendor-agnostic Diagnosis-as-Code for data, ML, and software delivery pipelines."
+description = "Vendor-agnostic framework for guarded data, ML, and software pipeline recovery."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"

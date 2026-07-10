@@ -10,7 +10,7 @@ OpenARIA is a lightweight Python framework for turning a pipeline failure into a
 
 The most important public claim is deliberately modest:
 
-> **OpenARIA v0.1 implements Diagnosis-as-Code, not autonomous production remediation.**
+> **OpenARIA's direction is Healing-as-Code. v0.1 implements Diagnosis-as-Code, the first safe and reviewable phase of that roadmap, not autonomous production remediation.**
 
 The repository is a research proof of concept. It demonstrates a small, inspectable slice of the proposed architecture using synthetic examples. It does not claim production readiness, empirical validation, universal root-cause accuracy, or a complete self-healing platform.
 
@@ -88,7 +88,7 @@ An incident report separates:
 - **missing evidence** - context still required to make the conclusion stronger; and
 - **recommended next steps** - safe investigation work for a human.
 
-This is the meaning of **Diagnosis-as-Code**: the diagnostic process and output are structured, reviewable, and reproducible instead of being an opaque free-form summary.
+This is the meaning of **Diagnosis-as-Code**: the diagnostic process and output are structured, reviewable, and reproducible instead of being an opaque free-form summary. It is the current milestone toward **Healing-as-Code**, where teams can eventually declare guarded policies, approvals, playbooks, execution boundaries, and verification behavior as reviewable configuration.
 
 ### 3.4 Guarded autonomy, not blind autonomy
 
@@ -368,7 +368,7 @@ Do not describe the roadmap as present functionality. In particular, OpenARIA do
 
 1. **Home** - concise thesis, principle cards, architecture diagram, quick start, cookbook links, paper and GitHub links.
 2. **Introduction** - project identity, problem, scope, and maturity.
-3. **Concepts** - Diagnosis-as-Code, deterministic-before-generative, evidence and uncertainty, guarded autonomy, framework versus cookbook.
+3. **Concepts** - Healing-as-Code roadmap, current Diagnosis-as-Code capability, deterministic-before-generative, evidence and uncertainty, guarded autonomy, framework versus cookbook.
 4. **Quick start** - the local simple-log cookbook.
 5. **Configuration reference** - `openaria.yml`, rules, paths, and CLI.
 6. **Architecture** - paper-layer mapping and the lifecycle extension boundaries.
@@ -378,9 +378,9 @@ Do not describe the roadmap as present functionality. In particular, OpenARIA do
 
 ### Suggested homepage copy
 
-**Headline:** `Diagnosis-as-Code for vendor-agnostic pipeline reliability.`
+**Headline:** `A vendor-agnostic framework for guarded pipeline recovery.`
 
-**Supporting sentence:** `OpenARIA is an open-source framework that turns pipeline failures into evidence-grounded, reviewable incident diagnoses and local operational memory - without requiring a specific observability vendor, model provider, or remediation platform.`
+**Supporting sentence:** `OpenARIA starts with evidence-grounded, reviewable incident diagnosis and local operational memory, then evolves toward Healing-as-Code: guarded, human-governed recovery across mixed pipeline estates.`
 
 **Primary call to action:** `Run the local cookbook`
 
@@ -389,7 +389,7 @@ Do not describe the roadmap as present functionality. In particular, OpenARIA do
 ### Claims the site must preserve
 
 - “Vendor-agnostic” means integrations are replaceable and project-owned; it does not mean every integration already exists.
-- “Self-healing” describes the paper's long-term guarded loop; v0.1 implements Diagnosis-as-Code and recommendation-oriented contracts.
+- “Healing-as-Code” and guarded recovery describe the paper's long-term direction; v0.1 implements the Diagnosis-as-Code phase and recommendation-oriented contracts.
 - “LLM optional” is a product boundary. No core LLM dependency, credential, or live network call is necessary for deterministic diagnosis.
 - “Safe” means bounded and reviewable by design. It does not guarantee that redaction or diagnosis is complete.
 - All current public demonstrations use synthetic data.

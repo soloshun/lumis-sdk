@@ -15,7 +15,7 @@ Thanks for contributing. OpenARIA is a small, safety-focused research proof of c
 - Keep the README accurate, task-oriented, and consistent with the core reference when public behavior changes.
 - Distinguish implemented functionality from lifecycle contracts, cookbook demonstrations, and roadmap ideas. Do not describe a future connector, autonomous action, or hosted product as present functionality.
 - Keep project-specific logs, rules, runbooks, and playbooks in a cookbook or consuming project; do not move scenario-specific material into `src/openaria`.
-- OpenARIA uses “Diagnosis-as-Code” for its current structured, evidence-grounded diagnosis approach. “Healing-as-Code” remains a future guarded-autonomy direction.
+- “Diagnosis-as-Code” names the current structured, evidence-grounded capability. “Healing-as-Code” is the longer-term guarded-recovery direction; do not describe it as implemented until its policy, approval, execution, and verification mechanisms exist and are tested.
 
 ## Local setup
 
