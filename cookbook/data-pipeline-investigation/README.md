@@ -83,9 +83,9 @@ Do not place real credentials or personal data in this cookbook. The redactor is
 
 1. `run_agent.py` first runs the cookbook's `openaria/openaria.yml` and `openaria/rules.yml` through OpenARIA's deterministic diagnosis engine.
 2. A rule match produces the deterministic report immediately. An unknown diagnosis requires an explicitly configured OpenRouter call.
-3. The agent can only access named, read-only tools: incident metadata, individual context items, selected Markdown knowledge, and one allowlisted synthetic code directory.
-4. The agent may recommend a playbook and request human approval, but has no execution tool.
-5. For an LLM scenario, `export_analysis` is the required final tool. It persists the model's Markdown rather than losing the agent's more readable explanation in terminal output.
+3. The agent receives a production-style incident-response policy: evidence and uncertainty standards, confidentiality constraints, report requirements, approval boundaries, and prohibited actions.
+4. Agno converts the named Python functions and their docstrings into tool definitions. The model chooses which read-only incident, context, knowledge, or code capability is relevant; the cookbook does not prescribe a fixed tool sequence.
+5. The agent may recommend a playbook and request human approval, but has no execution tool. For an LLM scenario, it must persist its final Markdown through the available report-recording capability so the human-readable analysis is not lost in terminal output.
 
 ## Knowledge library
 

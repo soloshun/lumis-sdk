@@ -78,7 +78,9 @@ The synthetic candidate model has validation RMSE 12.8 against an acceptance thr
 
 ## What the agent can and cannot do
 
-The opt-in agent has only named, read-only tools for incident metadata, individual context items, selected knowledge documents, and allowlisted synthetic source/data files. It can store a diagnosis in local SQLite memory and export final Markdown. It has no shell, unrestricted web access, cloud credentials, model registry write access, training trigger, deployment capability, or remediation tool.
+The opt-in agent receives an operational system prompt rather than a scripted list of tool calls. The prompt establishes evidence standards, uncertainty reporting, metric interpretation, confidentiality, human approval, and prohibited actions. Agno converts the named Python functions and their docstrings into tool definitions, so the model chooses the relevant read-only incident, context, knowledge, source, or data capability for the evidence it needs.
+
+It can store a diagnosis in local SQLite memory and persist final Markdown. It has no shell, unrestricted web access, cloud credentials, model registry write access, training trigger, deployment capability, or remediation tool.
 
 OpenRouter is optional and is used only for the two unknown scenarios when you explicitly provide `OPENROUTER_API_KEY`. Do not place real credentials, customer data, model artifacts, or production telemetry in this cookbook.
 

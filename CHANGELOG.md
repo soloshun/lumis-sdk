@@ -14,6 +14,7 @@ All notable changes to OpenARIA are recorded here. The project follows the spiri
 
 - Renamed the provider-named agent demonstration to `data-pipeline-investigation` so the cookbook name describes its domain rather than its optional implementation choices.
 - Moved cookbook `openaria.yml` and `rules.yml` files into cookbook-local `openaria/` directories.
+- Replaced scripted demo-agent tool sequences with domain-specific incident-response system policies; Agno now exposes tool definitions from function names, signatures, and docstrings for the model to select as needed.
 
 ## [0.1.0] - 2026-07-10
 
