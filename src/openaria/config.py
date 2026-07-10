@@ -79,6 +79,6 @@ def load_rules_file(path: Path) -> list[DeterministicRule]:
 
 
 def resolve_project_path(config_path: Path, configured_path: str) -> Path:
-    """Resolve a configured project path relative to its YAML file."""
+    """Resolve and normalize a configured project path relative to its YAML file."""
     path = Path(configured_path)
-    return path if path.is_absolute() else config_path.parent / path
+    return (path if path.is_absolute() else config_path.parent / path).resolve()

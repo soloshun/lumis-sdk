@@ -2,12 +2,12 @@ project: stock_feature_pipeline
 environment: local
 
 memory:
-  path: .openaria/incidents.db
+  path: ../.openaria/incidents.db
 
 reports:
-  output_dir: .openaria/reports
+  output_dir: ../.openaria/reports
 
 telemetry:
-  log: failure.log
+  log: ../failure.log
 
 rules_file: rules.yml

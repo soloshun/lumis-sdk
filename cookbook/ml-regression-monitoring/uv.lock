@@ -366,7 +366,7 @@ dev = [
 ]
 
 [[package]]
-name = "openaria-agno-openrouter-cookbook"
+name = "openaria-ml-regression-cookbook"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

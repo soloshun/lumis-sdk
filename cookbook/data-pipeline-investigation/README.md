@@ -1,13 +1,35 @@
-# Agno + OpenRouter reference-architecture cookbook
+# Data pipeline investigation cookbook
 
-This is a separate application that uses OpenARIA's framework ideas to demonstrate the paper’s seven-layer architecture with synthetic context. It does not add FastAPI, Agno, or OpenRouter as OpenARIA core dependencies.
+This cookbook teaches how OpenARIA can investigate a bounded synthetic data-pipeline incident estate. It uses schema, lineage, telemetry, code, and knowledge context to demonstrate the paper’s architecture without turning FastAPI, Agno, or OpenRouter into OpenARIA core dependencies.
+
+It is deliberately a **data-pipeline** example, not a generic demonstration of every kind of data incident. The next cookbook, `ml-regression-monitoring`, covers a separate ML regression domain.
+
+## What you will learn
+
+- How a known schema-drift signature is handled deterministically from `openaria/rules.yml`.
+- How an unfamiliar transformation error can route to an opt-in agent that reads bounded synthetic code.
+- How sensitive values in telemetry are redacted before agent tools and reports receive them.
+- How runbooks and playbooks remain project-owned Markdown knowledge, separate from telemetry and framework code.
+
+## Cookbook layout
+
+```text
+data-pipeline-investigation/
+├── openaria/                 # Framework configuration and deterministic rules
+├── synthetic_project/        # Bounded code fixture for the unfamiliar-error scenario
+├── knowledge/                # Cookbook-owned runbook and playbook Markdown
+├── demo_service.py           # Read-only synthetic incident estate
+└── run_agent.py              # Optional Agno/OpenRouter application
+```
+
+The `openaria/` directory is the cookbook's framework configuration boundary. `openaria.yml` points to local state and `rules.yml` defines the project-specific signatures; data, code, and provider integration remain outside it.
 
 ## What it demonstrates
 
 - A manually started FastAPI service simulates the pipeline estate, telemetry, lineage, verification context, and a separate Markdown knowledge library.
 - An Agno agent uses OpenRouter only when `OPENROUTER_API_KEY` is explicitly set.
 - The agent has bounded tools for incident/context retrieval, framework diagnosis, runbook/playbook and synthetic-code reads, local diagnosis recording, approval requests, and final Markdown export.
-- `get_framework_diagnosis` runs the cookbook's `openaria.yml` and `rules.yml` through OpenARIA, proving that the application uses the framework rather than hardcoding a diagnosis rule in the agent.
+- `get_framework_diagnosis` runs the cookbook's `openaria/openaria.yml` and `openaria/rules.yml` through OpenARIA, proving that the application uses the framework rather than hardcoding a diagnosis rule in the agent.
 - The agent may investigate and propose the synthetic allowlisted playbook, but it cannot execute an action.
 - The proposed schema change requires human approval; verification remains `not_run` because no remediation runs.
 
@@ -59,7 +81,7 @@ Do not place real credentials or personal data in this cookbook. The redactor is
 
 ## How the investigation flows
 
-1. `run_agent.py` first runs the cookbook's `openaria.yml` and `rules.yml` through OpenARIA's deterministic diagnosis engine.
+1. `run_agent.py` first runs the cookbook's `openaria/openaria.yml` and `openaria/rules.yml` through OpenARIA's deterministic diagnosis engine.
 2. A rule match produces the deterministic report immediately. An unknown diagnosis requires an explicitly configured OpenRouter call.
 3. The agent can only access named, read-only tools: incident metadata, individual context items, selected Markdown knowledge, and one allowlisted synthetic code directory.
 4. The agent may recommend a playbook and request human approval, but has no execution tool.

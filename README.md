@@ -101,7 +101,7 @@ Run the local, synthetic diagnosis cookbook:
 
 ```bash
 uv run openaria diagnose \
-  --config cookbook/simple-log-diagnosis/openaria.yml
+  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
 ```
 
 The command reads the cookbook's configured `failure.log`, writes a Markdown report under that cookbook's `.openaria/reports/` directory, saves an incident to local SQLite memory, and prints an incident ID. It makes no external network or model call.
@@ -110,14 +110,14 @@ Use that incident ID to inspect the report, record the human-confirmed outcome, 
 
 ```bash
 uv run openaria report <incident-id> \
-  --config cookbook/simple-log-diagnosis/openaria.yml
+  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
 
 uv run openaria resolve <incident-id> \
   --resolution "Describe the human-confirmed resolution." \
-  --config cookbook/simple-log-diagnosis/openaria.yml
+  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
 
 uv run openaria memory search "KeyError Close" \
-  --config cookbook/simple-log-diagnosis/openaria.yml
+  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
 ```
 
 ## Configure your own project
@@ -174,7 +174,7 @@ The core's default diagnosis path is deterministic. Known failures are resolved 
 
 For ambiguous incidents, OpenARIA offers an optional provider-neutral `ModelGateway` contract. A model is never contacted unless an integration explicitly enables it and supplies a gateway implementation. Before context crosses that boundary, OpenARIA applies a conservative redaction baseline; the response must validate as the same structured diagnosis schema or the core returns the deterministic fallback.
 
-This is intentionally not a complete data-loss-prevention solution. Integrations must minimize context, apply organization-specific safeguards, and verify provider retention and privacy controls. The optional [Agno + OpenRouter cookbook](cookbook/agno-openrouter-reference-architecture/README.md) demonstrates this boundary with synthetic data and an explicit opt-in API key.
+This is intentionally not a complete data-loss-prevention solution. Integrations must minimize context, apply organization-specific safeguards, and verify provider retention and privacy controls. The optional [data-pipeline investigation cookbook](cookbook/data-pipeline-investigation/README.md) demonstrates this boundary with synthetic data and an explicit opt-in API key.
 
 ## Framework and cookbooks
 
@@ -188,7 +188,10 @@ Available examples:
 
 - [Simple log diagnosis](cookbook/simple-log-diagnosis/README.md) - configuration-driven deterministic diagnosis.
 - [Recording a resolution](cookbook/recording-resolution/README.md) - human-confirmed outcome in local memory.
-- [Agno + OpenRouter reference architecture](cookbook/agno-openrouter-reference-architecture/README.md) - opt-in bounded agent over a synthetic FastAPI estate.
+- [Data pipeline investigation](cookbook/data-pipeline-investigation/README.md) - schema drift, unfamiliar transformation failures, and redacted telemetry through an opt-in bounded agent.
+- [ML regression monitoring](cookbook/ml-regression-monitoring/README.md) - feature drift, feature-contract failures, and candidate-model quality investigation through an opt-in bounded agent.
+
+See the [cookbook catalog](cookbook/README.md) for the domain boundaries and shared layout.
 
 Read [framework and cookbook architecture](docs/framework-and-cookbooks.md) for the boundary and [OpenARIA Core Reference](docs/OPENARIA_CORE_REFERENCE.md) for the implementation-level explanation intended for reviewers and the documentation site.
 
@@ -215,6 +218,8 @@ uv build
 ```
 
 GitHub Actions runs format, lint, type, and test checks on pull requests and pushes to `main`. OpenARIA is currently maintained by [Solomon Eshun](mailto:solomoneshun373@gmail.com).
+
+Notable public changes are recorded in [CHANGELOG.md](CHANGELOG.md).
 
 ## Documentation, research context, and references
 

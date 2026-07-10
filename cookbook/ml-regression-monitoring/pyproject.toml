@@ -1,7 +1,7 @@
 [project]
-name = "openaria-agno-openrouter-cookbook"
+name = "openaria-ml-regression-cookbook"
 version = "0.1.0"
-description = "Synthetic FastAPI and Agno/OpenRouter reference-architecture cookbook for OpenARIA."
+description = "Synthetic regression-pipeline monitoring cookbook for OpenARIA with opt-in Agno/OpenRouter reasoning."
 requires-python = ">=3.11"
 dependencies = [
   "agno>=2,<3",

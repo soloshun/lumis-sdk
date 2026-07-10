@@ -269,7 +269,7 @@ Run the synthetic, no-network example from the repository root:
 
 ```bash
 uv run openaria diagnose \
-  --config cookbook/simple-log-diagnosis/openaria.yml
+  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
 ```
 
 The configured cookbook log is read, a report is written under the cookbook's `.openaria/reports/` directory, and an incident ID is printed. That local state is ignored by Git.
@@ -294,9 +294,10 @@ Current cookbooks:
 | --- | --- |
 | [`simple-log-diagnosis`](../cookbook/simple-log-diagnosis/README.md) | A deterministic local log diagnosis using YAML rules. |
 | [`recording-resolution`](../cookbook/recording-resolution/README.md) | Recording a human-confirmed resolution against local incident memory. |
-| [`agno-openrouter-reference-architecture`](../cookbook/agno-openrouter-reference-architecture/README.md) | A separate opt-in FastAPI + Agno + OpenRouter application using synthetic context, bounded tools, explicit export, and redaction. |
+| [`data-pipeline-investigation`](../cookbook/data-pipeline-investigation/README.md) | A separate opt-in application for synthetic data-pipeline context, bounded tools, explicit export, and redaction. |
+| [`ml-regression-monitoring`](../cookbook/ml-regression-monitoring/README.md) | A separate opt-in application for feature drift, feature contracts, and candidate-model quality in a synthetic regression pipeline. |
 
-The Agno/OpenRouter example is intentionally not a core dependency. It proves that OpenARIA can be used below a provider- and agent-specific application without forcing that stack on every framework user.
+The optional Agno/OpenRouter examples are intentionally not core dependencies. They prove that OpenARIA can be used below provider- and agent-specific applications without forcing that stack on every framework user.
 
 ## 9. Safety, privacy, and clean-room requirements
 
@@ -327,6 +328,7 @@ openaria/
 │   ├── llm/                        # Optional model contract, validation, redaction
 │   └── lifecycle/                  # Non-executing extension contracts
 ├── cookbook/                       # Separate runnable demonstrations
+├── CHANGELOG.md                     # Public history of notable changes
 ├── docs/                           # Repository documentation source
 │   └── OPENARIA_CORE_REFERENCE.md  # Canonical source for the site agent
 ├── tests/                          # Framework tests

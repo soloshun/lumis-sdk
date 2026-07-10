@@ -1,4 +1,4 @@
-"""Run an opt-in Agno/OpenRouter investigation over the synthetic FastAPI estate."""
+"""Run an opt-in Agno/OpenRouter investigation over synthetic ML incidents."""
 
 import argparse
 import os
@@ -6,75 +6,75 @@ from pathlib import Path
 
 import httpx
 
-from openaria.config import load_config
+from openaria.config import load_config, resolve_project_path
 from openaria.incidents import incident_from_log
 from openaria.llm import redact_value
 from openaria.memory import SQLiteIncidentStore
 from openaria.reports import render_markdown_report
 from openaria.triage import diagnose_text
 
+_COOKBOOK_DIR = Path(__file__).parent
+_CONFIG_PATH = _COOKBOOK_DIR / "openaria" / "openaria.yml"
+
 
 def build_agent(base_url: str, model_id: str):
-    """Build the cookbook agent only when its optional dependencies are installed."""
+    """Build the cookbook agent only when optional dependencies are installed."""
     from agno.agent import Agent
     from agno.models.openrouter import OpenRouter
 
-    project_config = load_config(Path(__file__).with_name("openaria.yml"))
-    cookbook_dir = Path(__file__).parent
+    project_config = load_config(_CONFIG_PATH)
 
     def get_incident(incident_id: str) -> dict[str, object]:
-        """Retrieve the normalized synthetic incident by its ID."""
+        """Retrieve the normalized synthetic ML incident by ID."""
         incident = redact_value(_get_json(base_url, f"/incidents/{incident_id}"))
         assert isinstance(incident, dict)
         return incident
 
     def get_context(incident_id: str, context_name: str) -> object:
-        """Retrieve one synthetic context item from the bounded demo service."""
+        """Retrieve one bounded synthetic telemetry or metadata item."""
         return redact_value(_get_json(base_url, f"/incidents/{incident_id}/context/{context_name}"))
 
     def get_framework_diagnosis(incident_id: str) -> dict[str, object]:
-        """Run the OpenARIA configured deterministic diagnosis over the synthetic logs."""
-        logs = get_context(incident_id, "logs")
-        log_text = "\n".join(logs) if isinstance(logs, list) else str(logs)
-        return diagnose_text(log_text, project_config.rules).model_dump(mode="json")
+        """Run the configured OpenARIA deterministic diagnosis over synthetic logs."""
+        return _diagnosis_for(incident_id, get_context, project_config).model_dump(mode="json")
 
     def read_runbook(name: str) -> dict[str, str]:
-        """Read one synthetic project runbook by name before recommending a change."""
+        """Read one bounded synthetic ML investigation runbook."""
         knowledge = redact_value(_get_json(base_url, f"/knowledge/runbooks/{name}"))
         assert isinstance(knowledge, dict)
         return {str(key): str(value) for key, value in knowledge.items()}
 
     def read_playbook(name: str) -> dict[str, str]:
-        """Read one allowlisted synthetic playbook by name; it is recommendation-only."""
+        """Read one recommendation-only synthetic playbook."""
         knowledge = redact_value(_get_json(base_url, f"/knowledge/playbooks/{name}"))
         assert isinstance(knowledge, dict)
         return {str(key): str(value) for key, value in knowledge.items()}
 
     def read_synthetic_code(file_path: str) -> dict[str, str]:
-        """Read one bounded synthetic code file for an unfamiliar incident."""
+        """Read one allowlisted synthetic model or data file."""
         code = redact_value(_get_json(base_url, f"/code/{file_path}"))
         assert isinstance(code, dict)
         return {str(key): str(value) for key, value in code.items()}
 
     def record_framework_diagnosis(incident_id: str) -> dict[str, str]:
-        """Store the configured OpenARIA diagnosis in this cookbook's local SQLite memory."""
+        """Store the configured diagnosis in this cookbook's local SQLite memory."""
         incident_data = get_incident(incident_id)
-        logs = get_context(incident_id, "logs")
-        log_text = "\n".join(logs) if isinstance(logs, list) else str(logs)
+        log_text = _log_text(get_context(incident_id, "logs"))
         incident = incident_from_log(
             log_text, f"fastapi://{incident_id}/logs", project_config.project
         )
         diagnosis = diagnose_text(log_text, project_config.rules)
         report = render_markdown_report(incident, diagnosis)
-        report_path = cookbook_dir / project_config.reports.output_dir / f"{incident_id}.md"
+        report_path = _configured_path(project_config.reports.output_dir) / f"{incident_id}.md"
         report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(report, encoding="utf-8")
-        memory_path = cookbook_dir / project_config.memory.path
-        stored = SQLiteIncidentStore(memory_path).save(incident, diagnosis, report, report_path)
+        stored = SQLiteIncidentStore(_configured_path(project_config.memory.path)).save(
+            incident, diagnosis, report, report_path
+        )
         return {"incident_id": stored.id, "source_incident_id": str(incident_data["id"])}
 
     def propose_playbook(incident_id: str) -> dict[str, object]:
-        """Return the configured recommendation-only playbook for the synthetic incident."""
+        """Return a recommendation only when the configured rule provides one."""
         diagnosis = get_framework_diagnosis(incident_id)
         return {
             "playbook": diagnosis.get("suggested_playbook"),
@@ -83,25 +83,24 @@ def build_agent(base_url: str, model_id: str):
         }
 
     def request_approval(incident_id: str) -> dict[str, str]:
-        """Explain the required human approval boundary; this tool cannot approve an action."""
+        """Describe the human approval boundary; this tool cannot approve a change."""
         return {
             "incident_id": incident_id,
             "status": "pending_human_approval",
-            "reason": "Schema-related changes require an explicit human decision.",
+            "reason": "Model, feature, and threshold changes require an explicit human decision.",
         }
 
     def export_analysis(incident_id: str, markdown: str) -> dict[str, str]:
-        """Save the final LLM Markdown analysis to local OpenARIA memory and a report file."""
-        logs = get_context(incident_id, "logs")
-        log_text = "\n".join(logs) if isinstance(logs, list) else str(logs)
+        """Save final LLM Markdown analysis to local memory and a report file."""
+        log_text = _log_text(get_context(incident_id, "logs"))
         incident = incident_from_log(
             log_text, f"fastapi://{incident_id}/logs", project_config.project
         )
         fallback_diagnosis = diagnose_text(log_text, project_config.rules)
-        report_path = cookbook_dir / project_config.reports.output_dir / f"{incident_id}-llm.md"
+        report_path = _configured_path(project_config.reports.output_dir) / f"{incident_id}-llm.md"
         report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(markdown, encoding="utf-8")
-        stored = SQLiteIncidentStore(cookbook_dir / project_config.memory.path).save(
+        stored = SQLiteIncidentStore(_configured_path(project_config.memory.path)).save(
             incident, fallback_diagnosis, markdown, report_path
         )
         return {"report_path": str(report_path), "incident_id": stored.id}
@@ -121,30 +120,26 @@ def build_agent(base_url: str, model_id: str):
             export_analysis,
         ],
         system_message=(
-            "You are the OpenARIA cookbook investigation agent. Use only the supplied tools and "
-            "synthetic context. Never claim an action was executed. If deterministic diagnosis is "
-            "unknown, investigate the available context and code, then you MUST call "
-            "export_analysis exactly once with your final human-readable Markdown report."
+            "You are the OpenARIA ML cookbook investigation agent. Use only supplied tools and "
+            "synthetic context. Never claim an action was executed. When deterministic diagnosis "
+            "is unknown, investigate and call export_analysis exactly once with a human-readable "
+            "Markdown report."
         ),
         instructions=[
-            "Investigate only the supplied synthetic incident.",
+            "Call get_incident, get_context, and get_framework_diagnosis first.",
             (
-                "Call get_incident, get_context, and get_framework_diagnosis first. For a "
-                "schema incident, read_runbook('schema-drift-investigation') and "
-                "read_playbook('schema_mismatch_in_dataframe'). For an unfamiliar code error, "
-                "call read_synthetic_code('src/price_transform.py')."
+                "For a feature-contract incident, inspect src/inference.py. For a model-regression "
+                "incident, read_runbook('model-performance-review') and inspect "
+                "src/train_regression.py."
             ),
             (
-                "Call record_framework_diagnosis to write the validated diagnosis "
-                "to local OpenARIA memory."
+                "For feature drift, read_runbook('feature-drift-investigation') and "
+                "read_playbook('feature_drift_review') when relevant."
             ),
-            (
-                "Call propose_playbook and request_approval only when the configured playbook "
-                "is relevant."
-            ),
+            "Call record_framework_diagnosis before completing the investigation.",
             "Separate confirmed facts from hypotheses and state missing evidence.",
-            "Propose only the provided playbook. Do not claim to execute it.",
-            "State that approval is required before any schema-related change.",
+            "Never claim to retrain, deploy, promote, or change a model or feature pipeline.",
+            "State that human approval is required for model, feature, and threshold changes.",
         ],
         markdown=True,
     )
@@ -156,24 +151,36 @@ def _get_json(base_url: str, path: str) -> object:
     return response.json()
 
 
+def _log_text(logs: object) -> str:
+    return "\n".join(logs) if isinstance(logs, list) else str(logs)
+
+
+def _configured_path(configured_path: str) -> Path:
+    """Resolve a cookbook-local path from the OpenARIA YAML file."""
+    return resolve_project_path(_CONFIG_PATH, configured_path).resolve()
+
+
+def _diagnosis_for(incident_id: str, get_context, project_config):
+    """Return a configured diagnosis after retrieving redacted synthetic logs."""
+    return diagnose_text(_log_text(get_context(incident_id, "logs")), project_config.rules)
+
+
 def save_deterministic_result_if_matched(base_url: str, incident_id: str) -> bool:
     """Save and print a deterministic result, returning false only for unknown incidents."""
-    cookbook_dir = Path(__file__).parent
-    project_config = load_config(cookbook_dir / "openaria.yml")
+    project_config = load_config(_CONFIG_PATH)
     logs = redact_value(_get_json(base_url, f"/incidents/{incident_id}/context/logs"))
-    log_text = "\n".join(logs) if isinstance(logs, list) else str(logs)
+    log_text = _log_text(logs)
     diagnosis = diagnose_text(log_text, project_config.rules)
     if diagnosis.triage.classification == "unknown":
         return False
-
     incident = incident_from_log(log_text, f"fastapi://{incident_id}/logs", project_config.project)
     report = render_markdown_report(incident, diagnosis)
-    report_path = (
-        cookbook_dir / project_config.reports.output_dir / f"{incident_id}-deterministic.md"
+    report_path = _configured_path(project_config.reports.output_dir) / (
+        f"{incident_id}-deterministic.md"
     )
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(report, encoding="utf-8")
-    stored = SQLiteIncidentStore(cookbook_dir / project_config.memory.path).save(
+    stored = SQLiteIncidentStore(_configured_path(project_config.memory.path)).save(
         incident, diagnosis, report, report_path
     )
     print(f"Deterministic report written to {report_path}")
@@ -182,9 +189,9 @@ def save_deterministic_result_if_matched(base_url: str, incident_id: str) -> boo
 
 
 def main() -> None:
-    """Start a one-shot agent investigation after explicit user configuration."""
+    """Start one bounded ML incident investigation after explicit user configuration."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--incident-id", default="schema-drift-001")
+    parser.add_argument("--incident-id", default="feature-drift-001")
     args = parser.parse_args()
     base_url = os.getenv("OPENARIA_DEMO_URL", "http://127.0.0.1:8000")
     if save_deterministic_result_if_matched(base_url, args.incident_id):
@@ -194,8 +201,7 @@ def main() -> None:
             "Deterministic diagnosis was unknown. Set OPENROUTER_API_KEY to run the live agent."
         )
     model_id = os.getenv("OPENARIA_DEMO_MODEL", "deepseek/deepseek-v4-flash")
-    agent = build_agent(base_url, model_id)
-    agent.print_response(
+    build_agent(base_url, model_id).print_response(
         f"Investigate synthetic incident {args.incident_id} and produce a concise incident report.",
         stream=True,
     )

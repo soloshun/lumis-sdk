@@ -27,7 +27,7 @@ The `openaria.llm` and `openaria.lifecycle` modules are intentionally small publ
 
 ## Cookbook responsibilities
 
-The first agentic cookbook will be an application that uses the core. It will contain its own optional dependencies, setup instructions, and synthetic data.
+Agentic cookbooks are separate applications that use the core. Each contains its own optional dependencies, setup instructions, and synthetic data.
 
 - A small FastAPI simulator exposes a synthetic pipeline incident and bounded context endpoints.
 - An opt-in Agno agent uses OpenRouter only when a user supplies an API key and chooses a model.
@@ -43,7 +43,7 @@ The cookbook simulates the paper's seven logical layers. The agentic reasoning s
 
 | Paper layer | Cookbook demonstration | Core boundary |
 | --- | --- | --- |
-| 1. Existing pipeline estate | Cookbook-owned synthetic financial-data pipeline failure | Normalized `IncidentInput` |
+| 1. Existing pipeline estate | Cookbook-owned synthetic data or ML pipeline failure | Normalized `IncidentInput` |
 | 2. Telemetry and signals | Cookbook-owned logs, metrics, schema snapshot, and lineage snapshot | Context-provider contract |
 | 3. Incident memory and knowledge | Local SQLite incident memory and cookbook runbook/playbook | Memory-store contract |
 | 4. Deterministic policy and agentic reasoning | Cookbook YAML rules first; optional Agno diagnosis agent for ambiguous context | Diagnosis, model-gateway, and policy contracts |
@@ -73,8 +73,8 @@ An optional watcher can follow later as a bounded polling command with an explic
 
 1. Add framework lifecycle contracts and the data-driven YAML configuration surface.
 2. Move simple logs, rules, and resolution walkthroughs into cookbooks.
-3. Build the cookbook-owned synthetic financial-pipeline fixture pack and FastAPI simulator on top of framework contracts.
-4. Add the opt-in Agno + OpenRouter agent and its narrow tools.
-5. Demonstrate proposal, human approval, synthetic verification, and memory update.
+3. Build cookbook-owned synthetic data-pipeline and ML-regression fixture packs and FastAPI simulators on top of framework contracts.
+4. Add opt-in Agno + OpenRouter applications with narrow tools.
+5. Demonstrate recommendation, human approval boundaries, synthetic verification context, and memory update.
 
 This sequence gives the cookbook something real to consume while keeping OpenARIA useful without the cookbook.
