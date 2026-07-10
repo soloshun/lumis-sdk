@@ -1,23 +1,33 @@
 """Tests for deterministic triage and diagnosis rules."""
 
-from openaria.triage import diagnose_log
+from openaria.config import DeterministicRule
+from openaria.triage import diagnose_text
 
 
-def test_key_error_is_classified_as_a_schema_change() -> None:
-    """A missing expected column maps to the first supported failure type."""
-    diagnosis = diagnose_log("ERROR Step: transform_prices\nERROR KeyError: 'Close'")
+def test_configured_rule_is_applied_to_matching_text() -> None:
+    """A consuming project controls its own deterministic classification."""
+    rule = DeterministicRule(
+        name="configured-rule",
+        all_contains=["INCIDENT_SIGNATURE"],
+        classification="configured_failure",
+        severity="medium",
+        summary="The configured signature appeared.",
+        root_cause_hypothesis="The configured rule matched the supplied text.",
+        confidence=0.6,
+    )
+    diagnosis = diagnose_text("ERROR INCIDENT_SIGNATURE", [rule])
 
-    assert diagnosis.triage.classification == "schema_change"
+    assert diagnosis.triage.classification == "configured_failure"
     assert diagnosis.triage.severity.value == "medium"
-    assert diagnosis.confidence == 0.65
+    assert diagnosis.confidence == 0.6
     assert diagnosis.evidence[0].id == "E1"
-    assert "`Close`" in diagnosis.root_cause_hypothesis
+    assert "configured rule" in diagnosis.root_cause_hypothesis
 
 
 def test_unmatched_log_remains_explicitly_unknown() -> None:
     """Unrecognized logs never receive an invented classification."""
-    diagnosis = diagnose_log("ERROR process returned code 7")
+    diagnosis = diagnose_text("ERROR process returned code 7", [])
 
     assert diagnosis.triage.classification == "unknown"
     assert diagnosis.confidence == 0.1
-    assert "insufficient" in diagnosis.root_cause_hypothesis
+    assert "configured diagnosis rule" in diagnosis.root_cause_hypothesis

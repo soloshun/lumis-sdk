@@ -17,7 +17,7 @@ The core owns stable, typed interfaces and safe default behavior:
 - Define a provider-neutral model-gateway boundary, redaction, and structured-output validation.
 - Define lifecycle contracts for context retrieval, policy decisions, approval, planning, verification, and audit events.
 
-The core does **not** own a live agent, a cloud account, a perpetual monitor, production credentials, or direct remediation access.
+The core does **not** own a live agent, a cloud account, a perpetual monitor, production credentials, direct remediation access, synthetic business scenarios, or project-specific rules/playbooks.
 
 ## Cookbook responsibilities
 
@@ -37,13 +37,13 @@ The cookbook simulates the paper's seven logical layers. The agentic reasoning s
 
 | Paper layer | Cookbook demonstration | Core boundary |
 | --- | --- | --- |
-| 1. Existing pipeline estate | Synthetic financial-data pipeline failure | Normalized `IncidentInput` |
-| 2. Telemetry and signals | Synthetic logs, metrics, schema snapshot, and lineage snapshot | Context-provider contract |
-| 3. Incident memory and knowledge | Local SQLite incident memory and fixture runbook/playbook | Memory-store contract |
-| 4. Deterministic policy and agentic reasoning | Deterministic triage first; optional Agno diagnosis agent for ambiguous context | Diagnosis, model-gateway, and policy contracts |
-| 5. Approval and governance | Explicit human approval prompt or supplied demo decision; local audit event | Approval and audit contracts |
-| 6. Guarded execution | No production execution; a proposal only | Action-plan contract that cannot execute commands |
-| 7. Verification and learning | Synthetic verification result and memory update | Verifier and memory-store contracts |
+| 1. Existing pipeline estate | Cookbook-owned synthetic financial-data pipeline failure | Normalized `IncidentInput` |
+| 2. Telemetry and signals | Cookbook-owned logs, metrics, schema snapshot, and lineage snapshot | Context-provider contract |
+| 3. Incident memory and knowledge | Local SQLite incident memory and cookbook runbook/playbook | Memory-store contract |
+| 4. Deterministic policy and agentic reasoning | Cookbook YAML rules first; optional Agno diagnosis agent for ambiguous context | Diagnosis, model-gateway, and policy contracts |
+| 5. Approval and governance | Cookbook-owned explicit human approval prompt or fixture decision | Approval and audit contracts |
+| 6. Guarded execution | No production execution; a cookbook proposal only | Action-plan contract that cannot execute commands |
+| 7. Verification and learning | Cookbook-owned synthetic verification result and memory update | Verifier and memory-store contracts |
 
 ## Agent tools
 
@@ -67,9 +67,9 @@ An optional watcher can follow later as a bounded polling command with an explic
 
 ## Build sequence
 
-1. Add framework lifecycle contracts and static synthetic context implementations.
-2. Build a synthetic financial-pipeline fixture pack that satisfies Layers 1 through 3.
-3. Build the cookbook FastAPI simulator on top of those contracts.
+1. Add framework lifecycle contracts and the data-driven YAML configuration surface.
+2. Move simple logs, rules, and resolution walkthroughs into cookbooks.
+3. Build the cookbook-owned synthetic financial-pipeline fixture pack and FastAPI simulator on top of framework contracts.
 4. Add the opt-in Agno + OpenRouter agent and its narrow tools.
 5. Demonstrate proposal, human approval, synthetic verification, and memory update.
 

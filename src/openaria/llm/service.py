@@ -2,17 +2,19 @@
 
 from pydantic import ValidationError
 
+from openaria.config import DeterministicRule
 from openaria.llm.gateway import ModelAssistanceConfig, ModelGateway
 from openaria.llm.prompts import build_diagnosis_request
 from openaria.llm.redaction import redact_text
 from openaria.schemas import DiagnosisResult
-from openaria.triage import diagnose_log
+from openaria.triage import diagnose_text
 
 
 def diagnose_with_optional_model(
     log_text: str,
     config: ModelAssistanceConfig | None = None,
     gateway: ModelGateway | None = None,
+    rules: list[DeterministicRule] | None = None,
 ) -> DiagnosisResult:
     """Use a validated optional model result or the deterministic fallback.
 
@@ -20,7 +22,7 @@ def diagnose_with_optional_model(
     implementation are supplied. Invalid structured output returns the same
     deterministic result rather than presenting unvalidated model text.
     """
-    fallback = diagnose_log(log_text)
+    fallback = diagnose_text(log_text, rules or [])
     model_config = config or ModelAssistanceConfig()
     if not model_config.enabled or gateway is None:
         return fallback

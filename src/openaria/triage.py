@@ -1,84 +1,44 @@
-"""Small, explainable triage rules for the first OpenARIA proof."""
+"""Generic deterministic rule evaluation for configured OpenARIA projects."""
 
-import re
-
+from openaria.config import DeterministicRule
 from openaria.schemas import DiagnosisResult, EvidenceItem, Severity, TriageResult
 
-_KEY_ERROR_PATTERN = re.compile(r"KeyError:\s*['\"](?P<field>[^'\"]+)['\"]")
 
-
-def diagnose_log(log_text: str) -> DiagnosisResult:
-    """Diagnose a supplied log using deterministic, evidence-only rules.
-
-    This deliberately handles one initial schema-mismatch signature and returns an
-    explicit unknown result for every other input. It never calls a model or an
-    external system.
-    """
-    key_error_match = _KEY_ERROR_PATTERN.search(log_text)
-    if key_error_match:
-        return _schema_mismatch_diagnosis(key_error_match.group("field"), log_text)
-
+def diagnose_text(log_text: str, rules: list[DeterministicRule]) -> DiagnosisResult:
+    """Apply the first matching project-supplied rule to local text."""
+    for rule in rules:
+        if all(term.lower() in log_text.lower() for term in rule.all_contains):
+            return _diagnosis_from_rule(log_text, rule)
     return _unknown_diagnosis(log_text)
 
 
-def _schema_mismatch_diagnosis(field_name: str, log_text: str) -> DiagnosisResult:
-    error_line = _matching_line(log_text, "KeyError")
-    step_line = _matching_line(log_text, "Step:")
-    assert error_line is not None
+def _diagnosis_from_rule(log_text: str, rule: DeterministicRule) -> DiagnosisResult:
+    evidence_details = list(
+        dict.fromkeys(_matching_line(log_text, term) for term in rule.all_contains)
+    )
     evidence = [
         EvidenceItem(
-            id="E1",
+            id=f"E{index}",
             source="provided_log",
-            detail=error_line,
+            detail=detail,
             confidence=1.0,
         )
+        for index, detail in enumerate(evidence_details, start=1)
     ]
-    facts = [f"The supplied log contains a KeyError for the expected field `{field_name}`."]
-
-    if step_line:
-        evidence.append(
-            EvidenceItem(
-                id="E2",
-                source="provided_log",
-                detail=step_line,
-                confidence=1.0,
-            )
-        )
-        facts.append("The supplied log identifies the step where the error surfaced.")
-
     return DiagnosisResult(
         triage=TriageResult(
-            classification="schema_change",
-            severity=Severity.MEDIUM,
-            summary=(
-                f"The pipeline stopped because a step expected a field named `{field_name}`, "
-                "but the supplied log shows that field was unavailable."
-            ),
-            missing_context=[
-                "current input schema",
-                "last successful input schema",
-                "recent code changes",
-            ],
+            classification=rule.classification,
+            severity=rule.severity,
+            summary=rule.summary,
+            missing_context=rule.missing_evidence,
         ),
-        confirmed_facts=facts,
-        root_cause_hypothesis=(
-            f"The upstream data format may have changed, or a normalization step may have "
-            f"renamed or removed `{field_name}` before the failing step."
-        ),
-        confidence=0.65,
+        confirmed_facts=[f"The supplied log matched configured rule `{rule.name}`."],
+        root_cause_hypothesis=rule.root_cause_hypothesis,
+        confidence=rule.confidence,
         evidence=evidence,
-        missing_evidence=[
-            "current input schema",
-            "last successful input schema",
-            "recent code changes",
-        ],
-        recommended_next_steps=[
-            "Compare the current input schema with the last successful run.",
-            "Confirm whether the upstream source changed its exported fields.",
-            "Review the normalization mapping before changing pipeline code.",
-            "Add a schema validation check before the failing transformation.",
-        ],
-        suggested_playbook="schema_mismatch_in_dataframe",
+        missing_evidence=rule.missing_evidence,
+        recommended_next_steps=rule.recommended_next_steps,
+        suggested_playbook=rule.suggested_playbook,
     )
 
 
@@ -90,34 +50,21 @@ def _unknown_diagnosis(log_text: str) -> DiagnosisResult:
         triage=TriageResult(
             classification="unknown",
             severity=Severity.MEDIUM,
-            summary="The supplied log did not match a deterministic diagnosis rule.",
-            missing_context=["error type", "failing step", "recent pipeline context"],
+            summary="No configured deterministic rule matched the supplied incident text.",
+            missing_context=["a project-specific diagnosis rule", "additional incident context"],
         ),
         confirmed_facts=["A log was supplied for analysis."],
-        root_cause_hypothesis=(
-            "The available evidence is insufficient to identify a supported failure signature."
-        ),
+        root_cause_hypothesis="The available evidence did not match a configured diagnosis rule.",
         confidence=0.1,
-        evidence=[
-            EvidenceItem(
-                id="E1",
-                source="provided_log",
-                detail=first_line,
-                confidence=1.0,
-            )
-        ],
-        missing_evidence=["error type", "failing step", "recent pipeline context"],
-        recommended_next_steps=[
-            "Collect the full error message and stack trace.",
-            "Identify the pipeline step that failed.",
-            "Compare the failure with the last successful run.",
-        ],
+        evidence=[EvidenceItem(id="E1", source="provided_log", detail=first_line, confidence=1.0)],
+        missing_evidence=["a project-specific diagnosis rule", "additional incident context"],
+        recommended_next_steps=["Add context or a project-specific deterministic rule."],
     )
 
 
-def _matching_line(log_text: str, marker: str) -> str | None:
-    """Return a trimmed log line containing a marker, if one exists."""
+def _matching_line(log_text: str, marker: str) -> str:
+    """Return a log line that supplied a configured matching term."""
     for line in log_text.splitlines():
         if marker.lower() in line.lower():
             return line.strip()
-    return None
+    return marker

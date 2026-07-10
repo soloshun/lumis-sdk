@@ -14,7 +14,7 @@ The output is deliberately reviewable: it distinguishes facts from hypotheses an
 
 ## Status
 
-OpenARIA is an early proof of concept. The first public proof is a local command that diagnoses a synthetic pipeline failure and produces a Markdown incident report.
+OpenARIA is an early proof of concept. It is designed for projects to declare their incident-diagnosis behavior in `openaria.yml` and use the framework from their own code, CLI workflows, or cookbooks.
 
 ## Development
 
@@ -26,25 +26,44 @@ uv run openaria --help
 uv run pytest
 ```
 
-## Try a deterministic diagnosis
+## Configure a project
 
-The first example is intentionally narrow and offline. It recognizes a synthetic schema-mismatch log and writes an evidence-grounded report:
+An OpenARIA project declares its own memory location, report location, and deterministic rules in `openaria.yml`. The framework evaluates those rules; it does not contain your pipeline-specific error signatures or playbooks.
+
+```yaml
+project: my_pipeline
+memory:
+  path: .openaria/incidents.db
+rules:
+  - name: expected-field-missing
+    all_contains: ["KeyError", "expected_field"]
+    classification: schema_change
+    severity: medium
+    summary: A configured expected field was unavailable.
+    root_cause_hypothesis: The source schema may have changed.
+    confidence: 0.6
+```
+
+## Run a cookbook
+
+The simple-log cookbook supplies synthetic input and a project configuration:
 
 ```bash
 uv run openaria diagnose \
-  --log examples/simple-log-diagnosis/failure.log
+  --config cookbook/simple-log-diagnosis/openaria.yml \
+  --log cookbook/simple-log-diagnosis/failure.log
 ```
 
-The command writes `.openaria/reports/incident-report.md` and stores the incident in local SQLite memory. It uses no external network service, LLM, or remediation action.
+The command writes the report and local SQLite memory where that cookbook's YAML configuration specifies. It uses no external network service, LLM, or remediation action.
 
 ## Local incident memory
 
 Each diagnosis is saved in local SQLite memory at `.openaria/incidents.db`. The command prints an incident ID that can be used to retrieve the report, save a final resolution, or find matching past incidents:
 
 ```bash
-uv run openaria report <incident-id>
-uv run openaria resolve <incident-id> --resolution "The source renamed Close to closing_price."
-uv run openaria memory search "KeyError Close"
+uv run openaria report <incident-id> --config openaria.yml
+uv run openaria resolve <incident-id> --resolution "Describe the confirmed resolution." --config openaria.yml
+uv run openaria memory search "search terms" --config openaria.yml
 ```
 
 Search is local, transparent keyword matching. It does not send incident data anywhere.

@@ -5,6 +5,7 @@ from pathlib import Path
 import typer
 
 from openaria import __version__
+from openaria.config import OpenARIAConfig, load_config, resolve_project_path
 from openaria.incidents import incident_from_log
 from openaria.llm import diagnose_with_optional_model
 from openaria.memory import IncidentNotFoundError, SQLiteIncidentStore, search_incidents
@@ -18,7 +19,7 @@ app = typer.Typer(
 memory_app = typer.Typer(help="Search local OpenARIA incident memory.")
 app.add_typer(memory_app, name="memory")
 
-DEFAULT_MEMORY_PATH = Path(".openaria/incidents.db")
+DEFAULT_CONFIG_PATH = Path("openaria.yml")
 
 
 def version_callback(value: bool) -> None:
@@ -52,42 +53,52 @@ def diagnose(
         readable=True,
         help="Path to a local pipeline-failure log.",
     ),
-    output: Path = typer.Option(
-        Path(".openaria/reports/incident-report.md"),
-        "--output",
-        help="Path where the Markdown incident report will be written.",
+    config: Path = typer.Option(
+        DEFAULT_CONFIG_PATH,
+        "--config",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        help="Path to the project OpenARIA YAML configuration.",
     ),
-    memory_path: Path = typer.Option(
-        DEFAULT_MEMORY_PATH,
-        "--memory-path",
-        help="Path to the local SQLite incident-memory database.",
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        help="Optional override for the configured Markdown report path.",
     ),
 ) -> None:
-    """Diagnose a local log with deterministic, evidence-only rules."""
+    """Diagnose a local log using the project's configured deterministic rules."""
+    project_config = load_config(config)
     log_text = log.read_text(encoding="utf-8")
-    incident = incident_from_log(log_text, str(log))
-    diagnosis = diagnose_with_optional_model(log_text)
+    incident = incident_from_log(log_text, str(log), project_config.project)
+    diagnosis = diagnose_with_optional_model(log_text, rules=project_config.rules)
     report = render_markdown_report(incident, diagnosis)
 
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(report, encoding="utf-8")
-    stored = SQLiteIncidentStore(memory_path).save(incident, diagnosis, report, output)
-    typer.echo(f"Incident report written to {output}")
+    report_path = output or resolve_project_path(
+        config, f"{project_config.reports.output_dir}/incident-report.md"
+    )
+    memory_path = resolve_project_path(config, project_config.memory.path)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(report, encoding="utf-8")
+    stored = SQLiteIncidentStore(memory_path).save(incident, diagnosis, report, report_path)
+    typer.echo(f"Incident report written to {report_path}")
     typer.echo(f"Incident ID: {stored.id}")
 
 
 @app.command()
 def report(
     incident_id: str,
-    memory_path: Path = typer.Option(
-        DEFAULT_MEMORY_PATH,
-        "--memory-path",
-        help="Path to the local SQLite incident-memory database.",
+    config: Path = typer.Option(
+        DEFAULT_CONFIG_PATH,
+        "--config",
+        exists=True,
+        help="Path to the project OpenARIA YAML configuration.",
     ),
 ) -> None:
     """Print a stored incident report, including its final resolution if present."""
     try:
-        stored = SQLiteIncidentStore(memory_path).get(incident_id)
+        stored = SQLiteIncidentStore(_memory_path(config)).get(incident_id)
     except IncidentNotFoundError as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(code=1) from error
@@ -98,15 +109,16 @@ def report(
 def resolve(
     incident_id: str,
     resolution: str = typer.Option(..., "--resolution", help="Human-confirmed final resolution."),
-    memory_path: Path = typer.Option(
-        DEFAULT_MEMORY_PATH,
-        "--memory-path",
-        help="Path to the local SQLite incident-memory database.",
+    config: Path = typer.Option(
+        DEFAULT_CONFIG_PATH,
+        "--config",
+        exists=True,
+        help="Path to the project OpenARIA YAML configuration.",
     ),
 ) -> None:
     """Store a human-confirmed resolution for an incident."""
     try:
-        SQLiteIncidentStore(memory_path).set_resolution(incident_id, resolution)
+        SQLiteIncidentStore(_memory_path(config)).set_resolution(incident_id, resolution)
     except IncidentNotFoundError as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(code=1) from error
@@ -116,14 +128,15 @@ def resolve(
 @memory_app.command("search")
 def memory_search(
     query: str,
-    memory_path: Path = typer.Option(
-        DEFAULT_MEMORY_PATH,
-        "--memory-path",
-        help="Path to the local SQLite incident-memory database.",
+    config: Path = typer.Option(
+        DEFAULT_CONFIG_PATH,
+        "--config",
+        exists=True,
+        help="Path to the project OpenARIA YAML configuration.",
     ),
 ) -> None:
     """Find similar incidents using transparent local keyword matching."""
-    results = search_incidents(SQLiteIncidentStore(memory_path).list_all(), query)
+    results = search_incidents(SQLiteIncidentStore(_memory_path(config)).list_all(), query)
     if not results:
         typer.echo("No matching incidents found.")
         return
@@ -143,3 +156,9 @@ def memory_search(
 def main() -> None:
     """Run the OpenARIA CLI."""
     app()
+
+
+def _memory_path(config_path: Path) -> Path:
+    """Resolve the local incident-memory path from a project configuration."""
+    project_config: OpenARIAConfig = load_config(config_path)
+    return resolve_project_path(config_path, project_config.memory.path)

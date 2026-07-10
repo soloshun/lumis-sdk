@@ -1,0 +1,28 @@
+project: stock_feature_pipeline
+environment: local
+
+memory:
+  path: .openaria/incidents.db
+
+reports:
+  output_dir: .openaria/reports
+
+rules:
+  - name: missing-close-column
+    all_contains:
+      - "KeyError"
+      - "Close"
+    classification: schema_change
+    severity: medium
+    summary: A transformation expected the Close field, but the supplied log shows it was unavailable.
+    root_cause_hypothesis: The source schema may have changed, or a project normalization step may have renamed or removed Close.
+    confidence: 0.65
+    missing_evidence:
+      - current input schema
+      - last successful input schema
+      - recent code changes
+    recommended_next_steps:
+      - Compare the current input schema with the last successful run.
+      - Confirm whether the upstream source changed its exported fields.
+      - Review the normalization mapping before changing pipeline code.
+    suggested_playbook: schema_mismatch_in_dataframe

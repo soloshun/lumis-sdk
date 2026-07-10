@@ -1,5 +1,6 @@
 """One safe, non-executing lifecycle orchestration function."""
 
+from collections.abc import Callable
 from pathlib import Path
 
 from openaria.lifecycle.contracts import (
@@ -16,7 +17,6 @@ from openaria.lifecycle.models import (
     LifecycleResult,
     VerificationResult,
 )
-from openaria.llm import diagnose_with_optional_model
 from openaria.memory import SQLiteIncidentStore
 from openaria.reports import render_markdown_report
 from openaria.schemas import DiagnosisResult, IncidentInput
@@ -30,6 +30,7 @@ def run_lifecycle(
     approval_provider: ApprovalProvider,
     verifier: Verifier,
     audit_trail: AuditTrail,
+    diagnoser: Callable[[str], DiagnosisResult],
     memory_store: SQLiteIncidentStore | None = None,
     report_path: Path | None = None,
 ) -> LifecycleResult:
@@ -49,7 +50,7 @@ def run_lifecycle(
     )
 
     raw_log = incident.raw_payload.get("log", "")
-    diagnosis = diagnose_with_optional_model(str(raw_log))
+    diagnosis = diagnoser(str(raw_log))
     _record(audit_trail, audit_events, "diagnosis_completed", diagnosis.triage.classification)
 
     plan = policy_engine.propose(diagnosis, context)
