@@ -55,6 +55,12 @@ The core includes a provider-neutral model boundary that is disabled by default.
 
 The core does not require an LLM provider or agent framework. Provider-specific examples, including the planned Agno + OpenRouter cookbook, remain opt-in and separate from the core package.
 
+## Framework and cookbooks
+
+OpenARIA is built as a lightweight framework with typed incident, diagnosis, memory, model-gateway, policy, approval, and verification interfaces. Cookbooks are separate, runnable projects that depend on those public interfaces rather than embedding framework logic themselves.
+
+See [Framework and cookbook architecture](docs/framework-and-cookbooks.md) for the boundary between the reusable core and the synthetic agent demo.
+
 ## Safety and clean-room policy
 
 Use only public knowledge, original code, public documentation, and synthetic examples. Do not contribute employer/client code, credentials, logs, runbooks, datasets, or architecture material.
@@ -66,7 +72,7 @@ The public direction is:
 1. Local, deterministic diagnosis of synthetic incidents.
 2. Local incident memory and retrieval.
 3. Optional model-provider integrations behind a narrow interface.
-4. Reproducible synthetic pipeline demos.
+4. Framework lifecycle interfaces and reproducible synthetic context.
 5. Later, opt-in cookbook examples such as Agno with OpenRouter.
 
 ## Contributing
