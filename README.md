@@ -34,14 +34,9 @@ An OpenARIA project declares its own memory location, report location, and deter
 project: my_pipeline
 memory:
   path: .openaria/incidents.db
-rules:
-  - name: expected-field-missing
-    all_contains: ["KeyError", "expected_field"]
-    classification: schema_change
-    severity: medium
-    summary: A configured expected field was unavailable.
-    root_cause_hypothesis: The source schema may have changed.
-    confidence: 0.6
+telemetry:
+  log: logs/latest-failure.log
+rules_file: rules.yml
 ```
 
 ## Run a cookbook

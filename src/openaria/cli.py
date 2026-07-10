@@ -44,14 +44,10 @@ def openaria(
 
 @app.command()
 def diagnose(
-    log: Path = typer.Option(
-        ...,
+    log: Path | None = typer.Option(
+        None,
         "--log",
-        exists=True,
-        file_okay=True,
-        dir_okay=False,
-        readable=True,
-        help="Path to a local pipeline-failure log.",
+        help="Optional override for the configured local telemetry log.",
     ),
     config: Path = typer.Option(
         DEFAULT_CONFIG_PATH,
@@ -70,8 +66,11 @@ def diagnose(
 ) -> None:
     """Diagnose a local log using the project's configured deterministic rules."""
     project_config = load_config(config)
-    log_text = log.read_text(encoding="utf-8")
-    incident = incident_from_log(log_text, str(log), project_config.project)
+    log_path = log or _telemetry_log_path(config, project_config)
+    if not log_path.exists() or not log_path.is_file():
+        raise typer.BadParameter(f"Telemetry log does not exist or is not a file: {log_path}")
+    log_text = log_path.read_text(encoding="utf-8")
+    incident = incident_from_log(log_text, str(log_path), project_config.project)
     diagnosis = diagnose_with_optional_model(log_text, rules=project_config.rules)
     report = render_markdown_report(incident, diagnosis)
 
@@ -162,3 +161,10 @@ def _memory_path(config_path: Path) -> Path:
     """Resolve the local incident-memory path from a project configuration."""
     project_config: OpenARIAConfig = load_config(config_path)
     return resolve_project_path(config_path, project_config.memory.path)
+
+
+def _telemetry_log_path(config_path: Path, project_config: OpenARIAConfig) -> Path:
+    """Resolve the configured default log or require a CLI override."""
+    if project_config.telemetry.log is None:
+        raise typer.BadParameter("Provide --log or set telemetry.log in the project configuration.")
+    return resolve_project_path(config_path, project_config.telemetry.log)

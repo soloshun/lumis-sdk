@@ -16,6 +16,15 @@ memory:
 reports:
   output_dir: .openaria/reports
 
+telemetry:
+  log: logs/latest-failure.log
+
+rules_file: rules.yml
+```
+
+The external `rules.yml` file contains the rule definitions:
+
+```yaml
 rules:
   - name: missing-close-column
     all_contains:
@@ -44,7 +53,9 @@ rules:
 | `environment` | No | Deployment context; defaults to `local`. |
 | `memory.path` | No | SQLite file for incident history; defaults to `.openaria/incidents.db`. Relative paths are resolved from the YAML file. |
 | `reports.output_dir` | No | Directory for generated Markdown reports; defaults to `.openaria/reports`. Relative paths are resolved from the YAML file. |
-| `rules` | No | Ordered deterministic diagnosis rules. An empty list returns an explicit `unknown` diagnosis. |
+| `telemetry.log` | No | Default local log path for `openaria diagnose`. Use `--log` to override it for one command. |
+| `rules_file` | No | Relative or absolute YAML/JSON file containing ordered deterministic rules. |
+| `rules` | No | Inline deterministic rules. Use this only for a small configuration; rules from `rules_file` are appended after inline rules. |
 
 ## Rule fields
 
@@ -80,9 +91,13 @@ When several rules could match, order them from the most specific to the most ge
 ## Run a configured project
 
 ```bash
-uv run openaria diagnose \
-  --config path/to/openaria.yml \
-  --log path/to/failure.log
+uv run openaria diagnose --config path/to/openaria.yml
+```
+
+When `telemetry.log` is not configured, pass the input explicitly:
+
+```bash
+uv run openaria diagnose --config path/to/openaria.yml --log path/to/failure.log
 ```
 
 OpenARIA writes a Markdown report and stores the incident in the configured SQLite file. The command prints an incident ID.

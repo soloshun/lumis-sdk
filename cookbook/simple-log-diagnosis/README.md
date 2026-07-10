@@ -6,8 +6,7 @@ From this repository root:
 
 ```bash
 uv run openaria diagnose \
-  --config cookbook/simple-log-diagnosis/openaria.yml \
-  --log cookbook/simple-log-diagnosis/failure.log
+  --config cookbook/simple-log-diagnosis/openaria.yml
 ```
 
-The configuration determines the project name, local memory path, report output location, and diagnosis rule. Replace those values with the details of another project without changing OpenARIA source code.
+The configuration determines the project name, local memory path, report output location, telemetry log, and external rule file. Replace those values with the details of another project without changing OpenARIA source code. Add `--log path/to/other.log` to override the configured log for one run.

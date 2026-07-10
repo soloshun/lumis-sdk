@@ -1,13 +1,10 @@
-project: stock_feature_pipeline
-environment: local
+project: synthetic_reference_architecture
+environment: demo
 
 memory:
   path: .openaria/incidents.db
 
 reports:
   output_dir: .openaria/reports
-
-telemetry:
-  log: failure.log
 
 rules_file: rules.yml
