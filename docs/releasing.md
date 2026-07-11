@@ -40,10 +40,11 @@ A pending publisher does not reserve a package name; it becomes a normal publish
 5. Test the result from a clean environment. This script creates a temporary virtual environment, installs only the published package, checks the import and CLI version, exercises initialization, doctor, and rule validation, prints the result, and removes all temporary files when it exits:
 
    ```bash
-   bash scripts/verify_published_package.sh openaria 0.0.1
+   bash scripts/verify_published_package.sh \
+     openaria 0.0.1 https://test.pypi.org/simple/
    ```
 
-   Pass `https://pypi.org/simple/` as the third argument when verifying a production PyPI release.
+   The script defaults to production PyPI; pass the TestPyPI URL explicitly while staging.
 
 6. Run **Release package** again with the same version and select `pypi`. The `pypi` environment provides the manual approval boundary.
 
@@ -51,7 +52,14 @@ PyPI release files are immutable. If a release has a packaging defect, publish a
 
 ## Installing from another project
 
-While a release is on TestPyPI only:
+For the currently released production package:
+
+```bash
+uv add "openaria>=0.0.1,<0.1.0"
+pip install openaria
+```
+
+For a TestPyPI-only staging release:
 
 ```bash
 uv add \
@@ -63,11 +71,4 @@ pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
   "openaria==0.0.1"
-```
-
-After publishing the same release to production PyPI:
-
-```bash
-uv add "openaria>=0.0.1,<0.1.0"
-pip install openaria
 ```

@@ -5,7 +5,7 @@ set -euo pipefail
 
 PACKAGE_NAME="${1:-openaria}"
 PACKAGE_VERSION="${2:-0.0.1}"
-INDEX_URL="${3:-https://test.pypi.org/simple/}"
+INDEX_URL="${3:-https://pypi.org/simple/}"
 EXTRA_INDEX_URL="${4:-https://pypi.org/simple/}"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/openaria-publish-check.XXXXXX")"
 VENV_DIR="$WORK_DIR/venv"
