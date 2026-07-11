@@ -1,0 +1,104 @@
+name: Release package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version declared in pyproject.toml (for example, 0.0.1)
+        required: true
+        type: string
+      target:
+        description: Package index to publish to
+        required: true
+        default: testpypi
+        type: choice
+        options:
+          - testpypi
+          - pypi
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.target }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  verify-and-build:
+    name: Verify and build ${{ inputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.17"
+          enable-cache: true
+
+      - name: Install Python
+        run: uv python install 3.11
+
+      - name: Check declared version
+        run: |
+          test "$(uv version --short)" = "${{ inputs.version }}"
+
+      - name: Sync locked dependencies
+        run: uv sync --locked --all-groups
+
+      - name: Verify source
+        run: |
+          uv run ruff format --check .
+          uv run ruff check .
+          uv run mypy src
+          uv run python scripts/generate_config_schema.py --check
+          uv run pytest
+
+      - name: Build publishable distributions
+        run: uv build --no-sources
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist-${{ inputs.version }}
+          path: dist/
+          if-no-files-found: error
+
+  publish-testpypi:
+    name: Publish ${{ inputs.version }} to TestPyPI
+    needs: verify-and-build
+    if: inputs.target == 'testpypi'
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist-${{ inputs.version }}
+          path: dist/
+
+      - name: Publish distributions
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    name: Publish ${{ inputs.version }} to PyPI
+    needs: verify-and-build
+    if: inputs.target == 'pypi'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist-${{ inputs.version }}
+          path: dist/
+
+      - name: Publish distributions
+        uses: pypa/gh-action-pypi-publish@release/v1

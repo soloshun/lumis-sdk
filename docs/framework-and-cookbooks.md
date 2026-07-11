@@ -4,7 +4,7 @@ This page explains one boundary within the project. For the complete core narrat
 
 ## Purpose
 
-OpenARIA is a lightweight, vendor-agnostic framework for diagnosing pipeline incidents. Its reusable core should not depend on a specific orchestrator, web server, model provider, or agent framework.
+OpenARIA is a lightweight, vendor-agnostic framework for building guarded incident-recovery workflows. Its current implementation is diagnosis-centered, while its contracts deliberately leave room for policy-controlled planning, approval, verification, and learning. The reusable core does not depend on a specific orchestrator, web server, model provider, or agent framework.
 
 A cookbook is a separate runnable project that imports OpenARIA and demonstrates how an application can use those public interfaces. This keeps the core useful for different stacks while making the paper demonstration concrete and reproducible.
 
@@ -23,7 +23,7 @@ The core does **not** own a live agent, a cloud account, a perpetual monitor, pr
 
 ## Framework extension points
 
-The `openaria.llm` and `openaria.lifecycle` modules are intentionally small public extension surfaces, not leftover application code. `llm` defines an optional provider-neutral gateway, structured response validation, and redaction; `lifecycle` defines typed contracts for context, policy, approval, planning, verification, and audit events. The initial cookbooks use configuration, diagnosis, reports, and local memory directly, while future adapters can implement these contracts without putting an agent or vendor SDK in the core package.
+The canonical extension surfaces are `openaria.ports` and `openaria.domain`. Ports cover models, memory, reporting, context, policy, approval, verification, and audit. The `openaria.application` package composes these interfaces without importing provider SDKs. Model providers implement `ModelGateway`; redaction lives in `openaria.security`; local implementations live in `openaria.adapters`.
 
 ## Cookbook responsibilities
 
@@ -71,10 +71,10 @@ An optional watcher can follow later as a bounded polling command with an explic
 
 ## Build sequence
 
-1. Add framework lifecycle contracts and the data-driven YAML configuration surface.
-2. Move simple logs, rules, and resolution walkthroughs into cookbooks.
-3. Build cookbook-owned synthetic data-pipeline and ML-regression fixture packs and FastAPI simulators on top of framework contracts.
-4. Add opt-in Agno + OpenRouter applications with narrow tools.
-5. Demonstrate recommendation, human approval boundaries, synthetic verification context, and memory update.
+1. Define framework lifecycle contracts and a versioned YAML configuration surface.
+2. Keep logs, rules, runbooks, prompts, and synthetic scenarios in consuming projects or cookbooks.
+3. Build data, ML, and software-delivery demonstrations on the public ports and domain models.
+4. Add opt-in Agno + OpenRouter applications through the provider-neutral model boundary.
+5. Demonstrate recommendations, approval boundaries, verification context, and human-confirmed learning without production execution.
 
 This sequence gives the cookbook something real to consume while keeping OpenARIA useful without the cookbook.

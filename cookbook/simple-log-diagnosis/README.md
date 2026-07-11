@@ -1,6 +1,6 @@
 # Simple log diagnosis
 
-This cookbook uses OpenARIA as an installed framework. The cookbook owns the synthetic log and the project-specific deterministic rule; OpenARIA provides configuration loading, rule evaluation, reporting, and local memory.
+This cookbook uses OpenARIA as an installed framework. The cookbook owns the synthetic log and project rule; the CLI composes strict configuration with the canonical local-log, deterministic-rule, Markdown, and SQLite adapters. It is the smallest example of the same structure used by the agentic cookbooks.
 
 From this repository root:
 

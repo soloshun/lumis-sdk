@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openaria"
-version = "0.1.0"
-description = "Vendor-agnostic framework for guarded data, ML, and software pipeline recovery."
+version = "0.0.1"
+description = "Vendor-agnostic, deterministic-first framework for guarded incident recovery."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Solomon Eshun", email = "solomoneshun373@gmail.com" }]
-keywords = ["aiops", "diagnosis-as-code", "incident-management", "mlops", "observability", "pipeline-reliability"]
+keywords = ["aiops", "diagnosis-as-code", "healing-as-code", "incident-management", "mlops", "observability", "pipeline-reliability"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Intended Audience :: Developers",

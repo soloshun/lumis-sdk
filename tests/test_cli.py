@@ -1,5 +1,6 @@
 """Tests for the OpenARIA command-line interface."""
 
+import json
 import re
 from pathlib import Path
 
@@ -11,21 +12,37 @@ runner = CliRunner()
 
 
 def _project_config(tmp_path: Path) -> Path:
+    (tmp_path / "rules.yml").write_text(
+        """apiVersion: openaria.dev/v1alpha1
+kind: DiagnosisRuleSet
+metadata:
+  name: fixture-rules
+spec:
+  rules:
+    - id: fixture-rule
+      name: fixture-rule
+      all_contains: ["INCIDENT_SIGNATURE"]
+      classification: configured_failure
+      severity: medium
+      summary: The fixture signature appeared.
+      root_cause_hypothesis: The configured rule matched.
+      confidence: 0.6
+""",
+        encoding="utf-8",
+    )
     config_path = tmp_path / "openaria.yml"
     config_path.write_text(
-        """project: fixture-project
-memory:
-  path: incidents.db
-reports:
-  output_dir: reports
-rules:
-  - name: fixture-rule
-    all_contains: ["INCIDENT_SIGNATURE"]
-    classification: configured_failure
-    severity: medium
-    summary: The fixture signature appeared.
-    root_cause_hypothesis: The configured rule matched.
-    confidence: 0.6
+        """apiVersion: openaria.dev/v1alpha1
+kind: Project
+metadata:
+  name: fixture-project
+spec:
+  memory:
+    path: incidents.db
+  reports:
+    outputDir: reports
+  rules:
+    files: [rules.yml]
 """,
         encoding="utf-8",
     )
@@ -46,7 +63,7 @@ def test_version_is_available() -> None:
     result = runner.invoke(app, ["--version"])
 
     assert result.exit_code == 0
-    assert result.output.strip() == "0.1.0"
+    assert result.output.strip() == "0.0.1"
 
 
 def test_diagnose_writes_an_evidence_grounded_report(tmp_path: Path) -> None:
@@ -133,3 +150,22 @@ def test_cli_can_retrieve_resolve_and_search_a_saved_incident(tmp_path: Path) ->
     assert report_result.exit_code == 0
     assert "## Final Resolution" in report_result.output
     assert "Updated the source mapping." in report_result.output
+
+
+def test_init_doctor_and_rule_validation_form_a_local_project(tmp_path: Path) -> None:
+    """A generated project validates without credentials or network access."""
+    init_result = runner.invoke(app, ["init", "--destination", str(tmp_path)])
+
+    assert init_result.exit_code == 0
+    config_path = tmp_path / "openaria.yml"
+    assert config_path.exists()
+    assert (tmp_path / "rules.yml").exists()
+
+    doctor_result = runner.invoke(app, ["doctor", "--config", str(config_path)])
+    assert doctor_result.exit_code == 0
+    assert "api version: openaria.dev/v1alpha1" in doctor_result.output
+    assert "model assistance: disabled" in doctor_result.output
+
+    rules_result = runner.invoke(app, ["rules", "validate", "--config", str(config_path), "--json"])
+    assert rules_result.exit_code == 0
+    assert json.loads(rules_result.output) == {"valid": True, "rules": []}

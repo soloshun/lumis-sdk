@@ -1,17 +1,25 @@
-rules:
-  - name: stale-lockfile-in-ci
-    all_contains:
-      - "lockfile is out of date"
-      - "uv sync --locked"
-    classification: dependency_lockfile_mismatch
-    severity: low
-    summary: The CI dependency lockfile does not match the declared project dependencies.
-    root_cause_hypothesis: A dependency declaration changed without regenerating and committing the lockfile.
-    confidence: 0.85
-    missing_evidence:
-      - dependency manifest diff
-      - lockfile generation command output
-    recommended_next_steps:
-      - Compare the dependency manifest with the committed lockfile.
-      - Regenerate the lockfile in a reviewable change and rerun CI.
-    suggested_playbook: dependency_lockfile_refresh
+apiVersion: openaria.dev/v1alpha1
+kind: DiagnosisRuleSet
+metadata:
+  name: synthetic-software-delivery-rules
+spec:
+  rules:
+    - id: stale-lockfile-in-ci
+      name: stale-lockfile-in-ci
+      version: "1"
+      priority: 100
+      all_contains:
+        - "lockfile is out of date"
+        - "uv sync --locked"
+      classification: dependency_lockfile_mismatch
+      severity: low
+      summary: The CI dependency lockfile does not match the declared project dependencies.
+      root_cause_hypothesis: A dependency changed without regenerating and committing the lockfile.
+      confidence: 0.85
+      missing_evidence:
+        - dependency manifest diff
+        - lockfile generation command output
+      recommended_next_steps:
+        - Compare the dependency manifest with the committed lockfile.
+        - Regenerate the lockfile in a reviewable change and rerun CI.
+      suggested_playbook: dependency_lockfile_refresh

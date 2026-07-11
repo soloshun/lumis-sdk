@@ -102,4 +102,4 @@ All data is synthetic. The service has no write endpoint. The agent has no shell
 
 ## Relation to OpenARIA
 
-The cookbook owns the FastAPI service, synthetic data, and Agno/OpenRouter integration. OpenARIA remains the reusable framework that provides the incident, diagnosis, configuration, memory, report, and lifecycle contracts used by future cookbook adapters.
+The cookbook owns the FastAPI service, synthetic data, rules, knowledge, prompts, and Agno/OpenRouter integration. Its application imports deterministic and local-log behavior from `openaria.adapters`, strict project declarations from `openaria.config`, typed contracts from `openaria.domain`, and redaction from `openaria.security`. This is the same canonical surface available to any consuming project; no deprecated proof-of-concept modules are involved.

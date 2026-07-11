@@ -1,10 +1,10 @@
-"""Tests for lifecycle orchestration using project-supplied adapters."""
+"""Tests for canonical guarded lifecycle orchestration."""
 
-from pathlib import Path
-
+from openaria.adapters.deterministic import diagnose_text
+from openaria.adapters.incidents import incident_from_log
+from openaria.application import run_guarded_lifecycle
 from openaria.config import DeterministicRule
-from openaria.incidents import incident_from_log
-from openaria.lifecycle import (
+from openaria.domain import (
     ActionPlan,
     ApprovalDecision,
     ApprovalStatus,
@@ -15,10 +15,7 @@ from openaria.lifecycle import (
     RiskLevel,
     VerificationResult,
     VerificationStatus,
-    run_lifecycle,
 )
-from openaria.memory import SQLiteIncidentStore
-from openaria.triage import diagnose_text
 
 
 class FixtureContextProvider:
@@ -64,9 +61,10 @@ class FixtureAuditTrail:
         self.events.append(event)
 
 
-def test_lifecycle_uses_only_injected_project_adapters(tmp_path: Path) -> None:
-    """The framework does not need a built-in scenario to run a lifecycle."""
+def test_lifecycle_uses_only_injected_project_adapters() -> None:
+    """The application lifecycle composes only canonical ports."""
     rule = DeterministicRule(
+        id="fixture-rule",
         name="fixture-rule",
         all_contains=["FAILURE_CODE"],
         classification="configured_failure",
@@ -77,20 +75,17 @@ def test_lifecycle_uses_only_injected_project_adapters(tmp_path: Path) -> None:
     )
     incident = incident_from_log("FAILURE_CODE", "fixture.log", "fixture-project")
     audit_trail = FixtureAuditTrail()
-    store = SQLiteIncidentStore(tmp_path / "incidents.db")
-    result = run_lifecycle(
+    result = run_guarded_lifecycle(
         incident,
         context_provider=FixtureContextProvider(),
-        policy_engine=FixturePolicy(),
+        policy_evaluator=FixturePolicy(),
         approval_provider=FixtureApproval(),
         verifier=FixtureVerifier(),
         audit_trail=audit_trail,
         diagnoser=lambda text: diagnose_text(text, [rule]),
-        memory_store=store,
-        report_path=tmp_path / "report.md",
     )
 
     assert result.diagnosis.triage.classification == "configured_failure"
     assert result.action_plan.playbook_name == "configured_playbook"
-    assert result.stored_incident_id is not None
     assert result.verification.status is VerificationStatus.NOT_RUN
+    assert audit_trail.events == result.audit_events

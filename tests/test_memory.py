@@ -2,16 +2,17 @@
 
 from pathlib import Path
 
+from openaria.adapters.deterministic import diagnose_text
+from openaria.adapters.incidents import incident_from_log
+from openaria.adapters.reports import render_markdown_report
+from openaria.adapters.sqlite import SQLiteIncidentStore, search_incidents
 from openaria.config import DeterministicRule
-from openaria.incidents import incident_from_log
-from openaria.memory import SQLiteIncidentStore, search_incidents
-from openaria.reports import render_markdown_report
-from openaria.triage import diagnose_text
 
 
 def _save_schema_incident(database_path: Path) -> tuple[SQLiteIncidentStore, str]:
     log_text = "INCIDENT_SIGNATURE"
     rule = DeterministicRule(
+        id="fixture-rule",
         name="fixture-rule",
         all_contains=["INCIDENT_SIGNATURE"],
         classification="configured_failure",

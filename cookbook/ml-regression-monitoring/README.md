@@ -86,4 +86,4 @@ OpenRouter is optional and is used only for the two unknown scenarios when you e
 
 ## How this uses OpenARIA
 
-The cookbook owns the synthetic FastAPI service, regression fixtures, knowledge library, Agno agent, and provider choice. OpenARIA core supplies the configuration loader, deterministic rule evaluator, incident model, redaction boundary, Markdown reporting, SQLite memory, and lifecycle concepts. This division is what lets another project use a different agent framework, model provider, or telemetry source without changing the core framework.
+The cookbook owns the synthetic FastAPI service, regression fixtures, knowledge library, Agno agent, and provider choice. It imports strict declarations from `openaria.config`, concrete local behavior from `openaria.adapters`, domain contracts from `openaria.domain`, and redaction from `openaria.security`. Another project can replace the agent framework, model provider, or telemetry source while keeping those same canonical OpenARIA boundaries.

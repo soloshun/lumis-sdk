@@ -1,13 +1,22 @@
 # Contributing to OpenARIA
 
-Thanks for contributing. OpenARIA is a small, safety-focused research proof of concept, so small, well-tested changes are preferred.
+Thanks for contributing. OpenARIA is a pre-alpha, safety-focused open-source framework and research companion. Small, reviewable, well-tested changes are preferred.
 
 ## Before you contribute
 
 - Discuss substantial changes in an issue before investing in a pull request.
 - Use only original code, public documentation, and synthetic or public data.
 - Never submit credentials, private logs, customer information, employer/client code, runbooks, or architecture material.
-- Keep v0.1 focused on diagnosis and recommendations; production remediation is out of scope.
+- Keep the current release focused on diagnosis, recommendations, and guarded-recovery contracts; production remediation is out of scope.
+
+## Architecture boundaries
+
+- Put vendor-neutral models and invariants in `openaria.domain`.
+- Put orchestration in `openaria.application` and abstract dependencies behind `openaria.ports`.
+- Put SQLite, Markdown, deterministic engines, and future provider implementations in `openaria.adapters`.
+- Keep provider SDKs, synthetic scenarios, prompts, runbooks, and project rules out of the domain.
+- Prefer separate packages for substantial vendor adapters. Optional dependencies must not become core requirements.
+- Treat configuration, serialized records, CLI output, and public Python imports as versioned contracts. Document future transitions rather than silently breaking them.
 
 ## Documentation and public claims
 
@@ -24,7 +33,9 @@ uv sync --all-groups
 uv run ruff format --check .
 uv run ruff check .
 uv run mypy src
+uv run python scripts/generate_config_schema.py --check
 uv run pytest
+uv build
 ```
 
 ## Pull requests
@@ -32,6 +43,9 @@ uv run pytest
 - Keep the pull request focused and explain the user-visible behavior.
 - Add or update tests for code changes.
 - Update documentation and examples when behavior changes.
+- Add an entry under `CHANGELOG.md` when behavior, configuration, safety posture, or a public interface changes.
 - Do not add secrets to commits, fixtures, screenshots, or issue text.
+
+Changes that add action execution, widen filesystem/network authority, alter approval semantics, or weaken evidence boundaries require a design discussion and explicit threat-model updates before implementation.
 
 We welcome contributions to code, examples, cookbook recipes, and documentation. Changes to homepage messaging, branding, roadmap, sponsorship links, or product positioning are controlled by maintainers and may require prior discussion.

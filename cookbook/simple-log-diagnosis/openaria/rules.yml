@@ -1,19 +1,26 @@
-rules:
-  - name: missing-close-column
-    all_contains:
-      - "KeyError"
-      - "Close"
-    classification: schema_change
-    severity: medium
-    summary: A transformation expected the Close field, but the supplied log shows it was unavailable.
-    root_cause_hypothesis: The source schema may have changed, or a project normalization step may have renamed or removed Close.
-    confidence: 0.65
-    missing_evidence:
-      - current input schema
-      - last successful input schema
-      - recent code changes
-    recommended_next_steps:
-      - Compare the current input schema with the last successful run.
-      - Confirm whether the upstream source changed its exported fields.
-      - Review the normalization mapping before changing pipeline code.
-    suggested_playbook: schema_mismatch_in_dataframe
+apiVersion: openaria.dev/v1alpha1
+kind: DiagnosisRuleSet
+metadata:
+  name: stock-feature-rules
+spec:
+  rules:
+    - id: missing-close-column
+      name: missing-close-column
+      version: "1"
+      priority: 100
+      all_contains:
+        - "KeyError"
+        - "Close"
+      classification: schema_change
+      severity: medium
+      summary: A transformation expected the Close field, but the supplied log shows it was unavailable.
+      root_cause_hypothesis: The source schema may have changed, or a normalization step may have renamed or removed Close.
+      confidence: 0.65
+      missing_evidence:
+        - current input schema
+        - last successful input schema
+        - recent code changes
+      recommended_next_steps:
+        - Compare the current input schema with the last successful run.
+        - Confirm whether the upstream source changed its exported fields.
+      suggested_playbook: schema_mismatch_in_dataframe

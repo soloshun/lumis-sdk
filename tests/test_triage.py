@@ -1,12 +1,13 @@
 """Tests for deterministic triage and diagnosis rules."""
 
+from openaria.adapters.deterministic import diagnose_text
 from openaria.config import DeterministicRule
-from openaria.triage import diagnose_text
 
 
 def test_configured_rule_is_applied_to_matching_text() -> None:
     """A consuming project controls its own deterministic classification."""
     rule = DeterministicRule(
+        id="configured-rule",
         name="configured-rule",
         all_contains=["INCIDENT_SIGNATURE"],
         classification="configured_failure",

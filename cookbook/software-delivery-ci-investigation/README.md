@@ -64,4 +64,4 @@ software-delivery-ci-investigation/
 └── run_agent.py              # opt-in Agno/OpenRouter application
 ```
 
-OpenARIA core remains vendor-agnostic: the cookbook owns its CI terminology, synthetic files, FastAPI service, and provider integration. A real project could replace these with GitHub Actions, GitLab CI, Azure DevOps, another IaC tool, or another agent/model framework without changing the core diagnosis, report, memory, and lifecycle contracts.
+OpenARIA core remains vendor-agnostic: the cookbook owns its CI terminology, synthetic files, FastAPI service, rules, prompts, and provider integration. The runner imports local implementations from `openaria.adapters`, project declarations from `openaria.config`, and redaction from `openaria.security`. A real project could replace GitHub Actions, GitLab CI, Azure DevOps, IaC tooling, or the agent/model framework without changing the domain and port contracts.

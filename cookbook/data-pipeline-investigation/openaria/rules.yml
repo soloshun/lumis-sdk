@@ -1,13 +1,21 @@
-rules:
-  - name: synthetic-schema-drift
-    all_contains: ["KeyError", "Close"]
-    classification: schema_change
-    severity: medium
-    summary: The synthetic transformation expected Close, but the incident context reports it as unavailable.
-    root_cause_hypothesis: The synthetic source schema may have renamed Close to closing_price.
-    confidence: 0.65
-    missing_evidence: [recent source-owner change notice]
-    recommended_next_steps:
-      - Compare the expected and current synthetic schema snapshots.
-      - Request human approval before a mapping change.
-    suggested_playbook: schema_mismatch_in_dataframe
+apiVersion: openaria.dev/v1alpha1
+kind: DiagnosisRuleSet
+metadata:
+  name: synthetic-data-pipeline-rules
+spec:
+  rules:
+    - id: synthetic-schema-drift
+      name: synthetic-schema-drift
+      version: "1"
+      priority: 100
+      all_contains: ["KeyError", "Close"]
+      classification: schema_change
+      severity: medium
+      summary: The synthetic transformation expected Close, but the incident context reports it as unavailable.
+      root_cause_hypothesis: The synthetic source schema may have renamed Close to closing_price.
+      confidence: 0.65
+      missing_evidence: [recent source-owner change notice]
+      recommended_next_steps:
+        - Compare the expected and current synthetic schema snapshots.
+        - Request human approval before a mapping change.
+      suggested_playbook: schema_mismatch_in_dataframe
