@@ -51,14 +51,23 @@ PyPI release files are immutable. If a release has a packaging defect, publish a
 
 ## Installing from another project
 
-After publishing to PyPI:
+While a release is on TestPyPI only:
+
+```bash
+uv add \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  "openaria==0.0.1"
+
+pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  "openaria==0.0.1"
+```
+
+After publishing the same release to production PyPI:
 
 ```bash
 uv add "openaria>=0.0.1,<0.1.0"
-```
-
-For a one-off environment installation:
-
-```bash
 pip install openaria
 ```

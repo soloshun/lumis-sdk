@@ -123,6 +123,35 @@ uv sync --all-groups
 uv run openaria --help
 ```
 
+## Install OpenARIA
+
+OpenARIA `0.0.1` is currently published on **TestPyPI** for release verification. Install that exact pre-release from a project managed by `uv`:
+
+```bash
+uv add \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  "openaria==0.0.1"
+```
+
+Or install it into an existing environment with pip:
+
+```bash
+pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  "openaria==0.0.1"
+```
+
+After the same release has been promoted to production PyPI, the normal commands become:
+
+```bash
+uv add "openaria>=0.0.1,<0.1.0"
+pip install openaria
+```
+
+See the [release guide](docs/releasing.md) for the TestPyPI verification and production-promotion process.
+
 Run the local deterministic example:
 
 ```bash
