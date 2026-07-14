@@ -63,6 +63,35 @@ _CONTEXTS = {
     },
 }
 
+_INVESTIGATION_GUIDES = {
+    LOCKFILE_ID: {
+        "context_names": list(_CONTEXTS[LOCKFILE_ID]),
+        "code_files": [],
+        "runbooks": [],
+        "playbooks": ["dependency_lockfile_refresh"],
+        "note": "Known rule match; the deterministic report is sufficient for this scenario.",
+    },
+    WORKFLOW_ID: {
+        "context_names": list(_CONTEXTS[WORKFLOW_ID]),
+        "code_files": [".github/workflows/release.yml"],
+        "runbooks": ["ci-permission-investigation"],
+        "playbooks": [],
+        "note": (
+            "Unknown scenario; inspect the listed workflow and runbook before recommending review."
+        ),
+    },
+    INFRA_ID: {
+        "context_names": list(_CONTEXTS[INFRA_ID]),
+        "code_files": ["infra/main.tf"],
+        "runbooks": ["infrastructure-reference-investigation"],
+        "playbooks": [],
+        "note": (
+            "Unknown scenario; inspect the listed Terraform file and runbook "
+            "before recommending review."
+        ),
+    },
+}
+
 _KNOWLEDGE_ROOT = Path(__file__).parent / "knowledge"
 _CODE_ROOT = Path(__file__).parent / "synthetic_project"
 
@@ -87,6 +116,13 @@ def get_context(incident_id: str, context_name: str) -> object:
     if context_name not in context:
         raise HTTPException(status_code=404, detail="Synthetic context item not found")
     return context[context_name]
+
+
+@app.get("/incidents/{incident_id}/guide")
+def get_investigation_guide(incident_id: str) -> dict[str, object]:
+    """Return the valid evidence identifiers for one synthetic incident."""
+    _require_incident(incident_id)
+    return _INVESTIGATION_GUIDES[incident_id]
 
 
 @app.get("/code/{file_path:path}")

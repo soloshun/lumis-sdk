@@ -13,4 +13,5 @@ dependencies = [
 ]
 
 [tool.uv.sources]
+# Keep this executable example attached to the checkout that the reader cloned.
 openaria = { path = "../..", editable = true }

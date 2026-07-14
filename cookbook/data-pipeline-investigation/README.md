@@ -19,16 +19,25 @@ data-pipeline-investigation/
 ├── synthetic_project/        # Bounded code fixture for the unfamiliar-error scenario
 ├── knowledge/                # Cookbook-owned runbook and playbook Markdown
 ├── demo_service.py           # Read-only synthetic incident estate
-└── run_agent.py              # Optional Agno/OpenRouter application
+├── investigation_tools.py    # Bounded, documented agent capabilities
+└── run_agent.py              # Small deterministic-first application entry point
 ```
 
 The `openaria/` directory is the cookbook's framework configuration boundary. `openaria.yml` points to local state and `rules.yml` defines the project-specific signatures; data, code, and provider integration remain outside it.
+
+`uv sync` deliberately installs the repository checkout as an editable local `openaria` dependency. This keeps the cookbook self-contained and lets a reader inspect or change the framework while running the example. A consuming project can instead use the PyPI package with `uv add openaria`.
+
+## Why this cookbook exists
+
+This is an executable research demonstration: a deliberately small application that shows how OpenARIA can be composed around an evidence-grounded incident flow. It is not a production control plane, monitoring platform, or autonomous remediation system.
+
+Read `run_agent.py` first. It has only three steps: build the bounded tools, save a deterministic result when a rule matches, or start the optional agent for an unknown incident. `investigation_tools.py` documents each read, report, memory, and approval-boundary capability individually.
 
 ## What it demonstrates
 
 - A manually started FastAPI service simulates the pipeline estate, telemetry, lineage, verification context, and a separate Markdown knowledge library.
 - An Agno agent uses OpenRouter only when `OPENROUTER_API_KEY` is explicitly set.
-- The agent has bounded tools for incident/context retrieval, framework diagnosis, runbook/playbook and synthetic-code reads, local diagnosis recording, approval requests, and final Markdown export.
+- The agent has bounded tools for incident/context retrieval, framework diagnosis, runbook/playbook and synthetic-code reads, approval requests, and one safe Markdown-report export capability.
 - `get_framework_diagnosis` runs the cookbook's `openaria/openaria.yml` and `openaria/rules.yml` through OpenARIA, proving that the application uses the framework rather than hardcoding a diagnosis rule in the agent.
 - The agent may investigate and propose the synthetic allowlisted playbook, but it cannot execute an action.
 - The proposed schema change requires human approval; verification remains `not_run` because no remediation runs.
@@ -56,7 +65,7 @@ In another terminal, choose one of the scenarios below. The first scenario needs
 uv run python run_agent.py --incident-id schema-drift-001
 ```
 
-The `KeyError: 'Close'` signature matches `rules.yml`. OpenARIA writes `.openaria/reports/schema-drift-001-deterministic.md` and a local SQLite memory record. No LLM request is made.
+The `KeyError: 'Close'` signature matches `rules.yml`. OpenARIA writes `.openaria/reports/schema-drift-001.md` and a local SQLite memory record. No LLM request is made.
 
 ### 2. Unfamiliar code error (LLM investigation)
 
@@ -66,7 +75,7 @@ export OPENARIA_DEMO_MODEL="deepseek/deepseek-v4-flash"
 uv run python run_agent.py --incident-id code-error-001
 ```
 
-This incident has an unfamiliar `adjusted_price` error, so the agent can inspect `synthetic_project/src/price_transform.py`. Once it has investigated, it must call `export_analysis` exactly once. That tool writes the final human-readable report to `.openaria/reports/code-error-001-llm.md` and records it in local SQLite memory.
+This incident has an unfamiliar `adjusted_price` error, so the agent can inspect `synthetic_project/src/price_transform.py`. Agno streams the investigation and formats it in the terminal. Before completing, the agent calls `export_analysis` with `report_name="code-error-001-llm.md"` and the complete Markdown report. The tool writes that report to `.openaria/reports/` and records it in local SQLite memory.
 
 ### 3. Sensitive data in telemetry (LLM investigation with redaction)
 
@@ -84,8 +93,9 @@ Do not place real credentials or personal data in this cookbook. The redactor is
 1. `run_agent.py` first runs the cookbook's `openaria/openaria.yml` and `openaria/rules.yml` through OpenARIA's deterministic diagnosis engine.
 2. A rule match produces the deterministic report immediately. An unknown diagnosis requires an explicitly configured OpenRouter call.
 3. The agent receives a production-style incident-response policy: evidence and uncertainty standards, confidentiality constraints, report requirements, approval boundaries, and prohibited actions.
-4. Agno converts the named Python functions and their docstrings into tool definitions. The model chooses which read-only incident, context, knowledge, or code capability is relevant; the cookbook does not prescribe a fixed tool sequence.
-5. The agent may recommend a playbook and request human approval, but has no execution tool. For an LLM scenario, it must persist its final Markdown through the available report-recording capability so the human-readable analysis is not lost in terminal output.
+4. For an unknown incident, the agent first retrieves `get_investigation_guide`. The guide returns the exact available context keys, source paths, runbooks, and playbooks for that incident. Tool parameter schemas also restrict requests to the cookbook's valid identifiers, so the model does not need to guess names.
+5. Agno converts the documented `DataPipelineTools` methods into tool definitions. The model then chooses which of the guide's read-only incident, context, knowledge, or code capabilities is relevant; the cookbook does not prescribe a fixed evidence sequence.
+6. The agent may recommend a playbook and request human approval, but has no execution tool. For an LLM scenario, it must call `export_analysis` exactly once with a simple Markdown filename and the complete final report text before presenting that same report in the terminal.
 
 ## Knowledge library
 

@@ -74,6 +74,30 @@ _CONTEXTS = {
     PII_INCIDENT_ID: _PII_CONTEXT,
 }
 
+_INVESTIGATION_GUIDES = {
+    INCIDENT_ID: {
+        "context_names": list(_CONTEXT),
+        "code_files": [],
+        "runbooks": ["schema-drift-investigation"],
+        "playbooks": ["schema_mismatch_in_dataframe"],
+        "note": "Known rule match; the deterministic report is sufficient for this scenario.",
+    },
+    UNSEEN_INCIDENT_ID: {
+        "context_names": list(_UNSEEN_CONTEXT),
+        "code_files": ["src/price_transform.py"],
+        "runbooks": ["schema-drift-investigation"],
+        "playbooks": ["schema_mismatch_in_dataframe"],
+        "note": "Unknown scenario; inspect the listed source file before forming a hypothesis.",
+    },
+    PII_INCIDENT_ID: {
+        "context_names": list(_PII_CONTEXT),
+        "code_files": [],
+        "runbooks": [],
+        "playbooks": [],
+        "note": "Unknown scenario; analyze only the redacted telemetry returned by the service.",
+    },
+}
+
 _KNOWLEDGE_ROOT = Path(__file__).parent / "knowledge"
 _CODE_ROOT = Path(__file__).parent / "synthetic_project"
 
@@ -98,6 +122,13 @@ def get_context(incident_id: str, context_name: str) -> object:
     if context_name not in context:
         raise HTTPException(status_code=404, detail="Synthetic context item not found")
     return context[context_name]
+
+
+@app.get("/incidents/{incident_id}/guide")
+def get_investigation_guide(incident_id: str) -> dict[str, object]:
+    """Return the valid evidence identifiers for one synthetic incident."""
+    _require_incident(incident_id)
+    return _INVESTIGATION_GUIDES[incident_id]
 
 
 @app.get("/code/{file_path:path}")

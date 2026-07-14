@@ -41,43 +41,33 @@ OpenARIA starts with Diagnosis-as-Code: local incident evidence becomes a struct
 
 ```mermaid
 flowchart LR
-    subgraph ENTRY[Entry points]
-        CLI[CLI]
-        PY[Python API]
+    subgraph USERS[Project entry points]
+        CLI[OpenARIA CLI]
+        PY[Python application]
     end
-    subgraph APP[Application]
-        DX[Diagnosis service]
-        LC[Guarded lifecycle]
+    subgraph CORE[OpenARIA framework]
+        CFG[Strict project and rule configuration]
+        APP[Application services]
+        DOMAIN[Domain contracts]
+        PORTS[Optional provider ports]
     end
-    subgraph DOMAIN[Domain]
-        INC[Incidents]
-        EV[Evidence]
-        DIAG[Diagnoses]
-        REC[Recovery state]
-    end
-    subgraph PORTS[Ports]
-        MG[Model gateway]
-        MEM[Memory store]
-        CTX[Context provider]
-        POL[Policy evaluator]
-        REP[Report writer]
-        VER[Verifier]
-    end
-    subgraph ADAPTERS[Reference adapters]
-        DET[Deterministic rules]
-        SQL[SQLite]
-        MD[Markdown]
-        CFG[Local YAML/JSON]
+    subgraph LOCAL[Local reference adapters]
+        DET[Deterministic diagnosis]
+        MEM[SQLite incident memory]
+        REPORT[Markdown reports]
+        REDACT[Evidence redaction]
     end
 
-    CLI --> APP
+    CLI --> CFG
+    CLI --> DET
+    CLI --> MEM
+    CLI --> REPORT
     PY --> APP
     APP --> DOMAIN
     APP --> PORTS
-    DET --> APP
-    SQL --> MEM
-    MD --> REP
-    CFG --> CLI
+    APP --> DET
+    CFG --> DET
+    REDACT --> PORTS
 ```
 
 Canonical package boundaries:
@@ -96,7 +86,7 @@ src/openaria/
 
 The proof-of-concept flat modules have been removed. New code imports the explicit domain, application, port, adapter, configuration, and security packages shown above.
 
-Read the [architecture overview](docs/architecture/overview.md), [baseline audit](docs/architecture/refactor-audit.md), and [refactor plan](docs/architecture/refactor-plan.md).
+Read the [architecture overview](docs/architecture/overview.md), [core reference](docs/OPENARIA_CORE_REFERENCE.md), and [configuration reference](docs/configuration.md).
 
 ## Current capabilities
 
@@ -144,7 +134,7 @@ uv add "openaria==0.0.1"
 pip install "openaria==0.0.1"
 ```
 
-See the [release guide](docs/releasing.md) for TestPyPI staging, production promotion, and clean-room verification.
+The repository's GitHub Actions workflow publishes reviewed releases through PyPI Trusted Publishing.
 
 Run the local deterministic example:
 
@@ -217,6 +207,7 @@ openaria rules validate
 ## Python API
 
 ```python
+import asyncio
 from pathlib import Path
 
 from openaria.application import DiagnosisService
@@ -230,7 +221,7 @@ incident = IncidentInput(
     pipeline_name=config.project,
     raw_payload={"log": "ERROR KeyError: Close"},
 )
-diagnosis = await service.diagnose(incident)
+diagnosis = asyncio.run(service.diagnose(incident))
 ```
 
 ## Cookbooks
@@ -241,7 +232,7 @@ diagnosis = await service.diagnose(incident)
 - [Software-delivery CI investigation](cookbook/software-delivery-ci-investigation/README.md)
 - [Recording a human resolution](cookbook/recording-resolution/README.md)
 
-All examples are synthetic. Agent frameworks and model providers remain cookbook-only optional dependencies.
+Start with a cookbook for a runnable demonstration, then use the architecture and core references above to examine the framework contracts behind it. All examples are synthetic, executable research demonstrations: they show how a consuming application can use OpenARIA without claiming to be production control planes or autonomous remediation systems. Agent frameworks and model providers remain cookbook-only optional dependencies.
 
 ## Safety
 
@@ -273,7 +264,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md), [SUPPORT
 
 ## Releases
 
-OpenARIA releases are manually dispatched through GitHub Actions and published with PyPI Trusted Publishing; no long-lived PyPI token is stored in the repository. See the [release guide](docs/releasing.md) for the one-time account setup, TestPyPI-first procedure, and clean-room verification script.
+OpenARIA releases are manually dispatched through GitHub Actions and published with PyPI Trusted Publishing.
 
 ## Research and standards context
 

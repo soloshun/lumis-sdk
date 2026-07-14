@@ -23,10 +23,19 @@ ml-regression-monitoring/
 │   └── src/                  # Tiny training and inference fixtures
 ├── knowledge/                # Project-owned runbooks and playbooks
 ├── demo_service.py           # Read-only synthetic incident estate
-└── run_agent.py              # Optional bounded Agno/OpenRouter application
+├── investigation_tools.py    # Bounded, documented agent capabilities
+└── run_agent.py              # Small deterministic-first application entry point
 ```
 
 The `openaria/` directory is analogous to an infrastructure configuration directory: it holds the framework-facing declaration, not the data, code, or provider credentials. Its paths point back to this cookbook's local `.openaria/` state so reports and SQLite memory remain clearly local to the example.
+
+`uv sync` deliberately installs the repository checkout as an editable local `openaria` dependency. This keeps the cookbook self-contained for readers who clone the repository. A consuming project can instead use the released PyPI package with `uv add openaria`.
+
+## Why this cookbook exists
+
+This is an executable research demonstration: a deliberately small application showing how OpenARIA can be composed around an ML incident flow. It is not a production MLOps control plane, deployment system, or autonomous remediation service.
+
+Read `run_agent.py` first. It has only three steps: build bounded tools, save a deterministic result when a rule matches, or start the optional agent for an unknown incident. `investigation_tools.py` documents the individual read, report, memory, and approval-boundary capabilities.
 
 ## Setup
 
@@ -51,7 +60,7 @@ In a second terminal, run one scenario below.
 uv run python run_agent.py --incident-id feature-drift-001
 ```
 
-The synthetic monitor reports `income z_score=4.2 exceeded threshold=3.0`. Both markers match the rule in `openaria/rules.yml`, so OpenARIA writes `.openaria/reports/feature-drift-001-deterministic.md` and local SQLite memory. No model provider or API key is needed.
+The synthetic monitor reports `income z_score=4.2 exceeded threshold=3.0`. Both markers match the rule in `openaria/rules.yml`, so OpenARIA writes `.openaria/reports/feature-drift-001.md` and local SQLite memory. No model provider or API key is needed.
 
 The rule's `confidence: 0.75` is **not** a probability calculated by OpenARIA, and it is not a claim that the root cause is proven. It is a human-authored calibration value: the rule author is saying the available signature is fairly suggestive of feature-distribution drift, while still requiring the listed missing evidence before any response. Choose a value based on the specificity and reliability of the evidence behind that rule; revise it as your incident history shows whether the rule is trustworthy.
 
@@ -63,7 +72,7 @@ export OPENARIA_DEMO_MODEL="deepseek/deepseek-v4-flash"
 uv run python run_agent.py --incident-id feature-contract-001
 ```
 
-The log says the prediction path expected three features but received two. It intentionally does not match a deterministic rule. The agent can retrieve the incident's schema context and inspect `synthetic_project/src/inference.py`, which declares the expected feature contract. It must write its final Markdown analysis through `export_analysis` to `.openaria/reports/feature-contract-001-llm.md`.
+The log says the prediction path expected three features but received two. It intentionally does not match a deterministic rule. The agent can retrieve the incident's schema context and inspect `synthetic_project/src/inference.py`, which declares the expected feature contract. Agno streams the investigation in the terminal. Before completing, the agent calls `export_analysis` with `report_name="feature-contract-001-llm.md"` and the complete Markdown report.
 
 The agent can investigate and recommend a safe next step. It cannot change an API contract, backfill data, retrain, or deploy a model.
 
@@ -78,9 +87,9 @@ The synthetic candidate model has validation RMSE 12.8 against an acceptance thr
 
 ## What the agent can and cannot do
 
-The opt-in agent receives an operational system prompt rather than a scripted list of tool calls. The prompt establishes evidence standards, uncertainty reporting, metric interpretation, confidentiality, human approval, and prohibited actions. Agno converts the named Python functions and their docstrings into tool definitions, so the model chooses the relevant read-only incident, context, knowledge, source, or data capability for the evidence it needs.
+The opt-in agent receives an operational system prompt rather than a scripted list of tool calls. The prompt establishes evidence standards, uncertainty reporting, metric interpretation, confidentiality, human approval, and prohibited actions. For an unknown incident, it first retrieves `get_investigation_guide`, which supplies the valid context keys, source/data paths, runbooks, and playbooks for that scenario. The tool parameter schemas also restrict requests to the cookbook's valid identifiers. Agno then converts the documented `MLRegressionTools` methods into tool definitions, so the model can choose relevant read-only evidence without guessing names.
 
-It can store a diagnosis in local SQLite memory and persist final Markdown. It has no shell, unrestricted web access, cloud credentials, model registry write access, training trigger, deployment capability, or remediation tool.
+It can store a diagnosis in local SQLite memory and create one named Markdown report through its restricted export tool. It has no shell, unrestricted web access, cloud credentials, model registry write access, training trigger, deployment capability, or remediation tool.
 
 OpenRouter is optional and is used only for the two unknown scenarios when you explicitly provide `OPENROUTER_API_KEY`. Do not place real credentials, customer data, model artifacts, or production telemetry in this cookbook.
 

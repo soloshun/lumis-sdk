@@ -1,7 +1,5 @@
 # OpenARIA core reference
 
-> **Canonical site/documentation handoff.** Use this file, the repository README, and the typed code contracts as the source of truth. Do not present roadmap features as implemented.
-
 ## Identity
 
 - **ARIA** is the Agentic Recovery and Incident Automation research reference architecture.
@@ -33,8 +31,6 @@ It does not replace a monitoring system or orchestrator. It does not require a m
 Read:
 
 - [Architecture overview](architecture/overview.md)
-- [Refactor audit](architecture/refactor-audit.md)
-- [Migration plan](architecture/refactor-plan.md)
 - [Configuration reference](configuration.md)
 - [Threat model](safety/threat-model.md)
 - [Roadmap](../ROADMAP.md)
@@ -91,22 +87,3 @@ The synthetic cookbooks demonstrate three paper domains:
 - software-delivery CI and infrastructure validation.
 
 Agno and OpenRouter are optional cookbook choices, not OpenARIA core dependencies. Each cookbook owns its synthetic fixtures, config, rules, knowledge, service, prompt policy, and provider integration.
-
-
-## Site information architecture
-
-1. Home / Why OpenARIA
-2. Quick start
-3. Concepts: Diagnosis-as-Code, Healing-as-Code, deterministic first, guarded recovery, memory
-4. Architecture
-5. Configuration
-6. CLI
-7. Python API
-8. Ports and future plugins
-9. Cookbooks
-10. Safety
-11. Contributing and governance
-12. Roadmap
-13. OpenARIA
-
-The site must clearly label pre-alpha behavior, preserve the no-execution claim, and distinguish framework contracts from shipped adapters and roadmap plans.

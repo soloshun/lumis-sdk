@@ -1,6 +1,6 @@
 # Framework and cookbook architecture
 
-This page explains one boundary within the project. For the complete core narrative, public API model, paper mapping, and documentation-site handoff, start with the [OpenARIA Core Reference](OPENARIA_CORE_REFERENCE.md).
+This page explains one boundary within the project. For the complete core narrative, public API model, and paper mapping, start with the [OpenARIA Core Reference](OPENARIA_CORE_REFERENCE.md).
 
 ## Purpose
 
@@ -55,13 +55,14 @@ The cookbook simulates the paper's seven logical layers. The agentic reasoning s
 
 The agent should use narrow, named tools rather than one unrestricted context dump:
 
-1. `get_incident` and `get_context` retrieve bounded synthetic incident data.
-2. `get_framework_diagnosis` runs the cookbook configuration through the core deterministic engine.
-3. `read_runbook`, `read_playbook`, and `read_synthetic_code` read only cookbook-owned, allowlisted resources.
-4. `record_framework_diagnosis` stores a local framework report and `export_analysis` stores the final LLM Markdown report.
-5. `propose_playbook` and `request_approval` model a recommendation and explicit human decision boundary.
+1. `get_incident` and `get_investigation_guide` retrieve bounded incident data and the exact identifiers available for that scenario.
+2. `get_context` retrieves only guide-listed synthetic context, while typed parameters prevent guessing known context, code, or knowledge names.
+3. `get_framework_diagnosis` runs the cookbook configuration through the core deterministic engine.
+4. `read_runbook`, `read_playbook`, and `read_synthetic_code` read only cookbook-owned, allowlisted resources.
+5. The deterministic runner alone calls `record_framework_diagnosis` for a known rule match. An unknown-case agent may call `export_analysis` once to create a simple named Markdown report inside its local report directory.
+6. `propose_playbook` and `request_approval` model a recommendation and explicit human decision boundary.
 
-These tools model the investigation and governance loop, not autonomous execution. A proposed playbook is the terminal action for the first cookbook.
+The agent has no tool that can create a deterministic report. Its export tool can only create a named Markdown report inside the cookbook's local report directory. These tools model the investigation and governance loop, not autonomous execution. A proposed playbook is the terminal action for the first cookbook.
 
 ## Demo service and watcher
 
