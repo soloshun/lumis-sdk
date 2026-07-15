@@ -1,0 +1,19 @@
+apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: stock_feature_pipeline
+spec:
+  environment: local
+  memory:
+    provider: sqlite
+    path: ../.lumis/incidents.db
+  reports:
+    provider: markdown
+    outputDir: ../.lumis/reports
+  incidentSources:
+    - provider: local-log
+      path: ../failure.log
+  rules:
+    files: [rules.yml]
+  model:
+    enabled: false

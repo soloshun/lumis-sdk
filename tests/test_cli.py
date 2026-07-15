@@ -1,4 +1,4 @@
-"""Tests for the OpenARIA command-line interface."""
+"""Tests for the Lumis SDK command-line interface."""
 
 import json
 import re
@@ -6,14 +6,14 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from openaria.cli import app
+from lumis_sdk.cli import app
 
 runner = CliRunner()
 
 
 def _project_config(tmp_path: Path) -> Path:
     (tmp_path / "rules.yml").write_text(
-        """apiVersion: openaria.dev/v1alpha1
+        """apiVersion: lumis.dev/v1alpha1
 kind: DiagnosisRuleSet
 metadata:
   name: fixture-rules
@@ -30,9 +30,9 @@ spec:
 """,
         encoding="utf-8",
     )
-    config_path = tmp_path / "openaria.yml"
+    config_path = tmp_path / "lumis.yml"
     config_path.write_text(
-        """apiVersion: openaria.dev/v1alpha1
+        """apiVersion: lumis.dev/v1alpha1
 kind: Project
 metadata:
   name: fixture-project
@@ -49,12 +49,12 @@ spec:
     return config_path
 
 
-def test_help_describes_openaria() -> None:
+def test_help_describes_lumis_sdk() -> None:
     """The base command exposes a usable help screen."""
     result = runner.invoke(app, ["--help"])
 
     assert result.exit_code == 0
-    assert "OpenARIA" in result.output
+    assert "Lumis SDK" in result.output
     assert "structured incident reports" in result.output
 
 
@@ -157,13 +157,13 @@ def test_init_doctor_and_rule_validation_form_a_local_project(tmp_path: Path) ->
     init_result = runner.invoke(app, ["init", "--destination", str(tmp_path)])
 
     assert init_result.exit_code == 0
-    config_path = tmp_path / "openaria.yml"
+    config_path = tmp_path / "lumis.yml"
     assert config_path.exists()
     assert (tmp_path / "rules.yml").exists()
 
     doctor_result = runner.invoke(app, ["doctor", "--config", str(config_path)])
     assert doctor_result.exit_code == 0
-    assert "api version: openaria.dev/v1alpha1" in doctor_result.output
+    assert "api version: lumis.dev/v1alpha1" in doctor_result.output
     assert "model assistance: disabled" in doctor_result.output
 
     rules_result = runner.invoke(app, ["rules", "validate", "--config", str(config_path), "--json"])

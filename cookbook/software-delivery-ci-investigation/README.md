@@ -1,6 +1,6 @@
 # Software delivery CI investigation cookbook
 
-This cookbook teaches how OpenARIA can investigate a bounded software-delivery estate: one synthetic checkout service with CI, release workflow, and Terraform validation failures. It does not connect to GitHub, a cloud account, or a real repository.
+This cookbook teaches how Lumis SDK can investigate a bounded software-delivery estate: one synthetic checkout service with CI, release workflow, and Terraform validation failures. It does not connect to GitHub, a cloud account, or a real repository.
 
 ## What you will learn
 
@@ -18,11 +18,11 @@ uv sync
 uv run uvicorn demo_service:app --reload
 ```
 
-`uv sync` deliberately installs the repository checkout as an editable local `openaria` dependency. This keeps the cookbook self-contained for readers who clone the repository. A consuming project can instead use the released PyPI package with `uv add openaria`.
+`uv sync` deliberately installs the repository checkout as an editable local `lumis-sdk` dependency. This keeps the cookbook self-contained for readers who clone the repository. A consuming project can instead use the released PyPI package with `uv add lumis-sdk`.
 
 ## Why this cookbook exists
 
-This is an executable research demonstration: a deliberately small application showing how OpenARIA can be composed around CI and infrastructure incident evidence. It is not a production delivery control plane or an autonomous deployment/remediation system.
+This is an executable research demonstration: a deliberately small application showing how Lumis SDK can be composed around CI and infrastructure incident evidence. It is not a production delivery control plane or an autonomous deployment/remediation system.
 
 Read `run_agent.py` first. It has only three steps: build bounded tools, save a deterministic result when a rule matches, or start the optional agent for an unknown incident. `investigation_tools.py` documents the individual read, report, memory, and approval-boundary capabilities.
 
@@ -40,13 +40,13 @@ Run one scenario in a second terminal.
 uv run python run_agent.py --incident-id lockfile-ci-001
 ```
 
-The synthetic CI log contains both `lockfile is out of date` and `uv sync --locked`, matching `openaria/rules.yml`. OpenARIA writes `.openaria/reports/lockfile-ci-001.md` and local SQLite memory without an LLM.
+The synthetic CI log contains both `lockfile is out of date` and `uv sync --locked`, matching `lumis/rules.yml`. Lumis SDK writes `.lumis/reports/lockfile-ci-001.md` and local SQLite memory without an LLM.
 
 ### 2. Release workflow permission failure (LLM investigation)
 
 ```bash
 export OPENROUTER_API_KEY="..."
-export OPENARIA_DEMO_MODEL="deepseek/deepseek-v4-flash"
+export LUMIS_DEMO_MODEL="deepseek/deepseek-v4-flash"
 uv run python run_agent.py --incident-id workflow-permission-001
 ```
 
@@ -71,7 +71,7 @@ For unknown incidents, Agno streams the investigation in the terminal. Before co
 
 ```text
 software-delivery-ci-investigation/
-├── openaria/                 # project configuration and deterministic rules
+├── lumis/                 # project configuration and deterministic rules
 ├── synthetic_project/        # fake workflow, source, and Terraform files
 ├── knowledge/                # investigation runbooks and proposed playbook
 ├── demo_service.py           # read-only synthetic incident estate
@@ -79,4 +79,4 @@ software-delivery-ci-investigation/
 └── run_agent.py              # small deterministic-first application entry point
 ```
 
-OpenARIA core remains vendor-agnostic: the cookbook owns its CI terminology, synthetic files, FastAPI service, rules, prompts, and provider integration. The runner imports local implementations from `openaria.adapters`, project declarations from `openaria.config`, and redaction from `openaria.security`. A real project could replace GitHub Actions, GitLab CI, Azure DevOps, IaC tooling, or the agent/model framework without changing the domain and port contracts.
+Lumis SDK core remains vendor-agnostic: the cookbook owns its CI terminology, synthetic files, FastAPI service, rules, prompts, and provider integration. The runner imports local implementations from `lumis_sdk.adapters`, project declarations from `lumis_sdk.config`, and redaction from `lumis_sdk.security`. A real project could replace GitHub Actions, GitLab CI, Azure DevOps, IaC tooling, or the agent/model framework without changing the domain and port contracts.

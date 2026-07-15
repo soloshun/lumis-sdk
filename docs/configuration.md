@@ -1,11 +1,11 @@
-# OpenARIA configuration reference
+# Lumis SDK configuration reference
 
-OpenARIA configuration is a versioned public API. `openaria.dev/v1alpha1` documents are strict: unknown fields fail validation, paths resolve from the project document, and model use is disabled unless explicitly enabled and composed with a gateway.
+Lumis SDK configuration is a versioned public API. `lumis.dev/v1alpha1` documents are strict: unknown fields fail validation, paths resolve from the project document, and model use is disabled unless explicitly enabled and composed with a gateway.
 
 ## Project document
 
 ```yaml
-apiVersion: openaria.dev/v1alpha1
+apiVersion: lumis.dev/v1alpha1
 kind: Project
 metadata:
   name: customer-pipeline
@@ -15,10 +15,10 @@ spec:
   environment: local
   memory:
     provider: sqlite
-    path: .openaria/incidents.db
+    path: .lumis/incidents.db
   reports:
     provider: markdown
-    outputDir: .openaria/reports
+    outputDir: .lumis/reports
   incidentSources:
     - provider: local-log
       path: logs/latest-failure.log
@@ -30,7 +30,7 @@ spec:
 
 | Field | Required | Meaning |
 | --- | --- | --- |
-| `apiVersion` | Yes | Must be `openaria.dev/v1alpha1`. Versioning prevents silent behavior changes. |
+| `apiVersion` | Yes | Must be `lumis.dev/v1alpha1`. Versioning prevents silent behavior changes. |
 | `kind` | Yes | Must be `Project`. |
 | `metadata.name` | Yes | Stable project/pipeline identifier used in incidents and reports. |
 | `metadata.labels` | No | Project-owned string labels for future adapters and policy. |
@@ -46,7 +46,7 @@ spec:
 ## Rule-set document
 
 ```yaml
-apiVersion: openaria.dev/v1alpha1
+apiVersion: lumis.dev/v1alpha1
 kind: DiagnosisRuleSet
 metadata:
   name: customer-pipeline-rules
@@ -91,7 +91,7 @@ spec:
 
 ## Confidence
 
-OpenARIA does not calculate deterministic-rule confidence. The rule author sets it to communicate how strongly the matched signature supports the configured **hypothesis**.
+Lumis SDK does not calculate deterministic-rule confidence. The rule author sets it to communicate how strongly the matched signature supports the configured **hypothesis**.
 
 A specific error plus a verified schema diff may justify higher confidence than a generic timeout string. Start conservatively, include missing evidence, review confirmed outcomes, and revise the rule version when calibration changes.
 
@@ -103,29 +103,29 @@ Rules run by descending priority and then file/configuration order. A successful
 
 ## Path behavior
 
-Relative paths resolve and normalize from the project YAML location. In a cookbook where YAML lives under `openaria/`, local state can live at cookbook root:
+Relative paths resolve and normalize from the project YAML location. In a cookbook where YAML lives under `lumis/`, local state can live at cookbook root:
 
 ```yaml
 spec:
   memory:
-    path: ../.openaria/incidents.db
+    path: ../.lumis/incidents.db
   reports:
-    outputDir: ../.openaria/reports
+    outputDir: ../.lumis/reports
 ```
 
-Configured paths are local authority granted by the user running OpenARIA. Plugin and hosted adapters require separate path/network/permission policies.
+Configured paths are local authority granted by the user running Lumis SDK. Plugin and hosted adapters require separate path/network/permission policies.
 
 ## Validation and doctor
 
 ```bash
-uv run openaria doctor --config path/to/openaria.yml
-uv run openaria rules validate --config path/to/openaria.yml
-uv run openaria rules validate --config path/to/openaria.yml --json
+uv run lumis doctor --config path/to/lumis.yml
+uv run lumis rules validate --config path/to/lumis.yml
+uv run lumis rules validate --config path/to/lumis.yml --json
 ```
 
 `doctor` validates project/rule documents, reports selected local providers, checks the local-log path when configured, and warns when model policy is enabled. It does not write incident state or contact a network service.
 
-The checked [project schema](../schemas/openaria-project-v1alpha1.schema.json) and [rule-set schema](../schemas/openaria-rules-v1alpha1.schema.json) can be used by editors. CI verifies that both match the Pydantic contracts.
+The checked [project schema](../schemas/lumis-project-v1alpha1.schema.json) and [rule-set schema](../schemas/lumis-rules-v1alpha1.schema.json) can be used by editors. CI verifies that both match the Pydantic contracts.
 
 ## Secrets
 

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 
-app = FastAPI(title="OpenARIA synthetic ML regression estate", version="0.1.0")
+app = FastAPI(title="Lumis SDK synthetic ML regression estate", version="0.1.0")
 
 FEATURE_DRIFT_ID = "feature-drift-001"
 FEATURE_CONTRACT_ID = "feature-contract-001"

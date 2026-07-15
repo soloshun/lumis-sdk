@@ -1,11 +1,11 @@
-<h1 align="center">OpenARIA</h1>
+<h1 align="center">Lumis SDK</h1>
 
 <p align="center">
-  <strong>Deterministic-first, evidence-grounded guarded recovery & automony for data, ml & software pipelines.</strong>
+  <strong>Deterministic-first, evidence-grounded incident recovery for data, ML, and software pipelines.</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/soloshun/openaria/actions">CI</a> ·
+  <a href="https://github.com/soloshun/lumis-sdk/actions">CI</a> ·
   <a href="LICENSE">Apache-2.0</a> ·
   <a href="docs/architecture/overview.md">Architecture</a> ·
   <a href="docs/configuration.md">Configuration</a> ·
@@ -13,18 +13,18 @@
   <a href="ROADMAP.md">Roadmap</a>
 </p>
 
-OpenARIA is the open-source Python implementation companion to **ARIA** - the **Agentic Recovery and Incident Automation** reference architecture. It provides reusable contracts and local reference adapters for diagnosing failures in data, machine-learning, and software-delivery pipelines while keeping models optional and consequential actions under explicit control.
+Lumis SDK is an open-source Python implementation companion to the **agentic recovery and incident response** reference architecture proposed in the accompanying research. It provides reusable contracts and local reference adapters for diagnosing failures in data, machine-learning, and software-delivery pipelines while keeping models optional and consequential actions under explicit control.
 
-OpenARIA starts with Diagnosis-as-Code: local incident evidence becomes a structured, reviewable diagnosis, Markdown report, and operational-memory record. Its direction is Healing-as-Code: a guarded lifecycle for detect, triage, diagnose, plan, approve, remediate, verify, and learn.
+Lumis SDK starts with Diagnosis-as-Code: local incident evidence becomes a structured, reviewable diagnosis, Markdown report, and operational-memory record. Its direction is Healing-as-Code: a guarded lifecycle for detect, triage, diagnose, plan, approve, remediate, verify, and learn.
 
-> **Pre-alpha:** OpenARIA does not perform unrestricted or default production remediation. Current execution-related models are recommendation and verification contracts, not an authority granted to an LLM.
+> **Pre-alpha:** Lumis SDK does not perform unrestricted or default production remediation. Current execution-related models are recommendation and verification contracts, not an authority granted to an LLM.
 
-## ARIA and OpenARIA
+## Research and implementation boundary
 
-| Name | Role | Repository boundary |
+| Artefact | Role | Repository boundary |
 | --- | --- | --- |
-| **ARIA** | Research reference architecture and eight-stage lifecycle. | Technology-flexible design described by the paper. |
-| **OpenARIA** | Apache-2.0 framework and local implementation companion. | Domain contracts, application services, ports, safe reference adapters, CLI, testkit, and cookbooks. |
+| **Reference architecture** | Agentic recovery and incident response lifecycle. | Technology-flexible design described by the paper. |
+| **Lumis SDK** | Apache-2.0 framework and local implementation companion. | Domain contracts, application services, ports, safe reference adapters, CLI, testkit, and cookbooks. |
 
 
 ## Design principles
@@ -42,10 +42,10 @@ OpenARIA starts with Diagnosis-as-Code: local incident evidence becomes a struct
 ```mermaid
 flowchart LR
     subgraph USERS[Project entry points]
-        CLI[OpenARIA CLI]
+        CLI[Lumis SDK CLI]
         PY[Python application]
     end
-    subgraph CORE[OpenARIA framework]
+    subgraph CORE[Lumis SDK framework]
         CFG[Strict project and rule configuration]
         APP[Application services]
         DOMAIN[Domain contracts]
@@ -73,7 +73,7 @@ flowchart LR
 Canonical package boundaries:
 
 ```text
-src/openaria/
+src/lumis_sdk/
 ├── domain/       # strict vendor-neutral models
 ├── application/  # use-case orchestration
 ├── ports/        # replaceable provider interfaces
@@ -86,7 +86,7 @@ src/openaria/
 
 The proof-of-concept flat modules have been removed. New code imports the explicit domain, application, port, adapter, configuration, and security packages shown above.
 
-Read the [architecture overview](docs/architecture/overview.md), [core reference](docs/OPENARIA_CORE_REFERENCE.md), and [configuration reference](docs/configuration.md).
+Read the [architecture overview](docs/architecture/overview.md), [SDK reference](docs/LUMIS_SDK_REFERENCE.md), and [configuration reference](docs/configuration.md).
 
 ## Current capabilities
 
@@ -94,7 +94,7 @@ Read the [architecture overview](docs/architecture/overview.md), [core reference
 | --- | --- |
 | Incident input | Local log normalization and typed vendor-neutral incident contracts. |
 | Deterministic diagnosis | Ordered rules with stable ID, version, priority, matched terms, and evidence references. |
-| Versioned configuration | Strict `openaria.dev/v1alpha1` project and rule-set documents; unknown fields fail validation. |
+| Versioned configuration | Strict `lumis.dev/v1alpha1` project and rule-set documents; unknown fields fail validation. |
 | Reports | Deterministic Markdown with facts, evidence, hypotheses, confidence, review requirement, and safety boundary. |
 | Local memory | SQLite records, human resolutions, visible truth state, and transparent lexical search. |
 | Model boundary | Explicit policy, budgets, schema-validated output, fake CI gateway, and deterministic fallback. |
@@ -104,34 +104,34 @@ Read the [architecture overview](docs/architecture/overview.md), [core reference
 
 ## Quick start
 
-OpenARIA supports Python 3.11+ and uses [uv](https://docs.astral.sh/uv/).
+Lumis SDK supports Python 3.11+ and uses [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/soloshun/openaria.git
-cd openaria
+git clone https://github.com/soloshun/lumis-sdk.git
+cd lumis-sdk
 uv sync --all-groups
-uv run openaria --help
+uv run lumis --help
 ```
 
-## Install OpenARIA
+## Install Lumis SDK
 
-OpenARIA `0.0.1` is available on [PyPI](https://pypi.org/project/openaria/). Add it to a project managed by `uv`:
+The first Lumis SDK release will be published to PyPI as `lumis-sdk`. Once published, add it to a project managed by `uv`:
 
 ```bash
-uv add "openaria>=0.0.1,<0.1.0"
+uv add "lumis-sdk>=0.0.1,<0.1.0"
 ```
 
 Or install it into an existing environment with pip:
 
 ```bash
-pip install openaria
+pip install lumis-sdk
 ```
 
 For a specific reproducible release, pin the version:
 
 ```bash
-uv add "openaria==0.0.1"
-pip install "openaria==0.0.1"
+uv add "lumis-sdk==0.0.1"
+pip install "lumis-sdk==0.0.1"
 ```
 
 The repository's GitHub Actions workflow publishes reviewed releases through PyPI Trusted Publishing.
@@ -139,25 +139,25 @@ The repository's GitHub Actions workflow publishes reviewed releases through PyP
 Run the local deterministic example:
 
 ```bash
-uv run openaria doctor \
-  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
+uv run lumis doctor \
+  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
 
-uv run openaria diagnose \
-  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
+uv run lumis diagnose \
+  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
 ```
 
 The command reads a synthetic local log, writes a Markdown report, saves an unconfirmed incident episode to local SQLite, and prints its incident ID. It makes no network or model call.
 
 ```bash
-uv run openaria report <incident-id> \
-  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
+uv run lumis report <incident-id> \
+  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
 
-uv run openaria resolve <incident-id> \
+uv run lumis resolve <incident-id> \
   --resolution "Human-confirmed cause, action, and outcome." \
-  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
+  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
 
-uv run openaria memory search "KeyError Close" \
-  --config cookbook/simple-log-diagnosis/openaria/openaria.yml
+uv run lumis memory search "KeyError Close" \
+  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
 ```
 
 
@@ -165,7 +165,7 @@ uv run openaria memory search "KeyError Close" \
 ## Versioned project configuration
 
 ```yaml
-apiVersion: openaria.dev/v1alpha1
+apiVersion: lumis.dev/v1alpha1
 kind: Project
 metadata:
   name: customer-pipeline
@@ -173,10 +173,10 @@ spec:
   environment: local
   memory:
     provider: sqlite
-    path: .openaria/incidents.db
+    path: .lumis/incidents.db
   reports:
     provider: markdown
-    outputDir: .openaria/reports
+    outputDir: .lumis/reports
   incidentSources:
     - provider: local-log
       path: logs/latest-failure.log
@@ -186,20 +186,20 @@ spec:
     enabled: false
 ```
 
-Configuration is strict: misspelled or unknown fields fail with a validation error. Relative paths resolve from the project document. Files larger than the configured safety limit are rejected. Checked schemas for the [project](schemas/openaria-project-v1alpha1.schema.json) and [rule set](schemas/openaria-rules-v1alpha1.schema.json) support editors and tooling.
+Configuration is strict: misspelled or unknown fields fail with a validation error. Relative paths resolve from the project document. Files larger than the configured safety limit are rejected. Checked schemas for the [project](schemas/lumis-project-v1alpha1.schema.json) and [rule set](schemas/lumis-rules-v1alpha1.schema.json) support editors and tooling.
 
-OpenARIA intentionally accepts only the versioned project and rule-set structures during this pre-release revamp. Read the [configuration reference](docs/configuration.md) for every field and its meaning.
+Lumis SDK intentionally accepts only the versioned project and rule-set structures during this pre-release revamp. Read the [configuration reference](docs/configuration.md) for every field and its meaning.
 
 ## CLI
 
 ```text
-openaria init
-openaria doctor
-openaria diagnose
-openaria report
-openaria resolve
-openaria memory search
-openaria rules validate
+lumis init
+lumis doctor
+lumis diagnose
+lumis report
+lumis resolve
+lumis memory search
+lumis rules validate
 ```
 
 `doctor` and validation commands do not make network calls or write incident state. Model assistance remains disabled unless application code supplies both an enabled policy and a gateway adapter.
@@ -210,11 +210,11 @@ openaria rules validate
 import asyncio
 from pathlib import Path
 
-from openaria.application import DiagnosisService
-from openaria.config import load_config
-from openaria.domain import IncidentInput
+from lumis_sdk.application import DiagnosisService
+from lumis_sdk.config import load_config
+from lumis_sdk.domain import IncidentInput
 
-config = load_config(Path("openaria.yml"))
+config = load_config(Path("lumis.yml"))
 service = DiagnosisService(rules=config.rules)
 incident = IncidentInput(
     source_tool="local-log",
@@ -232,11 +232,11 @@ diagnosis = asyncio.run(service.diagnose(incident))
 - [Software-delivery CI investigation](cookbook/software-delivery-ci-investigation/README.md)
 - [Recording a human resolution](cookbook/recording-resolution/README.md)
 
-Start with a cookbook for a runnable demonstration, then use the architecture and core references above to examine the framework contracts behind it. All examples are synthetic, executable research demonstrations: they show how a consuming application can use OpenARIA without claiming to be production control planes or autonomous remediation systems. Agent frameworks and model providers remain cookbook-only optional dependencies.
+Start with a cookbook for a runnable demonstration, then use the architecture and core references above to examine the framework contracts behind it. All examples are synthetic, executable research demonstrations: they show how a consuming application can use Lumis SDK without claiming to be production control planes or autonomous remediation systems. Agent frameworks and model providers remain cookbook-only optional dependencies.
 
 ## Safety
 
-OpenARIA treats logs, tickets, runbooks, source files, and model output as untrusted input.
+Lumis SDK treats logs, tickets, runbooks, source files, and model output as untrusted input.
 
 - No direct shell, cloud-admin, Kubernetes-admin, or database actuation in core.
 - No live model key or billable request in CI.
@@ -264,12 +264,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md), [SUPPORT
 
 ## Releases
 
-OpenARIA releases are manually dispatched through GitHub Actions and published with PyPI Trusted Publishing.
+Lumis SDK releases are manually dispatched through GitHub Actions and published with PyPI Trusted Publishing.
 
 ## Research and standards context
 
-OpenARIA is informed by [OpenTelemetry](https://opentelemetry.io/), [OpenLineage](https://openlineage.io/), [Prometheus](https://prometheus.io/), [Site Reliability Engineering](https://sre.google/sre-book/table-of-contents/), [ReAct](https://arxiv.org/abs/2210.03629), and [LLM-based incident RCA research](https://doi.org/10.1145/3627703.3629553). These are design influences, not mandatory dependencies or claims of conformance.
+Lumis SDK is informed by [OpenTelemetry](https://opentelemetry.io/), [OpenLineage](https://openlineage.io/), [Prometheus](https://prometheus.io/), [Site Reliability Engineering](https://sre.google/sre-book/table-of-contents/), [ReAct](https://arxiv.org/abs/2210.03629), and [LLM-based incident RCA research](https://doi.org/10.1145/3627703.3629553). These are design influences, not mandatory dependencies or claims of conformance.
 
 ## Maintainer and license
 
-OpenARIA is currently maintained by [Solomon Eshun](mailto:solomoneshun373@gmail.com) and licensed under [Apache License 2.0](LICENSE).
+Lumis SDK is currently maintained by [Solomon Eshun](mailto:solomoneshun373@gmail.com) and licensed under [Apache License 2.0](LICENSE).

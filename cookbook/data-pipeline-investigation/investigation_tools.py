@@ -6,13 +6,13 @@ from typing import Literal, TypeAlias
 
 import httpx
 
-from openaria.adapters.deterministic import diagnose_text
-from openaria.adapters.incidents import incident_from_log
-from openaria.adapters.reports import render_markdown_report
-from openaria.adapters.sqlite import SQLiteIncidentStore
-from openaria.config import OpenARIAConfig, resolve_project_path
-from openaria.domain import DiagnosisResult
-from openaria.security import redact_value
+from lumis_sdk.adapters.deterministic import diagnose_text
+from lumis_sdk.adapters.incidents import incident_from_log
+from lumis_sdk.adapters.reports import render_markdown_report
+from lumis_sdk.adapters.sqlite import SQLiteIncidentStore
+from lumis_sdk.config import LumisConfig, resolve_project_path
+from lumis_sdk.domain import DiagnosisResult
+from lumis_sdk.security import redact_value
 
 DataIncidentId: TypeAlias = Literal["schema-drift-001", "code-error-001", "pii-leak-001"]
 DataContextName: TypeAlias = Literal["logs", "metrics", "lineage", "schema", "verification"]
@@ -27,7 +27,7 @@ class DataPipelineTools:
 
     base_url: str
     config_path: Path
-    config: OpenARIAConfig
+    config: LumisConfig
 
     def get_incident(self, incident_id: DataIncidentId) -> dict[str, object]:
         """Retrieve the normalized synthetic incident by its ID."""
@@ -46,7 +46,7 @@ class DataPipelineTools:
         return redact_value(self._get(f"/incidents/{incident_id}/context/{context_name}"))
 
     def get_framework_diagnosis(self, incident_id: DataIncidentId) -> dict[str, object]:
-        """Run the cookbook's deterministic OpenARIA rules over the synthetic logs."""
+        """Run the cookbook's deterministic Lumis SDK rules over the synthetic logs."""
         return self.diagnosis_for(incident_id).model_dump(mode="json")
 
     def read_runbook(self, name: DataRunbookName) -> dict[str, str]:
@@ -145,7 +145,7 @@ class DataPipelineTools:
         return redact_value(response.json())
 
     def _path(self, configured_path: str) -> Path:
-        """Resolve a local state path from the cookbook's OpenARIA configuration."""
+        """Resolve a local state path from the cookbook's Lumis SDK configuration."""
         return resolve_project_path(self.config_path, configured_path)
 
     @staticmethod

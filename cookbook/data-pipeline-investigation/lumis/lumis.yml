@@ -1,0 +1,16 @@
+apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: synthetic_data_pipeline
+spec:
+  environment: demo
+  memory:
+    provider: sqlite
+    path: ../.lumis/incidents.db
+  reports:
+    provider: markdown
+    outputDir: ../.lumis/reports
+  rules:
+    files: [rules.yml]
+  model:
+    enabled: false

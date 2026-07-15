@@ -6,9 +6,9 @@ from pathlib import Path
 
 from investigation_tools import DataPipelineTools
 
-from openaria.config import load_config
+from lumis_sdk.config import load_config
 
-_CONFIG_PATH = Path(__file__).parent / "openaria" / "openaria.yml"
+_CONFIG_PATH = Path(__file__).parent / "lumis" / "lumis.yml"
 
 DATA_PIPELINE_SYSTEM_PROMPT = """
 You are a senior data reliability engineer in a guarded incident-response service.
@@ -79,7 +79,7 @@ def main() -> None:
     parser.add_argument("--incident-id", default="schema-drift-001")
     args = parser.parse_args()
 
-    tools = create_tools(os.getenv("OPENARIA_DEMO_URL", "http://127.0.0.1:8000"))
+    tools = create_tools(os.getenv("LUMIS_DEMO_URL", "http://127.0.0.1:8000"))
     if save_deterministic_result(tools, args.incident_id):
         return
     if not os.getenv("OPENROUTER_API_KEY"):
@@ -87,7 +87,7 @@ def main() -> None:
             "Unknown diagnosis. Set OPENROUTER_API_KEY to run the optional live agent."
         )
 
-    model_id = os.getenv("OPENARIA_DEMO_MODEL", "deepseek/deepseek-v4-flash")
+    model_id = os.getenv("LUMIS_DEMO_MODEL", "deepseek/deepseek-v4-flash")
     build_agent(tools, model_id).print_response(
         f"Investigate synthetic incident {args.incident_id} and produce a concise incident report.",
         stream=True,

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 
-app = FastAPI(title="OpenARIA synthetic incident estate", version="0.1.0")
+app = FastAPI(title="Lumis SDK synthetic incident estate", version="0.1.0")
 
 INCIDENT_ID = "schema-drift-001"
 UNSEEN_INCIDENT_ID = "code-error-001"

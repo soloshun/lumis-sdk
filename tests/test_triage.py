@@ -1,7 +1,7 @@
 """Tests for deterministic triage and diagnosis rules."""
 
-from openaria.adapters.deterministic import diagnose_text
-from openaria.config import DeterministicRule
+from lumis_sdk.adapters.deterministic import diagnose_text
+from lumis_sdk.config import DeterministicRule
 
 
 def test_configured_rule_is_applied_to_matching_text() -> None:

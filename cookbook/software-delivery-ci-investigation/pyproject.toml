@@ -1,17 +1,17 @@
 [project]
-name = "openaria-software-delivery-ci-cookbook"
+name = "lumis-sdk-software-delivery-ci-cookbook"
 version = "0.1.0"
-description = "Synthetic CI and infrastructure investigation cookbook for OpenARIA with opt-in Agno/OpenRouter reasoning."
+description = "Synthetic CI and infrastructure investigation cookbook for Lumis SDK with opt-in Agno/OpenRouter reasoning."
 requires-python = ">=3.11"
 dependencies = [
   "agno>=2,<3",
   "fastapi>=0.115,<1",
   "httpx>=0.28,<1",
   "openai>=1,<3",
-  "openaria",
+  "lumis-sdk",
   "uvicorn>=0.30,<1",
 ]
 
 [tool.uv.sources]
 # Keep this executable example attached to the checkout that the reader cloned.
-openaria = { path = "../..", editable = true }
+lumis-sdk = { path = "../..", editable = true }

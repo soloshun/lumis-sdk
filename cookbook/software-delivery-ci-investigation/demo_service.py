@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 
-app = FastAPI(title="OpenARIA synthetic software-delivery estate", version="0.1.0")
+app = FastAPI(title="Lumis SDK synthetic software-delivery estate", version="0.1.0")
 
 LOCKFILE_ID = "lockfile-ci-001"
 WORKFLOW_ID = "workflow-permission-001"

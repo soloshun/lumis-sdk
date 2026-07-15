@@ -2,12 +2,12 @@
 
 from pathlib import Path
 
-from openaria.config import load_config
+from lumis_sdk.config import load_config
 
 
 def test_yaml_rule_set_is_loaded_relative_to_project_config(tmp_path: Path) -> None:
     (tmp_path / "rules.yml").write_text(
-        """apiVersion: openaria.dev/v1alpha1
+        """apiVersion: lumis.dev/v1alpha1
 kind: DiagnosisRuleSet
 metadata:
   name: fixture-rules
@@ -24,9 +24,9 @@ spec:
 """,
         encoding="utf-8",
     )
-    config_path = tmp_path / "openaria.yml"
+    config_path = tmp_path / "lumis.yml"
     config_path.write_text(
-        """apiVersion: openaria.dev/v1alpha1
+        """apiVersion: lumis.dev/v1alpha1
 kind: Project
 metadata:
   name: fixture-project
@@ -48,7 +48,7 @@ spec:
 
 def test_json_rule_set_is_supported(tmp_path: Path) -> None:
     (tmp_path / "rules.json").write_text(
-        '{"apiVersion":"openaria.dev/v1alpha1","kind":"DiagnosisRuleSet",'
+        '{"apiVersion":"lumis.dev/v1alpha1","kind":"DiagnosisRuleSet",'
         '"metadata":{"name":"json-rules"},"spec":{"rules":[{'
         '"id":"json-rule","name":"json-rule","all_contains":["JSON_SIGNATURE"],'
         '"classification":"json_failure","severity":"high",'
@@ -56,9 +56,9 @@ def test_json_rule_set_is_supported(tmp_path: Path) -> None:
         '"root_cause_hypothesis":"The JSON fixture matched.","confidence":0.8}]}}',
         encoding="utf-8",
     )
-    config_path = tmp_path / "openaria.yml"
+    config_path = tmp_path / "lumis.yml"
     config_path.write_text(
-        """apiVersion: openaria.dev/v1alpha1
+        """apiVersion: lumis.dev/v1alpha1
 kind: Project
 metadata:
   name: fixture

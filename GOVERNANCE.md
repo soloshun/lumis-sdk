@@ -1,6 +1,6 @@
-# OpenARIA governance
+# Lumis SDK governance
 
-OpenARIA currently uses a benevolent-maintainer model. Solomon Eshun is the project maintainer and release authority.
+Lumis SDK currently uses a benevolent-maintainer model. Solomon Eshun is the project maintainer and release authority.
 
 ## Decisions
 

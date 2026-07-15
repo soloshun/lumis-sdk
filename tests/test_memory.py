@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
-from openaria.adapters.deterministic import diagnose_text
-from openaria.adapters.incidents import incident_from_log
-from openaria.adapters.reports import render_markdown_report
-from openaria.adapters.sqlite import SQLiteIncidentStore, search_incidents
-from openaria.config import DeterministicRule
+from lumis_sdk.adapters.deterministic import diagnose_text
+from lumis_sdk.adapters.incidents import incident_from_log
+from lumis_sdk.adapters.reports import render_markdown_report
+from lumis_sdk.adapters.sqlite import SQLiteIncidentStore, search_incidents
+from lumis_sdk.config import DeterministicRule
 
 
 def _save_schema_incident(database_path: Path) -> tuple[SQLiteIncidentStore, str]:

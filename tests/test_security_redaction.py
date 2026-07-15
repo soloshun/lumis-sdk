@@ -1,6 +1,6 @@
 """Tests for evidence redaction at optional external boundaries."""
 
-from openaria.security import redact_text, redact_value
+from lumis_sdk.security import redact_text, redact_value
 
 
 def test_redaction_masks_common_values() -> None:

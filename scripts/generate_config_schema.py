@@ -1,15 +1,15 @@
-"""Generate or verify checked OpenARIA v1alpha1 JSON Schemas."""
+"""Generate or verify checked Lumis SDK v1alpha1 JSON Schemas."""
 
 import argparse
 import json
 from pathlib import Path
 
-from openaria.config import project_json_schema, rules_json_schema
+from lumis_sdk.config import project_json_schema, rules_json_schema
 
 SCHEMA_DIR = Path(__file__).parents[1] / "schemas"
 SCHEMAS = {
-    SCHEMA_DIR / "openaria-project-v1alpha1.schema.json": project_json_schema,
-    SCHEMA_DIR / "openaria-rules-v1alpha1.schema.json": rules_json_schema,
+    SCHEMA_DIR / "lumis-project-v1alpha1.schema.json": project_json_schema,
+    SCHEMA_DIR / "lumis-rules-v1alpha1.schema.json": rules_json_schema,
 }
 
 
@@ -22,7 +22,7 @@ def main() -> None:
         for path, factory in SCHEMAS.items():
             content = json.dumps(factory(), indent=2, sort_keys=True) + "\n"
             if not path.is_file() or path.read_text(encoding="utf-8") != content:
-                raise SystemExit(f"OpenARIA JSON Schema is missing or stale: {path}")
+                raise SystemExit(f"Lumis SDK JSON Schema is missing or stale: {path}")
             print(f"Schema is current: {path}")
         return
     SCHEMA_DIR.mkdir(parents=True, exist_ok=True)

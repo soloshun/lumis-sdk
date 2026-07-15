@@ -3,11 +3,11 @@
 import asyncio
 from pathlib import Path
 
-from openaria.adapters.deterministic import diagnose_text_with_explanation
-from openaria.adapters.sqlite import SQLiteIncidentStore
-from openaria.application import DiagnosisService
-from openaria.config import DeterministicRule
-from openaria.domain import (
+from lumis_sdk.adapters.deterministic import diagnose_text_with_explanation
+from lumis_sdk.adapters.sqlite import SQLiteIncidentStore
+from lumis_sdk.application import DiagnosisService
+from lumis_sdk.config import DeterministicRule
+from lumis_sdk.domain import (
     DiagnosisMethod,
     DiagnosisResult,
     IncidentInput,
@@ -15,8 +15,8 @@ from openaria.domain import (
     TriageResult,
     TruthState,
 )
-from openaria.ports import ModelUsePolicy
-from openaria.testkit import FakeModelGateway
+from lumis_sdk.ports import ModelUsePolicy
+from lumis_sdk.testkit import FakeModelGateway
 
 
 def _rule(name: str, *, priority: int, classification: str) -> DeterministicRule:

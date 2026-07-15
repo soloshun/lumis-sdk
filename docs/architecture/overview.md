@@ -1,6 +1,6 @@
-# OpenARIA architecture
+# Lumis SDK architecture
 
-OpenARIA uses ports and adapters so that its incident and recovery semantics remain independent of a model provider, database, observability vendor, orchestration system, cloud or agent framework.
+Lumis SDK uses ports and adapters so that its incident and recovery semantics remain independent of a model provider, database, observability vendor, orchestration system, cloud or agent framework.
 
 ## Dependency rule
 
@@ -19,15 +19,15 @@ entry points -> application -> domain
 
 | Package | Responsibility | Stability |
 | --- | --- | --- |
-| `openaria.domain` | Incidents, evidence, diagnoses, hypotheses, truth states, and guarded recovery state. | Canonical pre-1.0 API. |
-| `openaria.application` | Deterministic-first diagnosis and recommendation-only lifecycle orchestration. | Canonical pre-1.0 API. |
-| `openaria.ports` | Model, memory, reporting, context, policy, approval, verification, and audit boundaries. | Experimental; changes require compatibility notes. |
-| `openaria.adapters.deterministic` | Explainable local rule matching. | Reference adapter. |
-| `openaria.adapters.sqlite` | Local memory and transparent lexical retrieval. | Reference adapter. |
-| `openaria.adapters.reports` | Deterministic Markdown reports. | Reference adapter. |
-| `openaria.config` | Strict v1alpha1 documents, bounded loading, and schema. | Versioned configuration API. |
-| `openaria.cli` | Local composition and user commands. | Pre-alpha public interface. |
-| `openaria.testkit` | Fake gateways and later reusable contract suites. | Experimental. |
+| `lumis_sdk.domain` | Incidents, evidence, diagnoses, hypotheses, truth states, and guarded recovery state. | Canonical pre-1.0 API. |
+| `lumis_sdk.application` | Deterministic-first diagnosis and recommendation-only lifecycle orchestration. | Canonical pre-1.0 API. |
+| `lumis_sdk.ports` | Model, memory, reporting, context, policy, approval, verification, and audit boundaries. | Experimental; changes require compatibility notes. |
+| `lumis_sdk.adapters.deterministic` | Explainable local rule matching. | Reference adapter. |
+| `lumis_sdk.adapters.sqlite` | Local memory and transparent lexical retrieval. | Reference adapter. |
+| `lumis_sdk.adapters.reports` | Deterministic Markdown reports. | Reference adapter. |
+| `lumis_sdk.config` | Strict v1alpha1 documents, bounded loading, and schema. | Versioned configuration API. |
+| `lumis_sdk.cli` | Local composition and user commands. | Pre-alpha public interface. |
+| `lumis_sdk.testkit` | Fake gateways and later reusable contract suites. | Experimental. |
 
 ## Deterministic diagnosis
 
@@ -47,4 +47,4 @@ The canonical application lifecycle retrieves context, diagnoses, proposes a pla
 
 ## Pre-release contract
 
-The flat proof-of-concept modules and unversioned YAML shapes are intentionally removed. OpenARIA has no stable release consumers yet, so the repository exposes one coherent architecture rather than carrying two public APIs. Future breaking changes require a versioned configuration or storage transition.
+The flat proof-of-concept modules and unversioned YAML shapes are intentionally removed. Lumis SDK has no stable release consumers yet, so the repository exposes one coherent architecture rather than carrying two public APIs. Future breaking changes require a versioned configuration or storage transition.

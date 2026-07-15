@@ -1,4 +1,4 @@
-# OpenARIA threat model
+# Lumis SDK threat model
 
 ## Assets
 

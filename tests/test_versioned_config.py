@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from openaria.config import (
+from lumis_sdk.config import (
     MAX_CONFIG_BYTES,
     load_config,
     project_json_schema,
@@ -16,7 +16,7 @@ from openaria.config import (
 def test_versioned_project_and_rule_set_load_strictly(tmp_path: Path) -> None:
     """A v1alpha1 project resolves its external versioned rules."""
     (tmp_path / "rules.yml").write_text(
-        """apiVersion: openaria.dev/v1alpha1
+        """apiVersion: lumis.dev/v1alpha1
 kind: DiagnosisRuleSet
 metadata:
   name: fixture-rules
@@ -35,9 +35,9 @@ spec:
 """,
         encoding="utf-8",
     )
-    config_path = tmp_path / "openaria.yml"
+    config_path = tmp_path / "lumis.yml"
     config_path.write_text(
-        """apiVersion: openaria.dev/v1alpha1
+        """apiVersion: lumis.dev/v1alpha1
 kind: Project
 metadata:
   name: fixture-project
@@ -50,7 +50,7 @@ spec:
 
     config = load_config(config_path)
 
-    assert config.source_api_version == "openaria.dev/v1alpha1"
+    assert config.source_api_version == "lumis.dev/v1alpha1"
     assert config.rules[0].stable_id == "fixture-rule"
     assert config.rules[0].version == "2"
     assert config.rules[0].priority == 100
@@ -58,9 +58,9 @@ spec:
 
 def test_unknown_versioned_field_is_rejected(tmp_path: Path) -> None:
     """Misspelled fields never disappear silently."""
-    config_path = tmp_path / "openaria.yml"
+    config_path = tmp_path / "lumis.yml"
     config_path.write_text(
-        """apiVersion: openaria.dev/v1alpha1
+        """apiVersion: lumis.dev/v1alpha1
 kind: Project
 metadata:
   name: fixture-project
@@ -79,7 +79,7 @@ def test_project_schema_rejects_additional_properties() -> None:
     schema = project_json_schema()
 
     assert schema["additionalProperties"] is False
-    assert schema["properties"]["apiVersion"]["const"] == "openaria.dev/v1alpha1"
+    assert schema["properties"]["apiVersion"]["const"] == "lumis.dev/v1alpha1"
 
     rules_schema = rules_json_schema()
     assert rules_schema["additionalProperties"] is False
@@ -89,7 +89,7 @@ def test_project_schema_rejects_additional_properties() -> None:
 
 def test_oversized_configuration_is_rejected(tmp_path: Path) -> None:
     """Configuration loading has a deterministic size boundary."""
-    config_path = tmp_path / "openaria.yml"
+    config_path = tmp_path / "lumis.yml"
     config_path.write_bytes(b"x" * (MAX_CONFIG_BYTES + 1))
 
     with pytest.raises(ValueError, match="exceeds"):

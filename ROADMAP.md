@@ -1,4 +1,4 @@
-# OpenARIA roadmap
+# Lumis SDK roadmap
 
 ## v0.1 - Diagnosis-as-Code foundation
 

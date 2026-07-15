@@ -1,12 +1,12 @@
 # Framework and cookbook architecture
 
-This page explains one boundary within the project. For the complete core narrative, public API model, and paper mapping, start with the [OpenARIA Core Reference](OPENARIA_CORE_REFERENCE.md).
+This page explains one boundary within the project. For the complete core narrative, public API model, and paper mapping, start with the [Lumis SDK reference](LUMIS_SDK_REFERENCE.md).
 
 ## Purpose
 
-OpenARIA is a lightweight, vendor-agnostic framework for building guarded incident-recovery workflows. Its current implementation is diagnosis-centered, while its contracts deliberately leave room for policy-controlled planning, approval, verification, and learning. The reusable core does not depend on a specific orchestrator, web server, model provider, or agent framework.
+Lumis SDK is a lightweight, vendor-agnostic framework for building guarded incident-recovery workflows. Its current implementation is diagnosis-centered, while its contracts deliberately leave room for policy-controlled planning, approval, verification, and learning. The reusable core does not depend on a specific orchestrator, web server, model provider, or agent framework.
 
-A cookbook is a separate runnable project that imports OpenARIA and demonstrates how an application can use those public interfaces. This keeps the core useful for different stacks while making the paper demonstration concrete and reproducible.
+A cookbook is a separate runnable project that imports Lumis SDK and demonstrates how an application can use those public interfaces. This keeps the core useful for different stacks while making the paper demonstration concrete and reproducible.
 
 ## Core framework responsibilities
 
@@ -23,7 +23,7 @@ The core does **not** own a live agent, a cloud account, a perpetual monitor, pr
 
 ## Framework extension points
 
-The canonical extension surfaces are `openaria.ports` and `openaria.domain`. Ports cover models, memory, reporting, context, policy, approval, verification, and audit. The `openaria.application` package composes these interfaces without importing provider SDKs. Model providers implement `ModelGateway`; redaction lives in `openaria.security`; local implementations live in `openaria.adapters`.
+The canonical extension surfaces are `lumis_sdk.ports` and `lumis_sdk.domain`. Ports cover models, memory, reporting, context, policy, approval, verification, and audit. The `lumis_sdk.application` package composes these interfaces without importing provider SDKs. Model providers implement `ModelGateway`; redaction lives in `lumis_sdk.security`; local implementations live in `lumis_sdk.adapters`.
 
 ## Cookbook responsibilities
 
@@ -31,13 +31,13 @@ Agentic cookbooks are separate applications that use the core. Each contains its
 
 - A small FastAPI simulator exposes a synthetic pipeline incident and bounded context endpoints.
 - An opt-in Agno agent uses OpenRouter only when a user supplies an API key and chooses a model.
-- Agent tools call explicit cookbook adapters backed by OpenARIA's interfaces.
+- Agent tools call explicit cookbook adapters backed by Lumis SDK's interfaces.
 - The demo records a diagnosis, returns a proposed playbook, requests approval, and reads a synthetic verification result.
-- No tool receives shell access, database-write access outside local OpenARIA memory, or unrestricted web access.
+- No tool receives shell access, database-write access outside local Lumis SDK memory, or unrestricted web access.
 
 The cookbook must remain runnable without a live model call through fixtures and a deterministic mode. CI must never require an API key or make a billable request.
 
-## Mapping to the ARIA reference architecture
+## Mapping to the reference architecture
 
 The cookbook simulates the paper's seven logical layers. The agentic reasoning step is Layer 4; approval and governance are Layer 5.
 
@@ -78,4 +78,4 @@ An optional watcher can follow later as a bounded polling command with an explic
 4. Add opt-in Agno + OpenRouter applications through the provider-neutral model boundary.
 5. Demonstrate recommendations, approval boundaries, verification context, and human-confirmed learning without production execution.
 
-This sequence gives the cookbook something real to consume while keeping OpenARIA useful without the cookbook.
+This sequence gives the cookbook something real to consume while keeping Lumis SDK useful without the cookbook.

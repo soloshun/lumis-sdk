@@ -1,6 +1,6 @@
-# OpenARIA cookbooks
+# Lumis SDK cookbooks
 
-Cookbooks are small, runnable teaching projects that use OpenARIA core in a specific domain. They are not part of the core package's runtime dependency set. Each cookbook owns its synthetic data, domain rules, knowledge documents, optional integrations, and setup instructions.
+Cookbooks are small, runnable teaching projects that use Lumis SDK core in a specific domain. They are not part of the core package's runtime dependency set. Each cookbook owns its synthetic data, domain rules, knowledge documents, optional integrations, and setup instructions.
 
 ## Current cookbook domains
 
@@ -14,19 +14,19 @@ Cookbooks are small, runnable teaching projects that use OpenARIA core in a spec
 
 ## Shared structure
 
-Agentic cookbooks keep their framework-facing declaration in an `openaria/` directory:
+Agentic cookbooks keep their framework-facing declaration in an `lumis/` directory:
 
 ```text
 cookbook-name/
-├── openaria/
-│   ├── openaria.yml       # project, local state, report, and input paths
+├── lumis/
+│   ├── lumis.yml       # project, local state, report, and input paths
 │   └── rules.yml          # project-owned deterministic rules
 ├── knowledge/             # optional runbooks and playbooks
 ├── synthetic_project/     # synthetic code and data only
 └── README.md              # domain-specific teaching guide
 ```
 
-This organization keeps configuration easy to find without mixing it with source, data, or provider-specific code. Relative paths in `openaria/openaria.yml` are resolved from that directory; the supplied cookbooks point local reports and SQLite memory back to their cookbook root.
+This organization keeps configuration easy to find without mixing it with source, data, or provider-specific code. Relative paths in `lumis/lumis.yml` are resolved from that directory; the supplied cookbooks point local reports and SQLite memory back to their cookbook root.
 
 ## Adding a cookbook
 

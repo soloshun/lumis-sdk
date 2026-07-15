@@ -1,10 +1,10 @@
 """Tests for canonical guarded lifecycle orchestration."""
 
-from openaria.adapters.deterministic import diagnose_text
-from openaria.adapters.incidents import incident_from_log
-from openaria.application import run_guarded_lifecycle
-from openaria.config import DeterministicRule
-from openaria.domain import (
+from lumis_sdk.adapters.deterministic import diagnose_text
+from lumis_sdk.adapters.incidents import incident_from_log
+from lumis_sdk.application import run_guarded_lifecycle
+from lumis_sdk.config import DeterministicRule
+from lumis_sdk.domain import (
     ActionPlan,
     ApprovalDecision,
     ApprovalStatus,

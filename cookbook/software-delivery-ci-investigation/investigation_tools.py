@@ -6,13 +6,13 @@ from typing import Literal, TypeAlias
 import httpx
 from agno.tools import Toolkit
 
-from openaria.adapters.deterministic import diagnose_text
-from openaria.adapters.incidents import incident_from_log
-from openaria.adapters.reports import render_markdown_report
-from openaria.adapters.sqlite import SQLiteIncidentStore
-from openaria.config import OpenARIAConfig, resolve_project_path
-from openaria.domain import DiagnosisResult
-from openaria.security import redact_value
+from lumis_sdk.adapters.deterministic import diagnose_text
+from lumis_sdk.adapters.incidents import incident_from_log
+from lumis_sdk.adapters.reports import render_markdown_report
+from lumis_sdk.adapters.sqlite import SQLiteIncidentStore
+from lumis_sdk.config import LumisConfig, resolve_project_path
+from lumis_sdk.domain import DiagnosisResult
+from lumis_sdk.security import redact_value
 
 DeliveryIncidentId: TypeAlias = Literal[
     "lockfile-ci-001", "workflow-permission-001", "infra-resource-001"
@@ -34,7 +34,7 @@ class SoftwareDeliveryTools(Toolkit):
     as ``diagnosis_for`` stay available to this cookbook's deterministic runner, not the agent.
     """
 
-    def __init__(self, base_url: str, config_path: Path, config: OpenARIAConfig) -> None:
+    def __init__(self, base_url: str, config_path: Path, config: LumisConfig) -> None:
         """Create the toolkit and register its intentional, recommendation-only tool surface."""
         self.base_url = base_url
         self.config_path = config_path
@@ -74,7 +74,7 @@ class SoftwareDeliveryTools(Toolkit):
         return self._get(f"/incidents/{incident_id}/context/{context_name}")
 
     def get_framework_diagnosis(self, incident_id: DeliveryIncidentId) -> dict[str, object]:
-        """Run the cookbook's deterministic OpenARIA rules over the synthetic logs."""
+        """Run the cookbook's deterministic Lumis SDK rules over the synthetic logs."""
         return self.diagnosis_for(incident_id).model_dump(mode="json")
 
     def read_runbook(self, name: DeliveryRunbookName) -> dict[str, str]:
@@ -174,7 +174,7 @@ class SoftwareDeliveryTools(Toolkit):
         return redact_value(response.json())
 
     def _path(self, configured_path: str) -> Path:
-        """Resolve a local state path from the cookbook's OpenARIA configuration."""
+        """Resolve a local state path from the cookbook's Lumis SDK configuration."""
         return resolve_project_path(self.config_path, configured_path)
 
     @staticmethod
