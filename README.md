@@ -87,13 +87,15 @@ src/lumis_sdk/
 The proof-of-concept flat modules have been removed. New code imports the explicit domain, application, port, adapter, configuration, and security packages shown above.
 
 Read the [architecture overview](docs/architecture/overview.md), [SDK reference](docs/LUMIS_SDK_REFERENCE.md), and [configuration reference](docs/configuration.md).
+The [structured-rules API guide](docs/python-api/structured-rules.md) covers compound incident
+fields, evidence, fixture testing, and migration from `all_contains`.
 
 ## Current capabilities
 
 | Capability | Current behavior |
 | --- | --- |
 | Incident input | Local log normalization and typed vendor-neutral incident contracts. |
-| Deterministic diagnosis | Ordered rules with stable ID, version, priority, matched terms, and evidence references. |
+| Deterministic diagnosis | Legacy ordered text rules plus structured `all`/`any`/`not` rules with typed comparisons, required evidence, ranking, and candidate explanations. |
 | Versioned configuration | Strict `lumis.dev/v1alpha1` project and rule-set documents; unknown fields fail validation. |
 | Reports | Deterministic Markdown with facts, evidence, hypotheses, confidence, review requirement, and safety boundary. |
 | Local memory | SQLite records, human resolutions, visible truth state, and transparent lexical search. |
@@ -200,6 +202,7 @@ lumis report
 lumis resolve
 lumis memory search
 lumis rules validate
+lumis rules test
 ```
 
 `doctor` and validation commands do not make network calls or write incident state. Model assistance remains disabled unless application code supplies both an enabled policy and a gateway adapter.
@@ -230,6 +233,7 @@ diagnosis = asyncio.run(service.diagnose(incident))
 - [Data pipeline investigation](cookbook/data-pipeline-investigation/README.md)
 - [ML regression monitoring](cookbook/ml-regression-monitoring/README.md)
 - [Software-delivery CI investigation](cookbook/software-delivery-ci-investigation/README.md)
+- [Structured rule evaluation](cookbook/structured-rule-evaluation/README.md)
 - [Recording a human resolution](cookbook/recording-resolution/README.md)
 
 Start with a cookbook for a runnable demonstration, then use the architecture and core references above to examine the framework contracts behind it. All examples are synthetic, executable research demonstrations: they show how a consuming application can use Lumis SDK without claiming to be production control planes or autonomous remediation systems. Agent frameworks and model providers remain cookbook-only optional dependencies.

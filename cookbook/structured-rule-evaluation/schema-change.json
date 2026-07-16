@@ -1,0 +1,22 @@
+{
+  "fields": {
+    "log": {
+      "text": "ERROR KeyError: customer_id"
+    },
+    "schema": {
+      "diff": {
+        "removed_count": 1
+      }
+    }
+  },
+  "evidence": [
+    {
+      "id": "schema-diff-1",
+      "source": "schema-registry",
+      "kind": "schema_diff",
+      "detail": "customer_id was removed from the current input schema",
+      "confidence": 1.0,
+      "reference": "schema://orders/current-vs-previous"
+    }
+  ]
+}

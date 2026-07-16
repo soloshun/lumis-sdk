@@ -101,6 +101,11 @@ Confidence must not authorize remediation. Risk, approval, execution, and verifi
 
 Rules run by descending priority and then file/configuration order. A successful match exposes rule ID, version, priority, matched terms, and evidence IDs through `diagnose_text_with_explanation`. Equal-priority rules retain their declared order.
 
+For structured incident fields, use one strict `kind: DiagnosisRule` document per file. Structured
+rules support `all`, `any`, `not`, string and numeric comparisons, required evidence, priority,
+specificity, stable input-order tie breaking, and explanations for every candidate. See the
+[structured-rules API guide](python-api/structured-rules.md).
+
 ## Path behavior
 
 Relative paths resolve and normalize from the project YAML location. In a cookbook where YAML lives under `lumis/`, local state can live at cookbook root:
@@ -121,11 +126,15 @@ Configured paths are local authority granted by the user running Lumis SDK. Plug
 uv run lumis doctor --config path/to/lumis.yml
 uv run lumis rules validate --config path/to/lumis.yml
 uv run lumis rules validate --config path/to/lumis.yml --json
+uv run lumis rules test --rule path/to/rule.yml --input path/to/fixture.json
 ```
 
 `doctor` validates project/rule documents, reports selected local providers, checks the local-log path when configured, and warns when model policy is enabled. It does not write incident state or contact a network service.
 
-The checked [project schema](../schemas/lumis-project-v1alpha1.schema.json) and [rule-set schema](../schemas/lumis-rules-v1alpha1.schema.json) can be used by editors. CI verifies that both match the Pydantic contracts.
+The checked [project schema](../schemas/lumis-project-v1alpha1.schema.json),
+[legacy rule-set schema](../schemas/lumis-rules-v1alpha1.schema.json), and
+[structured diagnosis-rule schema](../schemas/lumis-diagnosis-rule-v1alpha1.schema.json) can be
+used by editors. CI verifies that they match the Pydantic contracts.
 
 ## Secrets
 
@@ -135,5 +144,8 @@ Do not put plaintext credentials in project YAML. v1alpha1 intentionally has no 
 
 - Project and rule files are limited to one MiB each.
 - The reference CLI reads local logs up to ten MiB.
-- Rule matching currently supports deterministic `all_contains`.
-- `all`, `any`, `not`, regex, structured fields, thresholds, and conflict analytics remain roadmap work backed by future tests and version notes.
+- Legacy rule sets remain limited to deterministic `all_contains`.
+- Structured `DiagnosisRule` documents support `all`, `any`, `not`, regex, structured fields,
+  numeric thresholds, required evidence, and deterministic ranking.
+- Time windows, schema-aware type coercion, conflict analytics, and compiled indexes remain
+  roadmap work.

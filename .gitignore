@@ -3,7 +3,7 @@ SPRINTS.md
 
 # Python and local Lumis SDK state
 .env
-.venv/
+.venv*/
 __pycache__/
 *.py[cod]
 .pytest_cache/

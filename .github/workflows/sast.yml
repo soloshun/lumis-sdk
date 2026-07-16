@@ -1,0 +1,33 @@
+name: Static security analysis
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  schedule:
+    - cron: "43 6 * * 1"
+
+concurrency:
+  group: sast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  bandit:
+    name: Bandit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.17"
+          enable-cache: true
+      - name: Install Python
+        run: uv python install 3.11
+      - name: Install locked dependencies
+        run: uv sync --frozen --all-groups --python 3.11
+      - name: Scan package code
+        run: uv run bandit --recursive --severity-level medium --confidence-level medium src

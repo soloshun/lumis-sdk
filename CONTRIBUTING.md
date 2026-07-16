@@ -40,6 +40,9 @@ uv build
 
 ## Pull requests
 
+- Branch from `dev` and open feature/fix pull requests back into `dev`. `main` is promoted from
+  `dev` through a release pull request. See the
+  [maintainer runbook](docs/contributing/maintainer-runbook.md).
 - Keep the pull request focused and explain the user-visible behavior.
 - Add or update tests for code changes.
 - Update documentation and examples when behavior changes.

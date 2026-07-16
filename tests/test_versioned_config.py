@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from lumis_sdk.config import (
     MAX_CONFIG_BYTES,
+    diagnosis_rule_json_schema,
     load_config,
     project_json_schema,
     rules_json_schema,
@@ -93,4 +94,104 @@ def test_oversized_configuration_is_rejected(tmp_path: Path) -> None:
     config_path.write_bytes(b"x" * (MAX_CONFIG_BYTES + 1))
 
     with pytest.raises(ValueError, match="exceeds"):
+        load_config(config_path)
+
+
+def test_project_can_load_single_structured_rule_documents(tmp_path: Path) -> None:
+    """Project rule paths may select the v0.2 single-document contract."""
+    (tmp_path / "rule.yml").write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: DiagnosisRule
+metadata:
+  name: timeout
+  version: "3"
+spec:
+  priority: 50
+  match:
+    all:
+      - field: duration.seconds
+        greaterThan: 300
+  diagnosis:
+    classification: orchestration_failure
+    summary: A task exceeded its expected duration.
+    hypothesis: The task may be stuck.
+    confidence: 0.7
+""",
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "lumis.yml"
+    config_path.write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: fixture-project
+spec:
+  rules:
+    files: [rule.yml]
+""",
+        encoding="utf-8",
+    )
+
+    config = load_config(config_path)
+
+    assert config.rules == []
+    assert config.structured_rules[0].stable_id == "timeout"
+    assert config.structured_rules[0].metadata.version == "3"
+    schema = diagnosis_rule_json_schema()
+    assert schema["properties"]["kind"]["const"] == "DiagnosisRule"
+    assert schema["additionalProperties"] is False
+
+
+def test_project_rejects_mixed_legacy_and_structured_rule_collections(tmp_path: Path) -> None:
+    """Cross-engine ordering stays explicit during the all_contains migration."""
+    (tmp_path / "legacy.yml").write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: DiagnosisRuleSet
+metadata:
+  name: legacy
+spec:
+  rules:
+    - id: legacy
+      name: legacy
+      all_contains: [SIGNATURE]
+      classification: legacy
+      severity: medium
+      summary: Legacy.
+      root_cause_hypothesis: Legacy.
+      confidence: 0.5
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "structured.yml").write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: DiagnosisRule
+metadata:
+  name: structured
+spec:
+  match:
+    all:
+      - field: log.text
+        contains: SIGNATURE
+  diagnosis:
+    classification: structured
+    summary: Structured.
+    hypothesis: Structured.
+    confidence: 0.5
+""",
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "lumis.yml"
+    config_path.write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: fixture-project
+spec:
+  rules:
+    files: [legacy.yml, structured.yml]
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="cannot mix"):
         load_config(config_path)

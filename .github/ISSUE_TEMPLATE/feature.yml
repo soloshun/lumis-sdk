@@ -1,0 +1,39 @@
+name: Feature or adapter request
+description: Propose a vendor-neutral SDK capability or optional adapter.
+title: "[Feature] "
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: adopter
+    attributes:
+      label: Adopter need
+      description: Describe the portable problem without assuming the Lumis hosted product.
+    validations:
+      required: true
+  - type: textarea
+    id: capability
+    attributes:
+      label: Proposed public capability
+      description: Name the Python, CLI, configuration, schema, adapter, or testkit contract needed.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Current workaround and alternatives
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and migration
+      description: Explain effects on existing adopters and whether an RFC is required.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety, privacy, and authority
+      description: Cover secrets, untrusted evidence, network/filesystem access, model use, execution, approval, and verification.
+    validations:
+      required: true

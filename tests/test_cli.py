@@ -169,3 +169,125 @@ def test_init_doctor_and_rule_validation_form_a_local_project(tmp_path: Path) ->
     rules_result = runner.invoke(app, ["rules", "validate", "--config", str(config_path), "--json"])
     assert rules_result.exit_code == 0
     assert json.loads(rules_result.output) == {"valid": True, "rules": []}
+
+
+def test_rules_test_emits_machine_readable_compound_explanation(tmp_path: Path) -> None:
+    """A single portable DiagnosisRule can be validated and evaluated from the CLI."""
+    rule_path = tmp_path / "rule.yml"
+    rule_path.write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: DiagnosisRule
+metadata:
+  name: schema-change
+  version: "2"
+spec:
+  priority: 100
+  match:
+    all:
+      - field: log.text
+        contains: KeyError
+      - field: schema.diff.removed_count
+        greaterThan: 0
+  diagnosis:
+    classification: schema_change
+    severity: high
+    summary: A required field was removed.
+    hypothesis: The upstream schema changed.
+    confidence: 0.8
+  evidence:
+    required: [schema_diff]
+""",
+        encoding="utf-8",
+    )
+    input_path = tmp_path / "incident.json"
+    input_path.write_text(
+        json.dumps(
+            {
+                "fields": {
+                    "log": {"text": "ERROR KeyError: customer_id"},
+                    "schema": {"diff": {"removed_count": 1}},
+                },
+                "evidence": [
+                    {
+                        "id": "schema-1",
+                        "source": "schema-registry",
+                        "detail": "customer_id was removed",
+                        "confidence": 1.0,
+                        "kind": "schema_diff",
+                        "reference": "schema://orders/diff",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(
+        app,
+        ["rules", "test", "--rule", str(rule_path), "--input", str(input_path)],
+    )
+
+    assert result.exit_code == 0
+    output = json.loads(result.output)
+    assert output["matched"] is True
+    assert output["winner"] == "schema-change"
+    assert output["candidates"][0]["evidenceReferences"] == ["schema://orders/diff"]
+
+
+def test_diagnose_uses_structured_log_rule_from_project_config(tmp_path: Path) -> None:
+    """The local diagnose flow can consume a single structured rule document."""
+    (tmp_path / "rule.yml").write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: DiagnosisRule
+metadata:
+  name: structured-signature
+spec:
+  match:
+    all:
+      - field: log.text
+        contains: INCIDENT_SIGNATURE
+  diagnosis:
+    classification: structured_failure
+    summary: The structured signature appeared.
+    hypothesis: The configured structured rule matched.
+    confidence: 0.7
+  evidence:
+    required: [log_window]
+""",
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "lumis.yml"
+    config_path.write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: structured-project
+spec:
+  memory:
+    path: incidents.db
+  reports:
+    outputDir: reports
+  rules:
+    files: [rule.yml]
+""",
+        encoding="utf-8",
+    )
+    log_path = tmp_path / "failure.log"
+    log_path.write_text("ERROR INCIDENT_SIGNATURE", encoding="utf-8")
+    output_path = tmp_path / "report.md"
+
+    result = runner.invoke(
+        app,
+        [
+            "diagnose",
+            "--config",
+            str(config_path),
+            "--log",
+            str(log_path),
+            "--output",
+            str(output_path),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "Classification: structured_failure" in output_path.read_text(encoding="utf-8")

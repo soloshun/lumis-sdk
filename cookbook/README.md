@@ -11,6 +11,7 @@ Cookbooks are small, runnable teaching projects that use Lumis SDK core in a spe
 | [data-pipeline-investigation](data-pipeline-investigation/README.md) | Schema drift, unfamiliar transformation failure, and telemetry redaction in a data pipeline. | Agno + OpenRouter |
 | [ml-regression-monitoring](ml-regression-monitoring/README.md) | Feature drift, feature contracts, and candidate-model quality in one regression pipeline. | Agno + OpenRouter |
 | [software-delivery-ci-investigation](software-delivery-ci-investigation/README.md) | CI lockfiles, workflow permissions, and Terraform references in one delivery pipeline. | Agno Toolkit + OpenRouter |
+| [structured-rule-evaluation](structured-rule-evaluation/README.md) | Compound structured fields, required evidence, deterministic ranking, and JSON explanations. | None |
 
 ## Shared structure
 
