@@ -2,6 +2,24 @@
 
 All notable changes to Lumis SDK are recorded here. The project follows the spirit of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses [Semantic Versioning](https://semver.org/) once release versions are established.
 
+## [Unreleased]
+
+### Added
+
+- A vendor-neutral async evidence-provider port and bounded collection service with deadlines,
+  kind filtering, duplicate handling, redaction, truncation, and structured failures.
+- A local JSON evidence adapter and strict project configuration for evidence budgets.
+- Versioned JSON diagnosis reports, checked JSON Schema, round-trip parsing, and CLI composition.
+- Stable testkit fixtures, fake evidence providers, and reusable evidence/report contract checks.
+- API documentation and a synthetic evidence-to-JSON-report cookbook.
+
+### Changed
+
+- Expanded `doctor` to verify configured local evidence paths.
+- Added tracked delivery-sprint sequencing to the public roadmap.
+- Updated release artifact actions and hardened the published-package verifier for cached indexes
+  and TestPyPI dependency resolution.
+
 ## [0.0.2] - 2026-07-16
 
 ### Added

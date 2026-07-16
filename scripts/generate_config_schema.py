@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from lumis_sdk.adapters.reports import diagnosis_report_json_schema
 from lumis_sdk.config import diagnosis_rule_json_schema, project_json_schema, rules_json_schema
 
 SCHEMA_DIR = Path(__file__).parents[1] / "schemas"
@@ -11,6 +12,7 @@ SCHEMAS = {
     SCHEMA_DIR / "lumis-project-v1alpha1.schema.json": project_json_schema,
     SCHEMA_DIR / "lumis-rules-v1alpha1.schema.json": rules_json_schema,
     SCHEMA_DIR / "lumis-diagnosis-rule-v1alpha1.schema.json": diagnosis_rule_json_schema,
+    SCHEMA_DIR / "lumis-diagnosis-report-v1alpha1.schema.json": diagnosis_report_json_schema,
 }
 
 

@@ -59,7 +59,7 @@ jobs:
         run: uv build --no-sources
 
       - name: Upload distributions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: python-dist-${{ inputs.version }}
           path: dist/
@@ -75,7 +75,7 @@ jobs:
       id-token: write
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: python-dist-${{ inputs.version }}
           path: dist/
@@ -95,7 +95,7 @@ jobs:
       id-token: write
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: python-dist-${{ inputs.version }}
           path: dist/

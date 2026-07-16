@@ -7,7 +7,7 @@ from lumis_sdk.domain import DiagnosisResult, IncidentInput
 
 
 class ReportWriter(Protocol):
-    """Persist one human-readable diagnosis report."""
+    """Persist one diagnosis report in a declared representation."""
 
     def write(
         self,

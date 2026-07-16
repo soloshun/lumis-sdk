@@ -2,7 +2,13 @@
 
 from dataclasses import dataclass
 
-from lumis_sdk.domain import DiagnosisResult, EvidenceItem, IncidentInput
+from lumis_sdk.domain import (
+    DiagnosisResult,
+    EvidenceCollection,
+    EvidenceItem,
+    EvidenceRequest,
+    IncidentInput,
+)
 from lumis_sdk.ports import ModelInvocation, ModelUsePolicy
 
 
@@ -32,3 +38,18 @@ class FakeModelGateway:
             prompt_version=policy.prompt_version,
             input_characters=len(log_text),
         )
+
+
+@dataclass
+class FakeEvidenceProvider:
+    """Return a predefined evidence collection without filesystem or network access."""
+
+    collection: EvidenceCollection
+    name: str = "fake-evidence"
+    calls: int = 0
+
+    async def collect(self, request: EvidenceRequest) -> EvidenceCollection:
+        """Return the fixture collection and record the call count."""
+        self.calls += 1
+        del request
+        return self.collection.model_copy(update={"provider": self.name})

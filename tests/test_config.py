@@ -34,6 +34,14 @@ spec:
   incidentSources:
     - provider: local-log
       path: logs/failure.log
+  evidenceProviders:
+    - provider: local-json
+      path: evidence/context.json
+      kinds: [schema_diff]
+      maxItems: 5
+      maxTotalCharacters: 5000
+      maxItemCharacters: 1000
+      timeoutSeconds: 2
   rules:
     files: [rules.yml]
 """,
@@ -43,6 +51,8 @@ spec:
     config = load_config(config_path)
 
     assert config.incident_sources[0].path == "logs/failure.log"
+    assert config.evidence_providers[0].provider == "local-json"
+    assert config.evidence_providers[0].max_items == 5
     assert config.rules[0].classification == "external_failure"
 
 

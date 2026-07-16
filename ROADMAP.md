@@ -23,3 +23,22 @@ Verifier port, explicit truth states persisted in memory, verified outcomes, tra
 ## v1.0 criteria
 
 Stable contracts and config v1, upgrade guide, security review, comprehensive docs, multiple independent adopters, tested plugin ecosystem, and no unresolved lifecycle ambiguity.
+
+## Delivery sprint sequence
+
+Dates are planning targets rather than release promises. The private GitHub project keeps the
+durable roadmap epics, while only the active sprint is split into granular implementation work.
+
+| Sprint | Target window | Outcome | Roadmap issues |
+| --- | --- | --- | --- |
+| Sprint 0 - Maintainer baseline | Complete | Open-source workflow, structured deterministic rules, and the `0.0.2` release. | #1 |
+| Sprint 1 - Evidence and reporting | 2026-07-16 to 2026-08-28 | Bounded typed evidence, versioned JSON reports, doctor checks, and stable testkit contracts. | #4 |
+| Sprint 2 - Plugin SDK | 2026-09-01 to 2026-10-02 | Governed discovery, manifests, compatibility checks, and plugin contract tests. | #5 |
+| Sprint 3 - Durable memory and connector proof | 2026-10-05 to 2026-11-13 | Optional shared memory and one independently packaged evidence path. | #2, #6 |
+| Sprint 4 - Policy and playbook proposals | 2026-11-16 to 2027-01-15 | Typed, evidence-linked, approval-aware proposals with no core execution authority. | #7 |
+| Sprint 5 - Verification and learning | 2027-01-18 to 2027-03-19 | Explicit verification truth, transparent retrieval, and replay evaluation. | #8 |
+| Sprint 6 - v1 stabilization | 2027-03-22 to 2027-06-30 | Stable contracts, secure releases, complete docs, and independent adoption evidence. | #9 |
+
+Feature and fix branches start from `dev` and return to `dev` through review. Reviewed release
+changes are promoted from `dev` to `main`; package publication remains an explicit maintainer
+release action.

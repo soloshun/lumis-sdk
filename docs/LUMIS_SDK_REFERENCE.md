@@ -45,23 +45,35 @@ Read:
 
 `lumis_sdk.application.DiagnosisService` runs deterministic diagnosis first. It reaches a model only for an unknown diagnosis when an enabled `ModelUsePolicy` and a `ModelGateway` are both supplied.
 
+`lumis_sdk.application.EvidenceService` collects bounded typed evidence through provider ports,
+with deadlines, filtering, duplicate handling, truncation, redaction, and structured failures.
+
 `lumis_sdk.application.run_guarded_lifecycle` coordinates context, diagnosis, proposal, approval, and verification without an executor or infrastructure adapter.
 
 ### Ports
 
-`lumis_sdk.ports` defines model, memory, reporting, context, policy, approval, verification, and audit interfaces. Independent packages can implement them without changing the Lumis SDK domain.
+`lumis_sdk.ports` defines evidence, model, memory, reporting, context, policy, approval,
+verification, and audit interfaces. Independent packages can implement them without changing the
+Lumis SDK domain.
 
 ### Adapters
 
-Reference adapters provide deterministic rules, SQLite local memory, and Markdown reports. Provider-specific connectors belong in separate packages when practical.
+Reference adapters provide deterministic rules, SQLite local memory, bounded local JSON evidence,
+and Markdown or versioned JSON reports. Provider-specific connectors belong in separate packages
+when practical.
 
 ### Testkit
 
-`lumis_sdk.testkit.FakeModelGateway` supports deterministic CI without credentials or live requests. Reusable adapter contract tests will expand in later milestones.
+`lumis_sdk.testkit` provides deterministic model and evidence fakes, incident/evidence fixtures,
+and reusable evidence-collection and JSON-report contract assertions without credentials or live
+requests.
 
 ## Configuration
 
-Projects use strict `lumis.dev/v1alpha1` `Project` and `DiagnosisRuleSet` documents. Unknown fields and unversioned proof-of-concept configuration are rejected, and JSON Schema is checked in.
+Projects use strict `lumis.dev/v1alpha1` `Project` and rule documents. Project configuration can
+select local JSON evidence and Markdown or JSON reporting. Unknown fields and unversioned
+proof-of-concept configuration are rejected, and checked JSON Schemas cover configuration, rules,
+and reports.
 
 ## Truth and confidence
 

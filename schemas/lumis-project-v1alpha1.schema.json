@@ -1,5 +1,66 @@
 {
   "$defs": {
+    "EvidenceProviderConfig": {
+      "additionalProperties": false,
+      "description": "One bounded local evidence provider composed by the reference CLI.",
+      "properties": {
+        "kinds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Kinds",
+          "type": "array"
+        },
+        "maxItemCharacters": {
+          "default": 8000,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Maxitemcharacters",
+          "type": "integer"
+        },
+        "maxItems": {
+          "default": 25,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Maxitems",
+          "type": "integer"
+        },
+        "maxTotalCharacters": {
+          "default": 131072,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Maxtotalcharacters",
+          "type": "integer"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "provider": {
+          "const": "local-json",
+          "title": "Provider",
+          "type": "string"
+        },
+        "redact": {
+          "default": true,
+          "title": "Redact",
+          "type": "boolean"
+        },
+        "timeoutSeconds": {
+          "default": 5.0,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Timeoutseconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "provider",
+        "path"
+      ],
+      "title": "EvidenceProviderConfig",
+      "type": "object"
+    },
     "IncidentSourceConfig": {
       "additionalProperties": false,
       "description": "One configured local incident source for v1alpha1.",
@@ -85,6 +146,13 @@
           "title": "Environment",
           "type": "string"
         },
+        "evidenceProviders": {
+          "items": {
+            "$ref": "#/$defs/EvidenceProviderConfig"
+          },
+          "title": "Evidenceproviders",
+          "type": "array"
+        },
         "incidentSources": {
           "items": {
             "$ref": "#/$defs/IncidentSourceConfig"
@@ -118,8 +186,11 @@
           "type": "string"
         },
         "provider": {
-          "const": "markdown",
           "default": "markdown",
+          "enum": [
+            "markdown",
+            "json"
+          ],
           "title": "Provider",
           "type": "string"
         }

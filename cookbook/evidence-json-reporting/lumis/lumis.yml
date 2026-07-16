@@ -1,0 +1,28 @@
+apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: synthetic-orders-pipeline
+spec:
+  environment: local
+  memory:
+    provider: sqlite
+    path: ../.lumis/incidents.db
+  reports:
+    provider: json
+    outputDir: ../.lumis/reports
+  incidentSources:
+    - provider: local-log
+      path: ../failure.log
+  evidenceProviders:
+    - provider: local-json
+      path: ../evidence/schema-diff.json
+      kinds: [schema_diff]
+      maxItems: 10
+      maxTotalCharacters: 100000
+      maxItemCharacters: 8000
+      timeoutSeconds: 5
+      redact: true
+  rules:
+    files: [schema-change.yml]
+  model:
+    enabled: false

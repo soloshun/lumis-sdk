@@ -1,5 +1,6 @@
 """Public domain contracts with no vendor or infrastructure dependencies."""
 
+from .evidence import EvidenceCollection, EvidenceFailure, EvidenceRequest
 from .models import (
     ConfirmedResolution,
     DiagnosisMethod,
@@ -24,6 +25,11 @@ from .recovery import (
     VerificationResult,
     VerificationStatus,
 )
+from .reports import (
+    DIAGNOSIS_REPORT_API_VERSION,
+    DIAGNOSIS_REPORT_KIND,
+    DiagnosisReportDocument,
+)
 
 __all__ = [
     "ActionPlan",
@@ -34,8 +40,14 @@ __all__ = [
     "ContextItem",
     "ContextKind",
     "DiagnosisMethod",
+    "DiagnosisReportDocument",
     "DiagnosisResult",
+    "DIAGNOSIS_REPORT_API_VERSION",
+    "DIAGNOSIS_REPORT_KIND",
+    "EvidenceCollection",
+    "EvidenceFailure",
     "EvidenceItem",
+    "EvidenceRequest",
     "Hypothesis",
     "IncidentContext",
     "IncidentInput",
