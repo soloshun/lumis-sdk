@@ -10,6 +10,7 @@ from .lifecycle import (
 )
 from .memory import IncidentEpisode, MemoryMatch, MemoryQuery, MemoryStore
 from .model import ModelGateway, ModelInvocation, ModelUsePolicy
+from .plugins import PluginCatalog, PluginFactory
 from .reporting import ReportWriter
 
 __all__ = [
@@ -24,6 +25,8 @@ __all__ = [
     "ModelGateway",
     "ModelInvocation",
     "ModelUsePolicy",
+    "PluginCatalog",
+    "PluginFactory",
     "PolicyEvaluator",
     "RecoveryVerifier",
     "ReportWriter",

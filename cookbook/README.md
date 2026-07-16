@@ -13,6 +13,7 @@ Cookbooks are small, runnable teaching projects that use Lumis SDK core in a spe
 | [software-delivery-ci-investigation](software-delivery-ci-investigation/README.md) | CI lockfiles, workflow permissions, and Terraform references in one delivery pipeline. | Agno Toolkit + OpenRouter |
 | [structured-rule-evaluation](structured-rule-evaluation/README.md) | Compound structured fields, required evidence, deterministic ranking, and JSON explanations. | None |
 | [evidence-json-reporting](evidence-json-reporting/README.md) | Bounded local evidence collection, redaction, required evidence, and versioned JSON reports. | None |
+| [plugin-package](plugin-package/README.md) | Independently packaged static manifest, lazy discovery, explicit loading, and contract testing. | None |
 
 ## Shared structure
 

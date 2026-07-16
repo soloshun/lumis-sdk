@@ -59,14 +59,15 @@ Lumis SDK domain.
 ### Adapters
 
 Reference adapters provide deterministic rules, SQLite local memory, bounded local JSON evidence,
-and Markdown or versioned JSON reports. Provider-specific connectors belong in separate packages
-when practical.
+Markdown or versioned JSON reports, and metadata-first plugin discovery. Provider-specific
+connectors belong in separate packages when practical.
 
 ### Testkit
 
 `lumis_sdk.testkit` provides deterministic model and evidence fakes, incident/evidence fixtures,
 and reusable evidence-collection and JSON-report contract assertions without credentials or live
-requests.
+requests. It also provides plugin manifest/factory fixtures and a reusable factory contract
+assertion for independently packaged adapters.
 
 ## Configuration
 

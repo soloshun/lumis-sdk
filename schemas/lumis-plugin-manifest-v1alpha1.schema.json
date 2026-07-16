@@ -1,0 +1,155 @@
+{
+  "$defs": {
+    "PluginAuthority": {
+      "description": "Sensitive runtime authorities that are never granted by discovery.",
+      "enum": [
+        "execution",
+        "filesystem",
+        "model",
+        "network",
+        "secrets"
+      ],
+      "title": "PluginAuthority",
+      "type": "string"
+    },
+    "PluginCapability": {
+      "description": "Public SDK extension surfaces a plugin may implement.",
+      "enum": [
+        "evidence_provider",
+        "incident_source",
+        "memory_store",
+        "model_gateway",
+        "report_writer"
+      ],
+      "title": "PluginCapability",
+      "type": "string"
+    },
+    "PluginMetadata": {
+      "additionalProperties": false,
+      "description": "Stable plugin identity.",
+      "properties": {
+        "name": {
+          "pattern": "^[a-z0-9]+(?:[-_.][a-z0-9]+)*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "PluginMetadata",
+      "type": "object"
+    },
+    "PluginSpec": {
+      "additionalProperties": false,
+      "description": "Capabilities and authority requests declared before package import.",
+      "properties": {
+        "capabilities": {
+          "items": {
+            "$ref": "#/$defs/PluginCapability"
+          },
+          "minItems": 1,
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "entryPoint": {
+          "title": "Entrypoint",
+          "type": "string"
+        },
+        "requiredAuthorities": {
+          "items": {
+            "$ref": "#/$defs/PluginAuthority"
+          },
+          "title": "Requiredauthorities",
+          "type": "array"
+        },
+        "sdk": {
+          "$ref": "#/$defs/SdkCompatibility"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "supportStatus": {
+          "$ref": "#/$defs/PluginSupportStatus"
+        }
+      },
+      "required": [
+        "entryPoint",
+        "capabilities",
+        "supportStatus",
+        "sdk",
+        "summary"
+      ],
+      "title": "PluginSpec",
+      "type": "object"
+    },
+    "PluginSupportStatus": {
+      "description": "Declared maintenance relationship for one plugin package.",
+      "enum": [
+        "official",
+        "community",
+        "experimental",
+        "archived"
+      ],
+      "title": "PluginSupportStatus",
+      "type": "string"
+    },
+    "SdkCompatibility": {
+      "additionalProperties": false,
+      "description": "Supported Lumis SDK release interval.",
+      "properties": {
+        "maximumExclusive": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "title": "Maximumexclusive",
+          "type": "string"
+        },
+        "minimum": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "title": "Minimum",
+          "type": "string"
+        }
+      },
+      "required": [
+        "minimum",
+        "maximumExclusive"
+      ],
+      "title": "SdkCompatibility",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Metadata shipped as ``lumis-plugin.json`` in a plugin distribution.",
+  "properties": {
+    "apiVersion": {
+      "const": "lumis.dev/v1alpha1",
+      "title": "Apiversion",
+      "type": "string"
+    },
+    "kind": {
+      "const": "PluginManifest",
+      "default": "PluginManifest",
+      "title": "Kind",
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "#/$defs/PluginMetadata"
+    },
+    "spec": {
+      "$ref": "#/$defs/PluginSpec"
+    }
+  },
+  "required": [
+    "apiVersion",
+    "metadata",
+    "spec"
+  ],
+  "title": "PluginManifest",
+  "type": "object"
+}

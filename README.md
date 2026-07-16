@@ -97,6 +97,8 @@ The [structured-rules API guide](docs/python-api/structured-rules.md) covers com
 fields, evidence, fixture testing, and migration from `all_contains`.
 The [evidence and JSON reports guide](docs/python-api/evidence-and-json-reports.md) documents the
 provider contract, bounded collection behavior, report schema, and reusable testkit.
+The [plugin SDK guide](docs/python-api/plugins.md) covers static manifests, metadata-only
+discovery, explicit loading policy, compatibility, and contract testing.
 
 ## Current capabilities
 
@@ -110,6 +112,7 @@ provider contract, bounded collection behavior, report schema, and reusable test
 | Local memory | SQLite records, human resolutions, visible truth state, and transparent lexical search. |
 | Model boundary | Explicit policy, budgets, schema-validated output, fake CI gateway, and deterministic fallback. |
 | Guarded lifecycle | Context, policy, approval, verification, and audit ports with no core action executor. |
+| Plugin SDK | Static strict manifests, lazy entry-point discovery, compatibility/support checks, default-denied sensitive authorities, and reusable factory contracts. |
 | CLI | Initialization, diagnosis, doctor, rule validation, reports, resolution, and memory search. |
 | Cookbooks | Synthetic data, ML regression, and software-delivery investigations with optional Agno/OpenRouter paths. |
 
@@ -141,8 +144,8 @@ pip install lumis-sdk
 For a specific reproducible release, pin the version:
 
 ```bash
-uv add "lumis-sdk==0.0.5"
-pip install "lumis-sdk==0.0.5"
+uv add "lumis-sdk==0.0.6"
+pip install "lumis-sdk==0.0.6"
 ```
 
 The repository's GitHub Actions workflow publishes reviewed releases through PyPI Trusted Publishing.
@@ -218,6 +221,8 @@ lumis resolve
 lumis memory search
 lumis rules validate
 lumis rules test
+lumis plugins list
+lumis plugins doctor
 ```
 
 `doctor` and validation commands do not make network calls or write incident state. Model assistance remains disabled unless application code supplies both an enabled policy and a gateway adapter.
