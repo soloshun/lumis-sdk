@@ -2,7 +2,7 @@
 
 All notable changes to Lumis SDK are recorded here. The project follows the spirit of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses [Semantic Versioning](https://semver.org/) once release versions are established.
 
-## [Unreleased]
+## [0.0.6] - 2026-07-16
 
 ### Added
 
