@@ -34,7 +34,7 @@ durable roadmap epics, while only the active sprint is split into granular imple
 | Sprint 0 - Maintainer baseline | Complete | Open-source workflow, structured deterministic rules, and the `0.0.2` release. | #1 |
 | Sprint 1 - Evidence and reporting | Complete | Bounded typed evidence, versioned JSON reports, doctor checks, stable testkit contracts, and releases `0.0.3`/`0.0.4`. | #4, #19 |
 | Sprint 2 - Plugin SDK | Complete | Governed discovery, manifests, compatibility checks, explicit authority policy, plugin contract tests, and an independent package proof. | #5 |
-| Sprint 3 - Durable memory and connector proof | 2026-10-05 to 2026-11-13 | Optional shared memory and one independently packaged evidence path. | #2, #6 |
+| Sprint 3 - Durable memory and connector proof | Complete | Optional shared memory, webhook normalization, an independently packaged evidence path, and the `0.0.7` release. | #2, #6 |
 | Sprint 4 - Policy and playbook proposals | 2026-11-16 to 2027-01-15 | Typed, evidence-linked, approval-aware proposals with no core execution authority. | #7 |
 | Sprint 5 - Verification and learning | 2027-01-18 to 2027-03-19 | Explicit verification truth, transparent retrieval, and replay evaluation. | #8 |
 | Sprint 6 - v1 stabilization | 2027-03-22 to 2027-06-30 | Stable contracts, secure releases, complete docs, and independent adoption evidence. | #9 |

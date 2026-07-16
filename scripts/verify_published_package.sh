@@ -4,7 +4,7 @@
 set -euo pipefail
 
 PACKAGE_NAME="${1:-lumis-sdk}"
-PACKAGE_VERSION="${2:-0.0.6}"
+PACKAGE_VERSION="${2:-0.0.7}"
 INDEX_URL="${3:-https://pypi.org/simple/}"
 EXTRA_INDEX_URL="${4:-https://pypi.org/simple/}"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/lumis-sdk-publish-check.XXXXXX")"
