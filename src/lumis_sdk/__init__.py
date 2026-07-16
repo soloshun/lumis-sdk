@@ -5,4 +5,4 @@ compose use cases from :mod:`lumis_sdk.application`, and implement or select
 interfaces from :mod:`lumis_sdk.ports`.
 """
 
-__version__ = "0.0.4"
+__version__ = "0.0.5"
