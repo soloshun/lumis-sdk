@@ -22,6 +22,9 @@ spec:
         contains: KeyError
       - field: schema.diff.removed_count
         greaterThan: 0
+      - field: components.references
+        anyElement:
+          prefix: dbt.model.
     any:
       - field: component.type
         equals: transformation
@@ -55,6 +58,12 @@ Unknown fields fail validation. Every condition defines exactly one operator:
 - `prefix`: case-sensitive string prefix;
 - `matchesRegex`: Python regular expression search, validated when the rule loads;
 - `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`: numeric comparison.
+
+List-valued fields use an explicit `anyElement` or `allElements` quantifier around one existing
+scalar operator. `anyElement` passes when at least one scalar element passes. `allElements` passes
+when every scalar element passes. Empty lists fail both quantifiers. Lists are limited to 100
+scalar elements; nested collections and oversized lists fail closed rather than being flattened
+or coerced to strings.
 
 Fields use dot paths. Callers may supply nested mappings or literal dotted keys. `all` requires
 every condition, `any` requires at least one when present, and `not` requires every listed
@@ -112,7 +121,8 @@ missing required evidence, and evidence references. The selected diagnosis separ
 configured outstanding evidence through `DiagnosisResult.missing_evidence`. Matching candidates
 are ranked by descending priority, then descending specificity, then stable input order.
 Specificity weights `all` conditions twice, then counts `any`, `not`, and required-evidence
-entries.
+entries. Quantified condition explanations include bounded actual values and
+`matched_element_indexes`.
 
 ## CLI validation and fixture testing
 
@@ -138,8 +148,9 @@ Migrate one complete project rule collection at a time:
 2. Use `metadata.name` as the old `id` and `metadata.version` as the old `version`.
 3. Replace every `all_contains` term with an `all` condition on `log.text`.
 4. Move diagnosis fields under `spec.diagnosis`.
-5. Add required evidence and structured conditions where reliable signals exist.
-6. Test matching, non-matching, missing-evidence, and tie fixtures with `lumis rules test`.
-7. Replace the project rule file list only after the complete collection passes.
+5. Replace adopter-side list flattening with explicit `anyElement` or `allElements` conditions.
+6. Add required evidence and structured conditions where reliable signals exist.
+7. Test matching, non-matching, empty/oversized lists, missing evidence, and tie fixtures.
+8. Replace the project rule file list only after the complete collection passes.
 
 Confidence remains human-authored diagnostic calibration. It does not grant execution authority.

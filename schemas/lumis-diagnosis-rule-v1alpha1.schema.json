@@ -58,10 +58,145 @@
       "title": "DiagnosisRuleMetadata",
       "type": "object"
     },
+    "ElementComparison": {
+      "additionalProperties": false,
+      "description": "One scalar comparison applied to elements of a bounded list.",
+      "properties": {
+        "contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contains"
+        },
+        "equals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Equals"
+        },
+        "greaterThan": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Greaterthan"
+        },
+        "greaterThanOrEqual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Greaterthanorequal"
+        },
+        "lessThan": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lessthan"
+        },
+        "lessThanOrEqual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lessthanorequal"
+        },
+        "matchesRegex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matchesregex"
+        },
+        "prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prefix"
+        }
+      },
+      "title": "ElementComparison",
+      "type": "object"
+    },
     "RuleCondition": {
       "additionalProperties": false,
-      "description": "One typed comparison against a dot-addressable incident field.",
+      "description": "One scalar or quantified comparison against a dot-addressable incident field.",
       "properties": {
+        "allElements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ElementComparison"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "anyElement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ElementComparison"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "contains": {
           "anyOf": [
             {

@@ -303,10 +303,10 @@ def rules_test(
                 "specificity": candidate.specificity,
                 "matched": candidate.matched,
                 "matchedConditions": [
-                    condition.__dict__ for condition in candidate.matched_conditions
+                    _condition_row(condition) for condition in candidate.matched_conditions
                 ],
                 "failedConditions": [
-                    condition.__dict__ for condition in candidate.failed_conditions
+                    _condition_row(condition) for condition in candidate.failed_conditions
                 ],
                 "missingEvidence": list(candidate.missing_evidence),
                 "evidenceReferences": list(candidate.evidence_references),
@@ -337,6 +337,13 @@ def _read_bounded_log(path: Path) -> str:
     if size > MAX_LOG_BYTES:
         raise typer.BadParameter(f"Telemetry log exceeds {MAX_LOG_BYTES} bytes: {path}")
     return path.read_text(encoding="utf-8")
+
+
+def _condition_row(condition: object) -> dict[str, object]:
+    values: dict[str, object] = dict(vars(condition))
+    indexes = values.pop("matched_element_indexes", ())
+    values["matchedElementIndexes"] = list(indexes) if isinstance(indexes, tuple) else []
+    return values
 
 
 def _read_bounded_json(path: Path) -> dict[str, object]:

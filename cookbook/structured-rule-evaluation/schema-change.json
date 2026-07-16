@@ -7,6 +7,12 @@
       "diff": {
         "removed_count": 1
       }
+    },
+    "components": {
+      "references": [
+        "dbt.model.orders",
+        "airflow.dag.daily_orders"
+      ]
     }
   },
   "evidence": [

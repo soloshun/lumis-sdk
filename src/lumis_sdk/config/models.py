@@ -141,8 +141,42 @@ class DeterministicRule(StrictModel):
         return self.rule_id
 
 
+class ElementComparison(StrictModel):
+    """One scalar comparison applied to elements of a bounded list."""
+
+    contains: str | None = None
+    equals: str | int | float | bool | None = None
+    prefix: str | None = None
+    matches_regex: str | None = Field(default=None, alias="matchesRegex")
+    greater_than: float | None = Field(default=None, alias="greaterThan")
+    greater_than_or_equal: float | None = Field(default=None, alias="greaterThanOrEqual")
+    less_than: float | None = Field(default=None, alias="lessThan")
+    less_than_or_equal: float | None = Field(default=None, alias="lessThanOrEqual")
+
+    @model_validator(mode="after")
+    def require_exactly_one_operator(self) -> "ElementComparison":
+        operators = (
+            self.contains,
+            self.equals,
+            self.prefix,
+            self.matches_regex,
+            self.greater_than,
+            self.greater_than_or_equal,
+            self.less_than,
+            self.less_than_or_equal,
+        )
+        if sum(value is not None for value in operators) != 1:
+            raise ValueError("a condition must define exactly one comparison operator")
+        if self.matches_regex is not None:
+            try:
+                re.compile(self.matches_regex)
+            except re.error as error:
+                raise ValueError(f"matchesRegex is invalid: {error}") from error
+        return self
+
+
 class RuleCondition(StrictModel):
-    """One typed comparison against a dot-addressable incident field."""
+    """One scalar or quantified comparison against a dot-addressable incident field."""
 
     field: str = Field(min_length=1)
     contains: str | None = None
@@ -153,6 +187,8 @@ class RuleCondition(StrictModel):
     greater_than_or_equal: float | None = Field(default=None, alias="greaterThanOrEqual")
     less_than: float | None = Field(default=None, alias="lessThan")
     less_than_or_equal: float | None = Field(default=None, alias="lessThanOrEqual")
+    any_element: ElementComparison | None = Field(default=None, alias="anyElement")
+    all_elements: ElementComparison | None = Field(default=None, alias="allElements")
 
     @model_validator(mode="after")
     def require_exactly_one_operator(self) -> "RuleCondition":
@@ -165,6 +201,8 @@ class RuleCondition(StrictModel):
             self.greater_than_or_equal,
             self.less_than,
             self.less_than_or_equal,
+            self.any_element,
+            self.all_elements,
         )
         if sum(value is not None for value in operators) != 1:
             raise ValueError("a condition must define exactly one comparison operator")

@@ -232,6 +232,7 @@ spec:
     assert output["matched"] is True
     assert output["winner"] == "schema-change"
     assert output["diagnosis"]["missingEvidence"] == []
+    assert output["candidates"][0]["matchedConditions"][0]["matchedElementIndexes"] == []
     assert output["candidates"][0]["evidenceReferences"] == ["schema://orders/diff"]
 
 

@@ -2,6 +2,18 @@
 
 All notable changes to Lumis SDK are recorded here. The project follows the spirit of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses [Semantic Versioning](https://semver.org/) once release versions are established.
 
+## [Unreleased]
+
+### Added
+
+- Explicit bounded `anyElement` and `allElements` comparisons for list-valued structured fields.
+- Quantified condition explanations with matched element indexes and bounded observed values.
+- A stable testkit fixture for list-valued incident fields.
+
+### Security
+
+- Empty, nested, non-list, and lists above 100 elements fail quantified comparisons closed.
+
 ## [0.0.4] - 2026-07-16
 
 ### Added
