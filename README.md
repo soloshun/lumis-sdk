@@ -117,7 +117,7 @@ uv run lumis --help
 
 ## Install Lumis SDK
 
-The first Lumis SDK release will be published to PyPI as `lumis-sdk`. Once published, add it to a project managed by `uv`:
+Lumis SDK is published to PyPI as `lumis-sdk`. Add it to a project managed by `uv`:
 
 ```bash
 uv add "lumis-sdk>=0.0.1,<0.1.0"
@@ -132,8 +132,8 @@ pip install lumis-sdk
 For a specific reproducible release, pin the version:
 
 ```bash
-uv add "lumis-sdk==0.0.1"
-pip install "lumis-sdk==0.0.1"
+uv add "lumis-sdk==0.0.2"
+pip install "lumis-sdk==0.0.2"
 ```
 
 The repository's GitHub Actions workflow publishes reviewed releases through PyPI Trusted Publishing.
