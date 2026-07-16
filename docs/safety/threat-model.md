@@ -22,7 +22,7 @@ Incident evidence, credentials, local files, operational memory, diagnosis integ
 | Unsafe Markdown | Reports are deterministic text, not executed HTML. | Escaping policy for future web renderers. |
 | Model hallucination | Schema validation, evidence separation, deterministic fallback, unconfirmed truth state. | Citation validation and evaluation metrics. |
 | Unapproved actuation | No core executor; application lifecycle is recommendation-only. | Any executor requires RFC, typed allowlist, signatures, limits, approval, audit, idempotency, and verification. |
-| Plugin supply chain | Plugin loading not implemented. | Manifest, compatibility, lazy loading, provenance, and trust labels before discovery ships. |
+| Plugin supply chain | Static strict manifests, metadata-only discovery, compatibility checks, isolated failures, support labels, explicit loading, and default-denied sensitive authorities. | Provenance/signature policy, package allowlists, and isolated-process loading where adopters require stronger containment. |
 | Silent telemetry | No remote telemetry adapter or default export. | Document explicit opt-in if optional Logfire/OpenTelemetry is added. |
 
 ## Security invariants
@@ -31,3 +31,5 @@ Incident evidence, credentials, local files, operational memory, diagnosis integ
 2. A model response is never a confirmed resolution or executable action.
 3. High-risk or irreversible actions cannot be introduced without human approval policy.
 4. Verification must follow any future execution before confirmed recovery.
+5. Installing or discovering a plugin grants no network, filesystem, secret, model, or execution
+   authority.

@@ -3,6 +3,7 @@
 import asyncio
 import json
 from pathlib import Path
+from typing import Any
 
 import typer
 from pydantic import ValidationError
@@ -11,6 +12,7 @@ from lumis_sdk import __version__
 from lumis_sdk.adapters.deterministic import diagnose_structured, diagnose_text
 from lumis_sdk.adapters.evidence import LocalJsonEvidenceProvider
 from lumis_sdk.adapters.incidents import incident_from_log
+from lumis_sdk.adapters.plugins import ImportlibPluginCatalog
 from lumis_sdk.adapters.reports import (
     append_resolution,
     render_json_report,
@@ -25,7 +27,13 @@ from lumis_sdk.config import (
     load_diagnosis_rule,
     resolve_project_path,
 )
-from lumis_sdk.domain import DiagnosisResult, EvidenceItem, EvidenceRequest, IncidentInput
+from lumis_sdk.domain import (
+    DiagnosisResult,
+    EvidenceItem,
+    EvidenceRequest,
+    IncidentInput,
+    PluginDescriptor,
+)
 
 MAX_LOG_BYTES = 10 * 1024 * 1024
 DEFAULT_CONFIG_PATH = Path("lumis.yml")
@@ -37,8 +45,10 @@ app = typer.Typer(
 )
 memory_app = typer.Typer(help="Search local Lumis SDK incident memory.")
 rules_app = typer.Typer(help="Validate and test deterministic diagnosis rules.")
+plugins_app = typer.Typer(help="Inspect installed Lumis SDK plugins without importing them.")
 app.add_typer(memory_app, name="memory")
 app.add_typer(rules_app, name="rules")
+app.add_typer(plugins_app, name="plugins")
 
 
 def version_callback(value: bool) -> None:
@@ -317,6 +327,46 @@ def rules_test(
     typer.echo(json.dumps(output, indent=2, default=str))
 
 
+@plugins_app.command("list")
+def plugins_list(
+    as_json: bool = typer.Option(False, "--json", help="Emit machine-readable output."),
+) -> None:
+    """List installed plugin metadata without importing plugin modules."""
+    descriptors = ImportlibPluginCatalog().discover()
+    rows = [_plugin_row(item) for item in descriptors]
+    if as_json:
+        typer.echo(json.dumps({"plugins": rows}, indent=2))
+        return
+    if not rows:
+        typer.echo("No Lumis SDK plugins installed.")
+        return
+    for row in rows:
+        capabilities = ",".join(row["capabilities"]) or "none"
+        typer.echo(
+            f"{row['name']} | {row['status']} | {row['supportStatus']} | "
+            f"{capabilities} | {row['distribution']}=={row['version']}"
+        )
+
+
+@plugins_app.command("doctor")
+def plugins_doctor(
+    as_json: bool = typer.Option(False, "--json", help="Emit machine-readable output."),
+) -> None:
+    """Validate static manifests and compatibility without importing plugin modules."""
+    descriptors = ImportlibPluginCatalog().discover()
+    rows = [_plugin_row(item) for item in descriptors]
+    valid = all(row["status"] == "compatible" for row in rows)
+    if as_json:
+        typer.echo(json.dumps({"valid": valid, "plugins": rows}, indent=2))
+    elif not rows:
+        typer.echo("Plugin doctor: ok; no plugins installed.")
+    else:
+        for row in rows:
+            typer.echo(f"{row['name']}: {row['status']}: {row['message']}")
+    if not valid:
+        raise typer.Exit(code=1)
+
+
 def main() -> None:
     """Run the Lumis SDK CLI."""
     app()
@@ -419,6 +469,21 @@ def _render_report(
 def _memory_path(config_path: Path) -> Path:
     project_config = _load_or_exit(config_path)
     return resolve_project_path(config_path, project_config.memory.path)
+
+
+def _plugin_row(descriptor: object) -> dict[str, Any]:
+    item = PluginDescriptor.model_validate(descriptor)
+    return {
+        "name": item.name,
+        "distribution": item.distribution,
+        "version": item.distribution_version,
+        "entryPoint": item.entry_point,
+        "status": item.status.value,
+        "supportStatus": item.support_status.value if item.support_status else "unknown",
+        "capabilities": [capability.value for capability in item.capabilities],
+        "requiredAuthorities": [authority.value for authority in item.required_authorities],
+        "message": item.message,
+    }
 
 
 def _telemetry_log_path(config_path: Path, project_config: LumisConfig) -> Path:

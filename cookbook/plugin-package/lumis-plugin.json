@@ -1,0 +1,21 @@
+{
+  "apiVersion": "lumis.dev/v1alpha1",
+  "kind": "PluginManifest",
+  "metadata": {
+    "name": "fixture-evidence",
+    "version": "1.0.0"
+  },
+  "spec": {
+    "entryPoint": "fixture",
+    "capabilities": [
+      "evidence_provider"
+    ],
+    "supportStatus": "experimental",
+    "sdk": {
+      "minimum": "0.0.4",
+      "maximumExclusive": "0.1.0"
+    },
+    "requiredAuthorities": [],
+    "summary": "Synthetic authority-free evidence plugin fixture."
+  }
+}

@@ -26,6 +26,7 @@ entry points -> application -> domain
 | `lumis_sdk.adapters.sqlite` | Local memory and transparent lexical retrieval. | Reference adapter. |
 | `lumis_sdk.adapters.evidence` | Bounded local JSON evidence collection. | Reference adapter. |
 | `lumis_sdk.adapters.reports` | Deterministic Markdown and versioned JSON reports. | Reference adapter. |
+| `lumis_sdk.adapters.plugins` | Metadata-only discovery and explicit policy-checked loading. | Experimental plugin SDK. |
 | `lumis_sdk.config` | Strict v1alpha1 documents, bounded loading, and schema. | Versioned configuration API. |
 | `lumis_sdk.cli` | Local composition and user commands. | Pre-alpha public interface. |
 | `lumis_sdk.testkit` | Deterministic fakes, fixtures, and reusable evidence/report contracts. | Experimental. |
@@ -39,6 +40,13 @@ so unavailable context cannot be mistaken for a confirmed observation.
 
 The `local-json` adapter is an offline reference implementation. Independent packages can
 implement the same port without introducing vendor types into domain or application code.
+
+## Plugin boundary
+
+Plugin distributions register the `lumis_sdk.plugins` entry-point group and ship a strict static
+manifest. Discovery validates distribution identity, SDK compatibility, support status,
+capabilities, and authority requests without importing plugin modules. Loading is explicit,
+policy-checked, and isolated per plugin; core remains fully usable with no plugins installed.
 
 ## Deterministic diagnosis
 

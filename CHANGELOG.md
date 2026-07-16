@@ -2,6 +2,17 @@
 
 All notable changes to Lumis SDK are recorded here. The project follows the spirit of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses [Semantic Versioning](https://semver.org/) once release versions are established.
 
+## [Unreleased]
+
+### Added
+
+- RFC-governed `lumis_sdk.plugins` discovery with strict static manifests and checked schema.
+- Metadata-only plugin listing and doctor commands that do not import plugin modules.
+- SDK compatibility, support status, capability, duplicate, archived, and authority checks.
+- Explicit policy-checked plugin loading with isolated import/factory failures.
+- Reusable plugin manifest/factory fixtures and contract assertions for independent packages.
+- Plugin API, compatibility, migration, packaging, and security documentation.
+
 ## [0.0.5] - 2026-07-16
 
 ### Added
