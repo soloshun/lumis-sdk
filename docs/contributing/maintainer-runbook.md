@@ -73,10 +73,13 @@ provider dependency.
 2. Open a release pull request from `dev` to `main`.
 3. Review version, compatibility notes, generated schemas, and clean-install behavior.
 4. Merge to `main`.
-5. Manually dispatch the release workflow with the exact `pyproject.toml` version.
+5. Manually dispatch the release workflow with the package selection and exact
+   `pyproject.toml` version.
 6. Publish to TestPyPI first when packaging or metadata changed, then publish to PyPI.
 7. Create the GitHub release and verify the installed package with
    `scripts/verify_published_package.sh`.
 8. Update Lumis only after the public SDK release is available.
 
 PyPI publication remains a maintainer-controlled manual action through Trusted Publishing.
+The same workflow publishes `core`, `postgres-memory`, and `http-json-evidence` independently;
+each distribution retains its own semantic version and must pass its package-specific contracts.

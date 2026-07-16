@@ -3,6 +3,12 @@
 This optional package implements the public asynchronous `EvidenceProvider` contract against one
 allowlisted HTTPS JSON endpoint. Core does not install an HTTP client.
 
+Install the independently versioned plugin alongside a compatible Lumis SDK release:
+
+```bash
+pip install "lumis-sdk==0.0.7" "lumis-sdk-http-json-evidence==0.1.0"
+```
+
 The connector:
 
 - requires exact destination-origin allowlisting and HTTPS;
