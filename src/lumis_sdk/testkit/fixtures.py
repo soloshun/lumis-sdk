@@ -27,3 +27,17 @@ def make_test_evidence(
         confidence=1.0,
         reference=f"testkit://evidence/{evidence_id}",
     )
+
+
+def make_test_collection_fields() -> dict[str, object]:
+    """Return deterministic list-valued fields for quantified rule contract tests."""
+    return {
+        "components": {
+            "references": [
+                "dbt.model.orders",
+                "dbt.source.raw_orders",
+                "airflow.dag.daily_orders",
+            ]
+        },
+        "durations": [15, 30, 120],
+    }

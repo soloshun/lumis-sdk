@@ -13,7 +13,8 @@ Expected result:
 
 - `matched` is `true`;
 - the winner is `missing-required-column`;
-- both conditions are explained;
+- all scalar and quantified conditions are explained;
+- the `dbt.model.orders` element index is retained in the quantified explanation;
 - `schema://orders/current-vs-previous` is retained as an evidence reference.
 
 The command only reads the two synthetic local files. It does not contact a model, telemetry

@@ -11,6 +11,9 @@ spec:
         contains: KeyError
       - field: schema.diff.removed_count
         greaterThan: 0
+      - field: components.references
+        anyElement:
+          prefix: dbt.model.
   diagnosis:
     classification: schema_change
     severity: high

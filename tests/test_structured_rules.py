@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from lumis_sdk.adapters.deterministic import diagnose_structured, evaluate_diagnosis_rule
 from lumis_sdk.config import DiagnosisRuleDocument, load_diagnosis_rule
 from lumis_sdk.domain import EvidenceItem
+from lumis_sdk.testkit import make_test_collection_fields
 
 
 def _rule(
@@ -146,6 +147,71 @@ def test_explanations_do_not_echo_unbounded_telemetry_values() -> None:
     assert isinstance(actual, str)
     assert len(actual) < 600
     assert "characters omitted" in actual
+
+
+def test_quantified_collection_conditions_report_matching_indexes() -> None:
+    rule = DiagnosisRuleDocument.model_validate(
+        {
+            "apiVersion": "lumis.dev/v1alpha1",
+            "kind": "DiagnosisRule",
+            "metadata": {"name": "collection-match"},
+            "spec": {
+                "match": {
+                    "all": [
+                        {
+                            "field": "components.references",
+                            "anyElement": {"prefix": "dbt.model."},
+                        },
+                        {
+                            "field": "durations",
+                            "allElements": {"lessThanOrEqual": 120},
+                        },
+                    ]
+                },
+                "diagnosis": {
+                    "classification": "collection_match",
+                    "summary": "Bounded collection predicates matched.",
+                    "hypothesis": "The supplied component set satisfies the rule.",
+                    "confidence": 0.8,
+                },
+            },
+        }
+    )
+
+    result = evaluate_diagnosis_rule(rule, make_test_collection_fields())
+
+    assert result.matched is True
+    assert result.matched_conditions[0].operator == "anyElement.prefix"
+    assert result.matched_conditions[0].matched_element_indexes == (0,)
+    assert result.matched_conditions[1].operator == "allElements.lessThanOrEqual"
+    assert result.matched_conditions[1].matched_element_indexes == (0, 1, 2)
+
+
+@pytest.mark.parametrize("value", [[], [["nested"]], list(range(101))])
+def test_collection_quantifiers_fail_closed_for_empty_nested_or_oversized_values(
+    value: list[object],
+) -> None:
+    rule = DiagnosisRuleDocument.model_validate(
+        {
+            "apiVersion": "lumis.dev/v1alpha1",
+            "kind": "DiagnosisRule",
+            "metadata": {"name": "bounded-collection"},
+            "spec": {
+                "match": {"all": [{"field": "resources", "allElements": {"greaterThan": 0}}]},
+                "diagnosis": {
+                    "classification": "bounded",
+                    "summary": "The bounded list matched.",
+                    "hypothesis": "Every resource value is positive.",
+                    "confidence": 0.5,
+                },
+            },
+        }
+    )
+
+    result = evaluate_diagnosis_rule(rule, {"resources": value})
+
+    assert result.matched is False
+    assert result.failed_conditions[0].matched_element_indexes == ()
 
 
 def test_single_document_loader_is_strict_and_bounded(tmp_path: Path) -> None:

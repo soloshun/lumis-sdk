@@ -5,7 +5,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from lumis_sdk.config import DiagnosisRuleDocument, RuleCondition
+from lumis_sdk.config import DiagnosisRuleDocument, ElementComparison, RuleCondition
 from lumis_sdk.domain import (
     DiagnosisMethod,
     DiagnosisResult,
@@ -15,6 +15,8 @@ from lumis_sdk.domain import (
 )
 
 MAX_EXPLANATION_VALUE_CHARS = 500
+MAX_COLLECTION_ELEMENTS = 100
+MAX_EXPLANATION_ELEMENTS = 10
 
 
 @dataclass(frozen=True)
@@ -27,6 +29,7 @@ class ConditionEvaluation:
     expected: str | int | float | bool
     actual: Any
     passed: bool
+    matched_element_indexes: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -169,6 +172,22 @@ def _evaluate_condition(
     path: str,
 ) -> ConditionEvaluation:
     actual = _resolve_field(fields, condition.field)
+    if condition.any_element is not None:
+        return _evaluate_collection_condition(
+            condition,
+            condition.any_element,
+            actual,
+            quantifier="anyElement",
+            path=path,
+        )
+    if condition.all_elements is not None:
+        return _evaluate_collection_condition(
+            condition,
+            condition.all_elements,
+            actual,
+            quantifier="allElements",
+            path=path,
+        )
     operator, expected = _condition_operator(condition)
     passed = _compare(actual, operator, expected)
     return ConditionEvaluation(
@@ -181,7 +200,40 @@ def _evaluate_condition(
     )
 
 
-def _condition_operator(condition: RuleCondition) -> tuple[str, str | int | float | bool]:
+def _evaluate_collection_condition(
+    condition: RuleCondition,
+    comparison: ElementComparison,
+    actual: Any,
+    *,
+    quantifier: str,
+    path: str,
+) -> ConditionEvaluation:
+    operator, expected = _condition_operator(comparison)
+    indexes: tuple[int, ...] = ()
+    passed = False
+    if (
+        isinstance(actual, list)
+        and 0 < len(actual) <= MAX_COLLECTION_ELEMENTS
+        and all(not isinstance(item, (list, dict, tuple, set)) for item in actual)
+    ):
+        indexes = tuple(
+            index for index, item in enumerate(actual) if _compare(item, operator, expected)
+        )
+        passed = bool(indexes) if quantifier == "anyElement" else len(indexes) == len(actual)
+    return ConditionEvaluation(
+        path=path,
+        field=condition.field,
+        operator=f"{quantifier}.{operator}",
+        expected=expected,
+        actual=_bounded_actual(actual),
+        passed=passed,
+        matched_element_indexes=indexes,
+    )
+
+
+def _condition_operator(
+    condition: RuleCondition | ElementComparison,
+) -> tuple[str, str | int | float | bool]:
     for field_name, operator in (
         ("contains", "contains"),
         ("equals", "equals"),
@@ -235,6 +287,15 @@ def _resolve_field(fields: Mapping[str, Any], path: str) -> Any:
 
 def _bounded_actual(actual: Any) -> Any:
     """Keep explanations useful without echoing an unbounded telemetry value."""
+    if isinstance(actual, list):
+        if len(actual) > MAX_COLLECTION_ELEMENTS:
+            return f"<collection with {len(actual)} elements exceeds {MAX_COLLECTION_ELEMENTS}>"
+        bounded = [_bounded_actual(item) for item in actual[:MAX_EXPLANATION_ELEMENTS]]
+        if len(actual) > MAX_EXPLANATION_ELEMENTS:
+            bounded.append(f"... [{len(actual) - MAX_EXPLANATION_ELEMENTS} elements omitted]")
+        return bounded
+    if isinstance(actual, Mapping):
+        return "<nested collection omitted>"
     if not isinstance(actual, str) or len(actual) <= MAX_EXPLANATION_VALUE_CHARS:
         return actual
     omitted = len(actual) - MAX_EXPLANATION_VALUE_CHARS
