@@ -44,6 +44,7 @@ def _rule(
                     "hypothesis": "The upstream schema changed.",
                     "confidence": 0.8,
                     "confirmedFacts": ["The current schema has removed fields."],
+                    "missingEvidence": ["previous successful schema", "upstream change record"],
                 },
                 "evidence": {"required": ["schema_diff"]},
                 "recommendedNextSteps": ["Compare the current and previous schemas."],
@@ -112,6 +113,11 @@ def test_priority_then_specificity_then_input_order_selects_winner() -> None:
     assert result.winner is not None
     assert result.winner.rule_id == "specific"
     assert result.diagnosis.triage.classification == "schema_change"
+    assert result.diagnosis.missing_evidence == [
+        "previous successful schema",
+        "upstream change record",
+    ]
+    assert result.diagnosis.triage.missing_context == result.diagnosis.missing_evidence
     assert "specificity" in result.selection_reason
     assert result.candidates[0].rule_id == "specific"
 
@@ -210,3 +216,14 @@ spec:
                 },
             }
         )
+
+
+def test_required_and_outstanding_evidence_cannot_be_ambiguous() -> None:
+    """A kind cannot gate matching and remain outstanding after that same rule matches."""
+    payload = _rule().model_dump(by_alias=True)
+    diagnosis = payload["spec"]["diagnosis"]
+    assert isinstance(diagnosis, dict)
+    diagnosis["missingEvidence"] = ["schema_diff"]
+
+    with pytest.raises(ValidationError, match="must be distinct"):
+        DiagnosisRuleDocument.model_validate(payload)

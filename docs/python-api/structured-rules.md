@@ -38,6 +38,9 @@ spec:
     confidence: 0.8
     confirmedFacts:
       - The current schema contains at least one removed field.
+    missingEvidence:
+      - Previous successful schema
+      - Upstream change record
   evidence:
     required: [schema_diff]
   recommendedNextSteps:
@@ -56,6 +59,11 @@ Unknown fields fail validation. Every condition defines exactly one operator:
 Fields use dot paths. Callers may supply nested mappings or literal dotted keys. `all` requires
 every condition, `any` requires at least one when present, and `not` requires every listed
 condition to be false.
+
+`spec.evidence.required` is a hard match precondition: the rule cannot win until every required
+kind is supplied. `spec.diagnosis.missingEvidence` is different: it records follow-up context
+that would strengthen, contradict, or confirm an already matched hypothesis. A value cannot
+appear in both lists; ambiguous duplication fails validation.
 
 ## Python API
 
@@ -93,15 +101,18 @@ if result.winner:
     print(result.selection_reason)
     print(result.winner.matched_conditions)
     print(result.winner.evidence_references)
+    print(result.diagnosis.missing_evidence)
 else:
     print(result.candidates[0].failed_conditions)
     print(result.candidates[0].missing_evidence)
 ```
 
 Every candidate includes rule ID/version, priority, specificity, matched and failed conditions,
-missing evidence, and evidence references. Matching candidates are ranked by descending priority,
-then descending specificity, then stable input order. Specificity weights `all` conditions twice,
-then counts `any`, `not`, and required-evidence entries.
+missing required evidence, and evidence references. The selected diagnosis separately exposes
+configured outstanding evidence through `DiagnosisResult.missing_evidence`. Matching candidates
+are ranked by descending priority, then descending specificity, then stable input order.
+Specificity weights `all` conditions twice, then counts `any`, `not`, and required-evidence
+entries.
 
 ## CLI validation and fixture testing
 

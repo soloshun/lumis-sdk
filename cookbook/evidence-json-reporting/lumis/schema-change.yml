@@ -17,6 +17,9 @@ spec:
     confidence: 0.8
     confirmedFacts:
       - The supplied log contains a KeyError.
+    missingEvidence:
+      - previous successful schema
+      - upstream change record
   evidence:
     required: [schema_diff]
   recommendedNextSteps:

@@ -277,6 +277,13 @@
           "title": "Hypothesis",
           "type": "string"
         },
+        "missingEvidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missingevidence",
+          "type": "array"
+        },
         "severity": {
           "$ref": "#/$defs/Severity",
           "default": "medium"

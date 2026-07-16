@@ -17,6 +17,9 @@ spec:
     summary: A required field was unavailable.
     hypothesis: The upstream schema or normalization mapping changed.
     confidence: 0.8
+    missingEvidence:
+      - previous successful schema
+      - upstream change record
   evidence:
     required: [schema_diff]
   recommendedNextSteps:

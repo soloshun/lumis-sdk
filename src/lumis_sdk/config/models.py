@@ -199,6 +199,7 @@ class StructuredRuleDiagnosis(StrictModel):
     hypothesis: str = Field(min_length=1)
     confidence: float = Field(ge=0, le=1)
     confirmed_facts: list[str] = Field(default_factory=list, alias="confirmedFacts")
+    missing_evidence: list[str] = Field(default_factory=list, alias="missingEvidence")
 
 
 class RuleEvidenceRequirements(StrictModel):
@@ -216,6 +217,17 @@ class StructuredDiagnosisRuleSpec(StrictModel):
     evidence: RuleEvidenceRequirements = Field(default_factory=RuleEvidenceRequirements)
     recommended_next_steps: list[str] = Field(default_factory=list, alias="recommendedNextSteps")
     suggested_playbook: str | None = Field(default=None, alias="suggestedPlaybook")
+
+    @model_validator(mode="after")
+    def separate_required_and_outstanding_evidence(self) -> "StructuredDiagnosisRuleSpec":
+        overlap = set(self.evidence.required) & set(self.diagnosis.missing_evidence)
+        if overlap:
+            duplicated = ", ".join(sorted(overlap))
+            raise ValueError(
+                "required evidence and diagnosis missingEvidence must be distinct; "
+                f"duplicated values: {duplicated}"
+            )
+        return self
 
 
 class DiagnosisRuleDocument(StrictModel):

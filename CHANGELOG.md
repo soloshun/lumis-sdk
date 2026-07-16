@@ -2,6 +2,18 @@
 
 All notable changes to Lumis SDK are recorded here. The project follows the spirit of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses [Semantic Versioning](https://semver.org/) once release versions are established.
 
+## [Unreleased]
+
+### Added
+
+- Structured diagnoses can declare `spec.diagnosis.missingEvidence` for follow-up evidence needs
+  without weakening `spec.evidence.required` match preconditions.
+
+### Changed
+
+- Rule validation rejects values duplicated between required and post-match outstanding evidence.
+- `lumis rules test` now exposes the selected diagnosis classification and outstanding evidence.
+
 ## [0.0.3] - 2026-07-16
 
 ### Added

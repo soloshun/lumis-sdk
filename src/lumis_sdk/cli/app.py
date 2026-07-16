@@ -291,6 +291,10 @@ def rules_test(
         "matched": result.winner is not None,
         "winner": result.winner.rule_id if result.winner else None,
         "selectionReason": result.selection_reason,
+        "diagnosis": {
+            "classification": result.diagnosis.triage.classification,
+            "missingEvidence": result.diagnosis.missing_evidence,
+        },
         "candidates": [
             {
                 "ruleId": candidate.rule_id,

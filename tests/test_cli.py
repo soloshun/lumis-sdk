@@ -231,6 +231,7 @@ spec:
     output = json.loads(result.output)
     assert output["matched"] is True
     assert output["winner"] == "schema-change"
+    assert output["diagnosis"]["missingEvidence"] == []
     assert output["candidates"][0]["evidenceReferences"] == ["schema://orders/diff"]
 
 
