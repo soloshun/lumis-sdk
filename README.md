@@ -141,8 +141,8 @@ pip install lumis-sdk
 For a specific reproducible release, pin the version:
 
 ```bash
-uv add "lumis-sdk==0.0.2"
-pip install "lumis-sdk==0.0.2"
+uv add "lumis-sdk==0.0.3"
+pip install "lumis-sdk==0.0.3"
 ```
 
 The repository's GitHub Actions workflow publishes reviewed releases through PyPI Trusted Publishing.
