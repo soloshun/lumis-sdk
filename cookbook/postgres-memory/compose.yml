@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lumis
+      POSTGRES_PASSWORD: lumis_local_only
+      POSTGRES_DB: lumis
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lumis -d lumis"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    volumes:
+      - postgres-memory:/var/lib/postgresql/data
+
+  writer:
+    build:
+      context: ../..
+      dockerfile: cookbook/postgres-memory/Dockerfile
+    command: ["write-hold"]
+    environment:
+      LUMIS_MEMORY_DATABASE_URL: postgresql://lumis:lumis_local_only@postgres:5432/lumis
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/lumis-writer-ready"]
+      interval: 1s
+      timeout: 1s
+      retries: 20
+
+  reader:
+    build:
+      context: ../..
+      dockerfile: cookbook/postgres-memory/Dockerfile
+    command: ["read"]
+    environment:
+      LUMIS_MEMORY_DATABASE_URL: postgresql://lumis:lumis_local_only@postgres:5432/lumis
+    depends_on:
+      writer:
+        condition: service_healthy
+
+volumes:
+  postgres-memory:

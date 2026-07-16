@@ -1,0 +1,10 @@
+apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: postgres-memory-cookbook
+spec:
+  memory:
+    provider: postgres
+    connectionUrlEnv: LUMIS_MEMORY_DATABASE_URL
+    schema: lumis_memory_cookbook
+    maxSearchCandidates: 100

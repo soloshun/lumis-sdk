@@ -137,6 +137,48 @@
       "title": "ObjectMetadata",
       "type": "object"
     },
+    "PostgresMemoryConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for an optional independently packaged PostgreSQL store.",
+      "properties": {
+        "connectTimeoutSeconds": {
+          "default": 10,
+          "maximum": 60,
+          "minimum": 1,
+          "title": "Connecttimeoutseconds",
+          "type": "integer"
+        },
+        "connectionUrlEnv": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Connectionurlenv",
+          "type": "string"
+        },
+        "maxSearchCandidates": {
+          "default": 1000,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Maxsearchcandidates",
+          "type": "integer"
+        },
+        "provider": {
+          "const": "postgres",
+          "title": "Provider",
+          "type": "string"
+        },
+        "schema": {
+          "default": "lumis_memory",
+          "pattern": "^[a-z_][a-z0-9_]{0,62}$",
+          "title": "Schema",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "connectionUrlEnv"
+      ],
+      "title": "PostgresMemoryConfig",
+      "type": "object"
+    },
     "ProjectSpec": {
       "additionalProperties": false,
       "description": "The v1alpha1 project specification.",
@@ -161,7 +203,15 @@
           "type": "array"
         },
         "memory": {
-          "$ref": "#/$defs/MemoryConfig"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MemoryConfig"
+            },
+            {
+              "$ref": "#/$defs/PostgresMemoryConfig"
+            }
+          ],
+          "title": "Memory"
         },
         "model": {
           "$ref": "#/$defs/ModelConfig"

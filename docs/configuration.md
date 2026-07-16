@@ -44,8 +44,8 @@ spec:
 | `metadata.name` | Yes | Stable project/pipeline identifier used in incidents and reports. |
 | `metadata.labels` | No | Project-owned string labels for future adapters and policy. |
 | `spec.environment` | No | Environment label; defaults to `local`. |
-| `spec.memory.provider` | No | `sqlite` in the reference package. Other providers implement a port. |
-| `spec.memory.path` | No | Local SQLite path, relative to project YAML. |
+| `spec.memory.provider` | No | `sqlite` by default; `postgres` selects the optional plugin configuration. |
+| `spec.memory.path` | No | Local SQLite path, relative to project YAML. SQLite only. |
 | `spec.reports.provider` | No | `markdown` or `json` in the reference package. |
 | `spec.reports.outputDir` | No | Report directory, relative to project YAML. |
 | `spec.incidentSources` | No | Bounded source declarations. v1alpha1 includes `local-log`. |
@@ -69,6 +69,30 @@ spec:
 Provider errors, malformed files, timeouts, and unreadable paths become structured collection
 failures. They do not silently become facts and do not grant network, execution, or broader
 filesystem authority.
+
+### PostgreSQL memory fields
+
+```yaml
+spec:
+  memory:
+    provider: postgres
+    connectionUrlEnv: LUMIS_MEMORY_DATABASE_URL
+    schema: lumis_memory
+    connectTimeoutSeconds: 10
+    maxSearchCandidates: 1000
+```
+
+| Field | Meaning |
+| --- | --- |
+| `connectionUrlEnv` | Required environment-variable name containing the connection URL. Never the URL itself. |
+| `schema` | Validated lowercase schema owned by the adapter. Defaults to `lumis_memory`. |
+| `connectTimeoutSeconds` | Per-operation connection timeout from 1 to 60 seconds. |
+| `maxSearchCandidates` | Maximum rows considered before public ranking; 1 to 10,000. |
+
+PostgreSQL requires the independently packaged `lumis-sdk-postgres-memory` plugin. Discovery does
+not grant its declared network or secret authorities. The reference report-aware CLI store remains
+SQLite-only; applications compose the asynchronous PostgreSQL `MemoryStore` through the Python
+and plugin API. See [RFC 0002](rfcs/0002-postgresql-memory.md).
 
 ## Rule-set document
 
@@ -167,7 +191,10 @@ that all checked schemas match the Pydantic contracts.
 
 ## Secrets
 
-Do not put plaintext credentials in project YAML. v1alpha1 intentionally has no generic secret string. Provider adapters should define typed secret references and document the environment or secret-manager boundary. Model providers cannot be selected by adding an undocumented field to core configuration.
+Do not put plaintext credentials in project YAML. PostgreSQL memory accepts only
+`connectionUrlEnv`, an environment-variable reference. Other provider adapters should define typed
+secret references and document the environment or secret-manager boundary. Model providers cannot
+be selected by adding an undocumented field to core configuration.
 
 ## Current limits
 

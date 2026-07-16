@@ -88,6 +88,33 @@ def test_project_schema_rejects_additional_properties() -> None:
     assert "id" in rule_definition["required"]
 
 
+def test_project_accepts_secret_referenced_postgres_memory(tmp_path: Path) -> None:
+    """PostgreSQL configuration contains only a secret reference and bounded settings."""
+    config_path = tmp_path / "lumis.yml"
+    config_path.write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: shared-memory
+spec:
+  memory:
+    provider: postgres
+    connectionUrlEnv: LUMIS_MEMORY_DATABASE_URL
+    schema: adopter_memory
+    connectTimeoutSeconds: 7
+    maxSearchCandidates: 500
+""",
+        encoding="utf-8",
+    )
+
+    config = load_config(config_path)
+
+    assert config.memory.provider == "postgres"
+    assert config.memory.connection_url_env == "LUMIS_MEMORY_DATABASE_URL"
+    assert config.memory.schema_name == "adopter_memory"
+    assert "postgresql://" not in config_path.read_text(encoding="utf-8")
+
+
 def test_oversized_configuration_is_rejected(tmp_path: Path) -> None:
     """Configuration loading has a deterministic size boundary."""
     config_path = tmp_path / "lumis.yml"

@@ -30,4 +30,6 @@ jobs:
       - name: Install locked dependencies
         run: uv sync --frozen --all-groups --python 3.11
       - name: Scan package code
-        run: uv run bandit --recursive --severity-level medium --confidence-level medium src
+        run: >-
+          uv run bandit --recursive --severity-level medium --confidence-level medium
+          src packages/lumis-sdk-postgres-memory/src

@@ -1,0 +1,24 @@
+{
+  "apiVersion": "lumis.dev/v1alpha1",
+  "kind": "PluginManifest",
+  "metadata": {
+    "name": "postgres-memory",
+    "version": "0.1.0"
+  },
+  "spec": {
+    "entryPoint": "postgres-memory",
+    "capabilities": [
+      "memory_store"
+    ],
+    "supportStatus": "official",
+    "sdk": {
+      "minimum": "0.0.7",
+      "maximumExclusive": "0.1.0"
+    },
+    "requiredAuthorities": [
+      "network",
+      "secrets"
+    ],
+    "summary": "Optional PostgreSQL operational-memory adapter with bounded retrieval."
+  }
+}

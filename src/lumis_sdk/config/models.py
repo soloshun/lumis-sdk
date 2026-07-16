@@ -26,6 +26,36 @@ class MemoryConfig(StrictModel):
     path: str = ".lumis/incidents.db"
 
 
+class PostgresMemoryConfig(StrictModel):
+    """Configuration for an optional independently packaged PostgreSQL store."""
+
+    provider: Literal["postgres"]
+    connection_url_env: str = Field(
+        alias="connectionUrlEnv",
+        pattern=r"^[A-Za-z_][A-Za-z0-9_]*$",
+    )
+    schema_name: str = Field(
+        default="lumis_memory",
+        alias="schema",
+        pattern=r"^[a-z_][a-z0-9_]{0,62}$",
+    )
+    connect_timeout_seconds: int = Field(
+        default=10,
+        ge=1,
+        le=60,
+        alias="connectTimeoutSeconds",
+    )
+    max_search_candidates: int = Field(
+        default=1_000,
+        ge=1,
+        le=10_000,
+        alias="maxSearchCandidates",
+    )
+
+
+ProjectMemoryConfig = MemoryConfig | PostgresMemoryConfig
+
+
 class ReportsConfig(StrictModel):
     """A project-owned report output location."""
 
@@ -97,7 +127,7 @@ class ProjectSpec(StrictModel):
     """The v1alpha1 project specification."""
 
     environment: str = "local"
-    memory: MemoryConfig = Field(default_factory=MemoryConfig)
+    memory: ProjectMemoryConfig = Field(default_factory=MemoryConfig)
     reports: ReportsConfig = Field(default_factory=ReportsConfig)
     incident_sources: list[IncidentSourceConfig] = Field(
         default_factory=list, alias="incidentSources"
@@ -312,7 +342,7 @@ class LumisConfig(StrictModel):
 
     project: str
     environment: str = "local"
-    memory: MemoryConfig = Field(default_factory=MemoryConfig)
+    memory: ProjectMemoryConfig = Field(default_factory=MemoryConfig)
     reports: ReportsConfig = Field(default_factory=ReportsConfig)
     incident_sources: list[IncidentSourceConfig] = Field(default_factory=list)
     evidence_providers: list[EvidenceProviderConfig] = Field(default_factory=list)

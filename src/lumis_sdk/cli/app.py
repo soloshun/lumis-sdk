@@ -169,7 +169,7 @@ def diagnose(
     report_path = output or resolve_project_path(
         config, f"{project_config.reports.output_dir}/incident-report.{extension}"
     )
-    memory_path = resolve_project_path(config, project_config.memory.path)
+    memory_path = _memory_path(config, project_config)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(report_text, encoding="utf-8")
     stored = SQLiteIncidentStore(memory_path).save(incident, diagnosis, report_text, report_path)
@@ -466,8 +466,18 @@ def _render_report(
     return render_markdown_report(incident, diagnosis)
 
 
-def _memory_path(config_path: Path) -> Path:
-    project_config = _load_or_exit(config_path)
+def _memory_path(
+    config_path: Path,
+    project_config: LumisConfig | None = None,
+) -> Path:
+    project_config = project_config or _load_or_exit(config_path)
+    if project_config.memory.provider != "sqlite":
+        typer.echo(
+            "The reference CLI incident/report store currently requires memory.provider=sqlite. "
+            "Compose the optional PostgreSQL MemoryStore through the Python/plugin API.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
     return resolve_project_path(config_path, project_config.memory.path)
 
 

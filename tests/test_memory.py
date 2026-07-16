@@ -1,12 +1,21 @@
 """Tests for local SQLite incident memory and transparent keyword search."""
 
+import asyncio
 from pathlib import Path
+
+import pytest
 
 from lumis_sdk.adapters.deterministic import diagnose_text
 from lumis_sdk.adapters.incidents import incident_from_log
 from lumis_sdk.adapters.reports import render_markdown_report
-from lumis_sdk.adapters.sqlite import SQLiteIncidentStore, search_incidents
+from lumis_sdk.adapters.sqlite import SQLiteIncidentStore, SQLiteMemoryStore, search_incidents
 from lumis_sdk.config import DeterministicRule
+from lumis_sdk.ports import MemoryConflictError, MemoryQuery
+from lumis_sdk.testkit import (
+    assert_memory_store_contract,
+    make_test_episode,
+    make_test_resolution,
+)
 
 
 def _save_schema_incident(database_path: Path) -> tuple[SQLiteIncidentStore, str]:
@@ -58,3 +67,42 @@ def test_keyword_search_handles_empty_memory(tmp_path: Path) -> None:
     store = SQLiteIncidentStore(tmp_path / "incidents.db")
 
     assert search_incidents(store.list_all(), "INCIDENT_SIGNATURE") == []
+
+
+def test_async_sqlite_store_satisfies_public_memory_contract(tmp_path: Path) -> None:
+    """The reusable contract suite validates the SQLite MemoryStore implementation."""
+    asyncio.run(assert_memory_store_contract(SQLiteMemoryStore(tmp_path / "portable-memory.db")))
+
+
+def test_async_sqlite_store_is_idempotent_across_instances(tmp_path: Path) -> None:
+    """Two process-like adapter instances can safely repeat one episode write."""
+    database_path = tmp_path / "shared.db"
+    episode = make_test_episode()
+
+    async def exercise() -> None:
+        first = SQLiteMemoryStore(database_path)
+        second = SQLiteMemoryStore(database_path)
+        await first.save_incident(episode)
+        await second.save_incident(episode)
+        await first.record_resolution(make_test_resolution())
+        await second.save_incident(episode)
+        matches = await second.search(MemoryQuery(text="fixture pipeline recovered"))
+        assert matches[0].episode.resolution is not None
+
+    asyncio.run(exercise())
+
+
+def test_async_sqlite_store_rejects_conflicting_resolution(tmp_path: Path) -> None:
+    """One incident ID cannot silently acquire two different confirmed outcomes."""
+    store = SQLiteMemoryStore(tmp_path / "portable-memory.db")
+
+    async def exercise() -> None:
+        await store.save_incident(make_test_episode())
+        resolution = make_test_resolution()
+        await store.record_resolution(resolution)
+        with pytest.raises(MemoryConflictError, match="different resolution"):
+            await store.record_resolution(
+                resolution.model_copy(update={"outcome": "A conflicting outcome."})
+            )
+
+    asyncio.run(exercise())

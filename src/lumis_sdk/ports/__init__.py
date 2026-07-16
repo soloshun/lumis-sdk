@@ -8,7 +8,14 @@ from .lifecycle import (
     PolicyEvaluator,
     RecoveryVerifier,
 )
-from .memory import IncidentEpisode, MemoryMatch, MemoryQuery, MemoryStore
+from .memory import (
+    IncidentEpisode,
+    MemoryConflictError,
+    MemoryIncidentNotFoundError,
+    MemoryMatch,
+    MemoryQuery,
+    MemoryStore,
+)
 from .model import ModelGateway, ModelInvocation, ModelUsePolicy
 from .plugins import PluginCatalog, PluginFactory
 from .reporting import ReportWriter
@@ -19,6 +26,8 @@ __all__ = [
     "ContextProvider",
     "EvidenceProvider",
     "IncidentEpisode",
+    "MemoryConflictError",
+    "MemoryIncidentNotFoundError",
     "MemoryMatch",
     "MemoryQuery",
     "MemoryStore",

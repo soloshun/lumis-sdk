@@ -1,6 +1,21 @@
 """Stable synthetic fixtures for adapter and integration tests."""
 
-from lumis_sdk.domain import EvidenceItem, IncidentInput
+from datetime import UTC, datetime
+from uuid import UUID
+
+from lumis_sdk.domain import (
+    ConfirmedResolution,
+    DiagnosisMethod,
+    DiagnosisResult,
+    EvidenceItem,
+    IncidentInput,
+    Severity,
+    TriageResult,
+    TruthState,
+)
+from lumis_sdk.ports import IncidentEpisode
+
+TEST_INCIDENT_ID = "11111111-1111-4111-8111-111111111111"
 
 
 def make_test_incident() -> IncidentInput:
@@ -41,3 +56,41 @@ def make_test_collection_fields() -> dict[str, object]:
         },
         "durations": [15, 30, 120],
     }
+
+
+def make_test_episode(*, incident_id: str = TEST_INCIDENT_ID) -> IncidentEpisode:
+    """Return one stable, unconfirmed operational-memory episode."""
+    return IncidentEpisode(
+        incident_id=incident_id,
+        incident=make_test_incident(),
+        diagnosis=DiagnosisResult(
+            triage=TriageResult(
+                classification="testkit_failure",
+                severity=Severity.MEDIUM,
+                summary="A synthetic testkit incident occurred.",
+            ),
+            confirmed_facts=["TESTKIT_SIGNATURE was observed."],
+            root_cause_hypothesis="The synthetic dependency was unavailable.",
+            confidence=0.8,
+            method=DiagnosisMethod.DETERMINISTIC,
+        ),
+        truth_state=TruthState.UNCONFIRMED_HYPOTHESIS,
+    )
+
+
+def make_test_resolution(
+    *,
+    incident_id: str = TEST_INCIDENT_ID,
+) -> ConfirmedResolution:
+    """Return a stable human-confirmed resolution for a test episode."""
+    return ConfirmedResolution(
+        incident_id=UUID(incident_id),
+        confirmed_root_cause="The synthetic dependency was unavailable.",
+        action_taken="Restored the synthetic dependency.",
+        outcome="The fixture pipeline recovered.",
+        verified=True,
+        confirmed_by="testkit-user",
+        confirmed_at=datetime(2026, 1, 1, tzinfo=UTC),
+        reusable_notes=["Check the synthetic dependency health first."],
+        truth_state=TruthState.HUMAN_CONFIRMED,
+    )

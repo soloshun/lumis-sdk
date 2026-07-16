@@ -24,7 +24,7 @@ It does not replace a monitoring system or orchestrator. It does not require a m
 | Approve | Explicit approval state contract. |
 | Remediate | No core executor. Future work requires RFC, allowlist, policy, audit, limits, and sandbox tests. |
 | Verify | Verification result contract; no false recovery claim. |
-| Learn | SQLite memory and human resolution; fuller truth-state persistence is roadmap work. |
+| Learn | SQLite and optional PostgreSQL operational memory retain explicit resolutions; verification-aware promotion and replay evaluation remain roadmap work. |
 
 ## Architecture source
 
@@ -60,12 +60,14 @@ Lumis SDK domain.
 
 Reference adapters provide deterministic rules, SQLite local memory, bounded local JSON evidence,
 Markdown or versioned JSON reports, and metadata-first plugin discovery. Provider-specific
-connectors belong in separate packages when practical.
+connectors belong in separate packages when practical. The repository includes an independently
+installable PostgreSQL memory plugin proof without adding its driver to core.
 
 ### Testkit
 
 `lumis_sdk.testkit` provides deterministic model and evidence fakes, incident/evidence fixtures,
-and reusable evidence-collection and JSON-report contract assertions without credentials or live
+and reusable evidence-collection, JSON-report, and asynchronous memory-store contract assertions
+without credentials or live
 requests. It also provides plugin manifest/factory fixtures and a reusable factory contract
 assertion for independently packaged adapters.
 

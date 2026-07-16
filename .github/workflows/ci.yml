@@ -60,3 +60,46 @@ jobs:
           uv venv --python ${{ matrix.python-version }} .venv-smoke
           uv pip install --python .venv-smoke/bin/python dist/*.whl
           .venv-smoke/bin/lumis --version
+
+  postgres-memory:
+    name: PostgreSQL memory plugin contract
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: lumis
+          POSTGRES_PASSWORD: lumis_test
+          POSTGRES_DB: lumis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lumis -d lumis"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          version: "0.11.17"
+          enable-cache: true
+
+      - name: Install Python
+        run: uv python install 3.12
+
+      - name: Run independent adapter contract
+        env:
+          LUMIS_TEST_POSTGRES_URL: postgresql://lumis:lumis_test@localhost:5432/lumis
+          PYTHONPATH: packages/lumis-sdk-postgres-memory/src
+        run: |
+          uv run --python 3.12 --with 'psycopg[binary]>=3.2,<4' \
+            mypy packages/lumis-sdk-postgres-memory/src
+          uv run --python 3.12 --with 'psycopg[binary]>=3.2,<4' \
+            pytest packages/lumis-sdk-postgres-memory/tests
+
+      - name: Build independent adapter distribution
+        run: uv build --project packages/lumis-sdk-postgres-memory

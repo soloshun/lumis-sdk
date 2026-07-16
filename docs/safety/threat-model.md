@@ -23,6 +23,8 @@ Incident evidence, credentials, local files, operational memory, diagnosis integ
 | Model hallucination | Schema validation, evidence separation, deterministic fallback, unconfirmed truth state. | Citation validation and evaluation metrics. |
 | Unapproved actuation | No core executor; application lifecycle is recommendation-only. | Any executor requires RFC, typed allowlist, signatures, limits, approval, audit, idempotency, and verification. |
 | Plugin supply chain | Static strict manifests, metadata-only discovery, compatibility checks, isolated failures, support labels, explicit loading, and default-denied sensitive authorities. | Provenance/signature policy, package allowlists, and isolated-process loading where adopters require stronger containment. |
+| Shared-memory credential or SQL abuse | PostgreSQL uses an environment-variable reference, validated/quoted schema, fixed statements, bounded candidates, explicit plugin authorities, and no execution surface. | Deployment TLS, rotation, least-privilege roles, retention, backup, and network policy remain adopter responsibilities. |
+| Memory poisoning or false learning | Episode IDs are idempotent, conflicting reuse fails closed, truth state is explicit, and resolutions cannot target absent incidents. | v0.5 adds verification-aware promotion, supersession, rejection, and replay evaluation. |
 | Silent telemetry | No remote telemetry adapter or default export. | Document explicit opt-in if optional Logfire/OpenTelemetry is added. |
 
 ## Security invariants

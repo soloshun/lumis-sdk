@@ -2,6 +2,24 @@
 
 All notable changes to Lumis SDK are recorded here. The project follows the spirit of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses [Semantic Versioning](https://semver.org/) once release versions are established.
 
+## Unreleased
+
+### Added
+
+- Accepted RFC 0002 for provider-neutral shared-memory configuration, idempotency, migrations,
+  bounded retrieval, and explicit plugin authority.
+- Added reusable asynchronous `MemoryStore` contract assertions and an async SQLite reference
+  adapter while preserving the existing report-aware CLI store.
+- Added strict secret-referenced PostgreSQL memory configuration and checked schema.
+- Added the independently installable `lumis-sdk-postgres-memory` plugin with serialized
+  migrations, fixed SQL, explicit network/secrets authority, contract tests, and Docker cookbook.
+
+### Security
+
+- Memory idempotency conflicts and resolutions for absent incidents fail closed.
+- PostgreSQL credentials remain outside YAML, schema identifiers are validated and quoted, and
+  candidate retrieval is bounded.
+
 ## [0.0.6] - 2026-07-16
 
 ### Added
