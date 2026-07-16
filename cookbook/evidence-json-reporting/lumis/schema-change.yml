@@ -1,0 +1,25 @@
+apiVersion: lumis.dev/v1alpha1
+kind: DiagnosisRule
+metadata:
+  name: missing-customer-id
+  version: "1"
+spec:
+  priority: 100
+  match:
+    all:
+      - field: log.text
+        contains: KeyError
+  diagnosis:
+    classification: schema_change
+    severity: high
+    summary: A required customer identifier was unavailable.
+    hypothesis: The upstream schema or normalization mapping changed.
+    confidence: 0.8
+    confirmedFacts:
+      - The supplied log contains a KeyError.
+  evidence:
+    required: [schema_diff]
+  recommendedNextSteps:
+    - Compare the current and previous successful schemas.
+    - Review the upstream contract owner and recent changes.
+  suggestedPlaybook: investigate_schema_contract

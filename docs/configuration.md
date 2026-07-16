@@ -22,6 +22,15 @@ spec:
   incidentSources:
     - provider: local-log
       path: logs/latest-failure.log
+  evidenceProviders:
+    - provider: local-json
+      path: evidence/schema-diff.json
+      kinds: [schema-diff]
+      maxItems: 20
+      maxTotalCharacters: 50000
+      maxItemCharacters: 10000
+      timeoutSeconds: 5
+      redact: true
   rules:
     files: [rules.yml]
   model:
@@ -37,11 +46,29 @@ spec:
 | `spec.environment` | No | Environment label; defaults to `local`. |
 | `spec.memory.provider` | No | `sqlite` in the reference package. Other providers implement a port. |
 | `spec.memory.path` | No | Local SQLite path, relative to project YAML. |
-| `spec.reports.provider` | No | `markdown` in the reference package. |
+| `spec.reports.provider` | No | `markdown` or `json` in the reference package. |
 | `spec.reports.outputDir` | No | Report directory, relative to project YAML. |
 | `spec.incidentSources` | No | Bounded source declarations. v1alpha1 includes `local-log`. |
+| `spec.evidenceProviders` | No | Ordered bounded evidence declarations. v1alpha1 includes `local-json`. |
 | `spec.rules.files` | No | Ordered versioned `DiagnosisRuleSet` documents. |
 | `spec.model.enabled` | No | Explicit policy flag; defaults to `false`. It does not install or select a provider. |
+
+### Evidence provider fields
+
+| Field | Meaning |
+| --- | --- |
+| `provider` | Reference provider name. v1alpha1 supports `local-json`. |
+| `path` | Local JSON file containing an item list or `{"items": [...]}`. |
+| `kinds` | Optional evidence-kind allowlist. Empty means all supplied kinds. |
+| `maxItems` | Maximum accepted items after filtering and duplicate removal. |
+| `maxTotalCharacters` | Maximum combined detail size accepted from the provider. |
+| `maxItemCharacters` | Maximum detail size for one item. Longer details are marked and truncated. |
+| `timeoutSeconds` | Collection deadline enforced by the application service. |
+| `redact` | Conservatively redact likely secrets before evidence enters diagnosis or reports. |
+
+Provider errors, malformed files, timeouts, and unreadable paths become structured collection
+failures. They do not silently become facts and do not grant network, execution, or broader
+filesystem authority.
 
 ## Rule-set document
 
@@ -134,7 +161,9 @@ uv run lumis rules test --rule path/to/rule.yml --input path/to/fixture.json
 The checked [project schema](../schemas/lumis-project-v1alpha1.schema.json),
 [legacy rule-set schema](../schemas/lumis-rules-v1alpha1.schema.json), and
 [structured diagnosis-rule schema](../schemas/lumis-diagnosis-rule-v1alpha1.schema.json) can be
-used by editors. CI verifies that they match the Pydantic contracts.
+used by editors. JSON report consumers can validate against the
+[diagnosis-report schema](../schemas/lumis-diagnosis-report-v1alpha1.schema.json). CI verifies
+that all checked schemas match the Pydantic contracts.
 
 ## Secrets
 
@@ -144,6 +173,8 @@ Do not put plaintext credentials in project YAML. v1alpha1 intentionally has no 
 
 - Project and rule files are limited to one MiB each.
 - The reference CLI reads local logs up to ten MiB.
+- The local JSON evidence adapter reads files up to one MiB; collection applies configured item,
+  per-item character, total-character, timeout, kind, duplicate-ID, and redaction limits.
 - Legacy rule sets remain limited to deterministic `all_contains`.
 - Structured `DiagnosisRule` documents support `all`, `any`, `not`, regex, structured fields,
   numeric thresholds, required evidence, and deterministic ranking.

@@ -1,5 +1,6 @@
 """Public ports implemented by local, hosted, or community adapters."""
 
+from .evidence import EvidenceProvider
 from .lifecycle import (
     ApprovalProvider,
     AuditTrail,
@@ -15,6 +16,7 @@ __all__ = [
     "ApprovalProvider",
     "AuditTrail",
     "ContextProvider",
+    "EvidenceProvider",
     "IncidentEpisode",
     "MemoryMatch",
     "MemoryQuery",

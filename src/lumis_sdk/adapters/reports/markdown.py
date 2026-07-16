@@ -1,8 +1,27 @@
 """Deterministic Markdown report adapter."""
 
 from collections.abc import Iterable
+from pathlib import Path
 
 from lumis_sdk.domain import DiagnosisResult, IncidentInput
+
+
+class MarkdownReportWriter:
+    """Persist deterministic human-readable Markdown reports."""
+
+    def write(
+        self,
+        *,
+        incident: IncidentInput,
+        diagnosis: DiagnosisResult,
+        destination: Path,
+    ) -> Path:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            render_markdown_report(incident, diagnosis),
+            encoding="utf-8",
+        )
+        return destination
 
 
 def render_markdown_report(incident: IncidentInput, diagnosis: DiagnosisResult) -> str:

@@ -1,0 +1,295 @@
+{
+  "$defs": {
+    "DiagnosisMethod": {
+      "description": "The mechanism that produced a diagnosis.",
+      "enum": [
+        "deterministic",
+        "retrieval",
+        "model_assisted",
+        "hybrid",
+        "escalated"
+      ],
+      "title": "DiagnosisMethod",
+      "type": "string"
+    },
+    "DiagnosisResult": {
+      "additionalProperties": false,
+      "description": "An evidence-grounded diagnosis produced by one declared method.",
+      "properties": {
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "confirmed_facts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Confirmed Facts",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceItem"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "method": {
+          "$ref": "#/$defs/DiagnosisMethod",
+          "default": "deterministic"
+        },
+        "missing_evidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Evidence",
+          "type": "array"
+        },
+        "recommended_next_steps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Recommended Next Steps",
+          "type": "array"
+        },
+        "requires_human_review": {
+          "default": true,
+          "title": "Requires Human Review",
+          "type": "boolean"
+        },
+        "root_cause_hypothesis": {
+          "title": "Root Cause Hypothesis",
+          "type": "string"
+        },
+        "suggested_playbook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suggested Playbook"
+        },
+        "triage": {
+          "$ref": "#/$defs/TriageResult"
+        }
+      },
+      "required": [
+        "triage",
+        "root_cause_hypothesis",
+        "confidence"
+      ],
+      "title": "DiagnosisResult",
+      "type": "object"
+    },
+    "EvidenceItem": {
+      "additionalProperties": false,
+      "description": "A claim-supported observation from supplied incident context.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "default": "observation",
+          "title": "Kind",
+          "type": "string"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed At"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "detail",
+        "confidence"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "IncidentInput": {
+      "additionalProperties": false,
+      "description": "A vendor-neutral representation of a received incident.",
+      "properties": {
+        "environment": {
+          "default": "local",
+          "title": "Environment",
+          "type": "string"
+        },
+        "pipeline_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pipeline Name"
+        },
+        "raw_payload": {
+          "additionalProperties": true,
+          "title": "Raw Payload",
+          "type": "object"
+        },
+        "source_tool": {
+          "title": "Source Tool",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_tool"
+      ],
+      "title": "IncidentInput",
+      "type": "object"
+    },
+    "Severity": {
+      "description": "The urgency assigned to an incident.",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "TriageResult": {
+      "additionalProperties": false,
+      "description": "A deterministic first-pass classification of an incident.",
+      "properties": {
+        "classification": {
+          "title": "Classification",
+          "type": "string"
+        },
+        "missing_context": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Context",
+          "type": "array"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "classification",
+        "severity",
+        "summary"
+      ],
+      "title": "TriageResult",
+      "type": "object"
+    },
+    "TruthState": {
+      "description": "The confirmation state of retained operational knowledge.",
+      "enum": [
+        "unconfirmed_hypothesis",
+        "human_confirmed",
+        "verification_confirmed",
+        "rejected",
+        "superseded"
+      ],
+      "title": "TruthState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A stable JSON diagnosis report that preserves evidence and truth state.",
+  "properties": {
+    "apiVersion": {
+      "const": "lumis.dev/v1alpha1",
+      "title": "Apiversion",
+      "type": "string"
+    },
+    "confirmedResolution": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confirmedresolution"
+    },
+    "diagnosis": {
+      "$ref": "#/$defs/DiagnosisResult"
+    },
+    "incident": {
+      "$ref": "#/$defs/IncidentInput"
+    },
+    "kind": {
+      "const": "DiagnosisReport",
+      "default": "DiagnosisReport",
+      "title": "Kind",
+      "type": "string"
+    },
+    "truthState": {
+      "$ref": "#/$defs/TruthState",
+      "default": "unconfirmed_hypothesis"
+    }
+  },
+  "required": [
+    "apiVersion",
+    "incident",
+    "diagnosis"
+  ],
+  "title": "DiagnosisReportDocument",
+  "type": "object"
+}

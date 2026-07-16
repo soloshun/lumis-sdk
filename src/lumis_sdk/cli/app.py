@@ -1,5 +1,6 @@
 """Lumis SDK command-line composition root."""
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -8,9 +9,15 @@ from pydantic import ValidationError
 
 from lumis_sdk import __version__
 from lumis_sdk.adapters.deterministic import diagnose_structured, diagnose_text
+from lumis_sdk.adapters.evidence import LocalJsonEvidenceProvider
 from lumis_sdk.adapters.incidents import incident_from_log
-from lumis_sdk.adapters.reports import append_resolution, render_markdown_report
+from lumis_sdk.adapters.reports import (
+    append_resolution,
+    render_json_report,
+    render_markdown_report,
+)
 from lumis_sdk.adapters.sqlite import IncidentNotFoundError, SQLiteIncidentStore, search_incidents
+from lumis_sdk.application import EvidenceService
 from lumis_sdk.config import (
     MAX_CONFIG_BYTES,
     LumisConfig,
@@ -18,7 +25,7 @@ from lumis_sdk.config import (
     load_diagnosis_rule,
     resolve_project_path,
 )
-from lumis_sdk.domain import EvidenceItem
+from lumis_sdk.domain import DiagnosisResult, EvidenceItem, EvidenceRequest, IncidentInput
 
 MAX_LOG_BYTES = 10 * 1024 * 1024
 DEFAULT_CONFIG_PATH = Path("lumis.yml")
@@ -90,6 +97,10 @@ def doctor(
     if project_config.incident_sources:
         log_path = resolve_project_path(config, project_config.incident_sources[0].path)
         checks.append(("local log", "readable" if log_path.is_file() else f"missing: {log_path}"))
+    for index, provider in enumerate(project_config.evidence_providers, start=1):
+        evidence_path = resolve_project_path(config, provider.path)
+        state = "readable" if evidence_path.is_file() else f"missing: {evidence_path}"
+        checks.append((f"evidence provider {index} ({provider.provider})", state))
     for name, value in checks:
         typer.echo(f"{name}: {value}")
     if project_config.model.enabled:
@@ -109,7 +120,24 @@ def diagnose(
     log_path = log or _telemetry_log_path(config, project_config)
     log_text = _read_bounded_log(log_path)
     incident = incident_from_log(log_text, str(log_path), project_config.project)
+    configured_evidence = asyncio.run(
+        _collect_configured_evidence(config, project_config, incident)
+    )
     if project_config.structured_rules:
+        supplied_evidence = [
+            EvidenceItem(
+                id="provided-log-1",
+                source="provided_log",
+                detail=next(
+                    (line.strip() for line in log_text.splitlines() if line.strip()),
+                    "No log content",
+                ),
+                confidence=1.0,
+                kind="log_window",
+                reference=str(log_path),
+            ),
+            *configured_evidence,
+        ]
         diagnosis = diagnose_structured(
             {
                 "log": {"text": log_text},
@@ -118,25 +146,18 @@ def diagnose(
                 "environment": project_config.environment,
             },
             project_config.structured_rules,
-            [
-                EvidenceItem(
-                    id="E1",
-                    source="provided_log",
-                    detail=next(
-                        (line.strip() for line in log_text.splitlines() if line.strip()),
-                        "No log content",
-                    ),
-                    confidence=1.0,
-                    kind="log_window",
-                    reference=str(log_path),
-                )
-            ],
+            supplied_evidence,
         ).diagnosis
     else:
         diagnosis = diagnose_text(log_text, project_config.rules)
-    report_text = render_markdown_report(incident, diagnosis)
+        if configured_evidence:
+            diagnosis = diagnosis.model_copy(
+                update={"evidence": [*diagnosis.evidence, *configured_evidence]}
+            )
+    report_text = _render_report(project_config, incident, diagnosis)
+    extension = "json" if project_config.reports.provider == "json" else "md"
     report_path = output or resolve_project_path(
-        config, f"{project_config.reports.output_dir}/incident-report.md"
+        config, f"{project_config.reports.output_dir}/incident-report.{extension}"
     )
     memory_path = resolve_project_path(config, project_config.memory.path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -157,7 +178,17 @@ def report(
     except IncidentNotFoundError as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(code=1) from error
-    typer.echo(append_resolution(stored.report_markdown, stored.resolution))
+    if Path(stored.report_path).suffix.lower() == ".json":
+        typer.echo(
+            render_json_report(
+                stored.incident,
+                stored.diagnosis,
+                truth_state=stored.truth_state,
+                confirmed_resolution=stored.resolution,
+            )
+        )
+    else:
+        typer.echo(append_resolution(stored.report_markdown, stored.resolution))
 
 
 @app.command()
@@ -315,6 +346,63 @@ def _read_bounded_json(path: Path) -> dict[str, object]:
     if not isinstance(payload, dict):
         raise typer.BadParameter("Rule test input must be a JSON object.")
     return payload
+
+
+async def _collect_configured_evidence(
+    config_path: Path,
+    project_config: LumisConfig,
+    incident: IncidentInput,
+) -> list[EvidenceItem]:
+    collected: list[EvidenceItem] = []
+    seen_ids: set[str] = set()
+    for provider_config in project_config.evidence_providers:
+        provider = LocalJsonEvidenceProvider(
+            resolve_project_path(config_path, provider_config.path)
+        )
+        service = EvidenceService(
+            provider=provider,
+            timeout_seconds=provider_config.timeout_seconds,
+        )
+        collection = await service.collect(
+            EvidenceRequest(
+                incident=incident,
+                kinds=provider_config.kinds,
+                max_items=provider_config.max_items,
+                max_total_characters=provider_config.max_total_characters,
+                max_item_characters=provider_config.max_item_characters,
+                redact=provider_config.redact,
+            )
+        )
+        for failure in collection.failures:
+            typer.echo(
+                f"warning: evidence provider {failure.provider}: {failure.code}: {failure.message}",
+                err=True,
+            )
+        if collection.truncated:
+            typer.echo(
+                f"warning: evidence provider {collection.provider} reached a configured bound",
+                err=True,
+            )
+        for item in collection.items:
+            if item.id in seen_ids:
+                typer.echo(
+                    f"warning: duplicate evidence ID ignored: {item.id}",
+                    err=True,
+                )
+                continue
+            seen_ids.add(item.id)
+            collected.append(item)
+    return collected
+
+
+def _render_report(
+    project_config: LumisConfig,
+    incident: IncidentInput,
+    diagnosis: DiagnosisResult,
+) -> str:
+    if project_config.reports.provider == "json":
+        return render_json_report(incident, diagnosis)
+    return render_markdown_report(incident, diagnosis)
 
 
 def _memory_path(config_path: Path) -> Path:

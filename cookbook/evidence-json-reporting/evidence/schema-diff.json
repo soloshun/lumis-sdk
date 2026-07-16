@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "id": "schema-diff-1",
+      "source": "synthetic-schema-registry",
+      "kind": "schema_diff",
+      "detail": "customer_id was removed from orders; owner=owner@example.com",
+      "confidence": 1.0,
+      "reference": "schema://orders/current-vs-previous",
+      "attributes": {
+        "dataset": "orders",
+        "change": "removed_column"
+      }
+    }
+  ]
+}

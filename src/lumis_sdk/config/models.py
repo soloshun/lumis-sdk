@@ -29,7 +29,7 @@ class MemoryConfig(StrictModel):
 class ReportsConfig(StrictModel):
     """A project-owned report output location."""
 
-    provider: Literal["markdown"] = "markdown"
+    provider: Literal["markdown", "json"] = "markdown"
     output_dir: str = Field(default=".lumis/reports", alias="outputDir")
 
 
@@ -38,6 +38,34 @@ class IncidentSourceConfig(StrictModel):
 
     provider: Literal["local-log"]
     path: str
+
+
+class EvidenceProviderConfig(StrictModel):
+    """One bounded local evidence provider composed by the reference CLI."""
+
+    provider: Literal["local-json"]
+    path: str
+    kinds: list[str] = Field(default_factory=list)
+    max_items: int = Field(default=25, ge=1, le=100, alias="maxItems")
+    max_total_characters: int = Field(
+        default=131_072,
+        ge=1,
+        le=1_000_000,
+        alias="maxTotalCharacters",
+    )
+    max_item_characters: int = Field(
+        default=8_000,
+        ge=1,
+        le=100_000,
+        alias="maxItemCharacters",
+    )
+    timeout_seconds: float = Field(
+        default=5.0,
+        gt=0,
+        le=60,
+        alias="timeoutSeconds",
+    )
+    redact: bool = True
 
 
 class RulesConfig(StrictModel):
@@ -73,6 +101,9 @@ class ProjectSpec(StrictModel):
     reports: ReportsConfig = Field(default_factory=ReportsConfig)
     incident_sources: list[IncidentSourceConfig] = Field(
         default_factory=list, alias="incidentSources"
+    )
+    evidence_providers: list[EvidenceProviderConfig] = Field(
+        default_factory=list, alias="evidenceProviders"
     )
     rules: RulesConfig = Field(default_factory=RulesConfig)
     model: ModelConfig = Field(default_factory=ModelConfig)
@@ -234,6 +265,7 @@ class LumisConfig(StrictModel):
     memory: MemoryConfig = Field(default_factory=MemoryConfig)
     reports: ReportsConfig = Field(default_factory=ReportsConfig)
     incident_sources: list[IncidentSourceConfig] = Field(default_factory=list)
+    evidence_providers: list[EvidenceProviderConfig] = Field(default_factory=list)
     rules_files: list[str] = Field(default_factory=list)
     rules: list[DeterministicRule] = Field(default_factory=list)
     structured_rules: list[DiagnosisRuleDocument] = Field(default_factory=list)

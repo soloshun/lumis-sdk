@@ -291,3 +291,84 @@ spec:
 
     assert result.exit_code == 0
     assert "Classification: structured_failure" in output_path.read_text(encoding="utf-8")
+
+
+def test_diagnose_collects_local_evidence_and_writes_json_report(tmp_path: Path) -> None:
+    """Configured evidence and JSON reporting compose through public contracts."""
+    (tmp_path / "rule.yml").write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: DiagnosisRule
+metadata:
+  name: schema-change
+spec:
+  match:
+    all:
+      - field: log.text
+        contains: KeyError
+  diagnosis:
+    classification: schema_change
+    summary: A required field was unavailable.
+    hypothesis: The upstream schema changed.
+    confidence: 0.8
+  evidence:
+    required: [schema_diff]
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "evidence.json").write_text(
+        json.dumps(
+            {
+                "items": [
+                    {
+                        "id": "schema-1",
+                        "source": "schema-registry",
+                        "detail": "customer_id was removed; owner=person@example.com",
+                        "confidence": 1.0,
+                        "kind": "schema_diff",
+                        "reference": "schema://orders/diff",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "lumis.yml"
+    config_path.write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: json-project
+spec:
+  memory:
+    path: incidents.db
+  reports:
+    provider: json
+    outputDir: reports
+  evidenceProviders:
+    - provider: local-json
+      path: evidence.json
+      kinds: [schema_diff]
+  rules:
+    files: [rule.yml]
+""",
+        encoding="utf-8",
+    )
+    log_path = tmp_path / "failure.log"
+    log_path.write_text("ERROR KeyError: customer_id", encoding="utf-8")
+
+    result = runner.invoke(
+        app,
+        ["diagnose", "--config", str(config_path), "--log", str(log_path)],
+    )
+
+    assert result.exit_code == 0
+    report_path = tmp_path / "reports/incident-report.json"
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["kind"] == "DiagnosisReport"
+    assert report["diagnosis"]["triage"]["classification"] == "schema_change"
+    assert report["diagnosis"]["evidence"][1]["id"] == "schema-1"
+    assert "person@example.com" not in report["diagnosis"]["evidence"][1]["detail"]
+
+    doctor = runner.invoke(app, ["doctor", "--config", str(config_path)])
+    assert doctor.exit_code == 0
+    assert "evidence provider 1 (local-json): readable" in doctor.output

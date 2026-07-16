@@ -79,6 +79,7 @@ def _runtime_from_versioned(document: ProjectDocument) -> LumisConfig:
         memory=document.spec.memory,
         reports=document.spec.reports,
         incident_sources=document.spec.incident_sources,
+        evidence_providers=document.spec.evidence_providers,
         rules_files=document.spec.rules.files,
         model=document.spec.model,
         source_api_version=document.api_version,
