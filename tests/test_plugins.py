@@ -1,6 +1,7 @@
 """Plugin SDK manifest, discovery, loading, and contract tests."""
 
 import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -28,10 +29,22 @@ class FakeDistribution:
         self.metadata = {"Name": name}
         self.version = version
         self._manifest = manifest
+        self.files: None = None
 
     def read_text(self, filename: str) -> str | None:
         assert filename == "lumis-plugin.json"
         return self._manifest
+
+
+class FileBackedDistribution(FakeDistribution):
+    def __init__(self, name: str, version: str, manifest_path: Path) -> None:
+        super().__init__(name, version, None)
+        self.files = [Path(name) / "lumis-plugin.json"]
+        self._manifest_path = manifest_path
+
+    def locate_file(self, filename: Path) -> Path:
+        assert filename == self.files[0]
+        return self._manifest_path
 
 
 class FakeEntryPoint:
@@ -205,6 +218,48 @@ def test_static_manifest_is_strict_json() -> None:
 
     assert payload["kind"] == "PluginManifest"
     assert payload["spec"]["requiredAuthorities"] == []
+
+
+def test_distribution_unique_manifest_paths_do_not_collide(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    http_entry, http_factory = _entry_point(
+        name="http-json-evidence",
+        plugin_name="http-json-evidence",
+    )
+    postgres_entry, postgres_factory = _entry_point(
+        name="postgres-memory",
+        plugin_name="postgres-memory",
+    )
+    http_path = tmp_path / "http.json"
+    postgres_path = tmp_path / "postgres.json"
+    http_path.write_text(
+        http_factory.lumis_manifest.model_dump_json(by_alias=True),
+        encoding="utf-8",
+    )
+    postgres_path.write_text(
+        postgres_factory.lumis_manifest.model_dump_json(by_alias=True),
+        encoding="utf-8",
+    )
+    http_entry.dist = FileBackedDistribution(
+        "lumis-sdk-http-json-evidence",
+        "1.0.0",
+        http_path,
+    )
+    postgres_entry.dist = FileBackedDistribution(
+        "lumis-sdk-postgres-memory",
+        "1.0.0",
+        postgres_path,
+    )
+    _install_entry_points(monkeypatch, http_entry, postgres_entry)
+
+    descriptors = ImportlibPluginCatalog().discover()
+
+    assert [(item.name, item.status) for item in descriptors] == [
+        ("http-json-evidence", PluginDiscoveryStatus.COMPATIBLE),
+        ("postgres-memory", PluginDiscoveryStatus.COMPATIBLE),
+    ]
 
 
 def test_plugin_cli_is_safe_when_no_plugins_are_installed(

@@ -22,6 +22,7 @@ from lumis_sdk.domain import (
 
 _HEADER_NAME = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
 _MANIFEST_PATHS = (
+    Path(__file__).with_name("lumis-plugin.json"),
     Path(__file__).parents[1] / "lumis-plugin.json",
     Path(__file__).parents[2] / "lumis-plugin.json",
 )

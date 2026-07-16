@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lumis-sdk-postgres-memory"
-version = "0.1.0"
+version = "0.1.1"
 description = "Optional PostgreSQL MemoryStore plugin for Lumis SDK."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 dependencies = [
-  "lumis-sdk>=0.0.7,<0.1.0",
+  "lumis-sdk>=0.0.8,<0.1.0",
   "psycopg[binary]>=3.2,<4",
 ]
 
@@ -27,7 +27,7 @@ lumis-sdk = { path = "../..", editable = true }
 packages = ["src/lumis_postgres_memory"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"lumis-plugin.json" = "lumis-plugin.json"
+"lumis-plugin.json" = "lumis_postgres_memory/lumis-plugin.json"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

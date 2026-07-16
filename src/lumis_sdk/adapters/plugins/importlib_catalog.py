@@ -201,8 +201,11 @@ def _manifest_for_entry_point(entry_point: Any) -> PluginManifest:
 
 
 def _read_static_manifest(distribution: Any) -> str | None:
-    raw = distribution.read_text(PLUGIN_MANIFEST_FILENAME)
-    if raw is not None:
+    files = getattr(distribution, "files", None)
+    if files is None:
+        raw = distribution.read_text(PLUGIN_MANIFEST_FILENAME)
+        if raw is None:
+            return None
         if not isinstance(raw, str):
             raise ValueError("Plugin manifest must be UTF-8 text.")
         if len(raw.encode("utf-8")) > MAX_PLUGIN_MANIFEST_BYTES:
@@ -210,8 +213,8 @@ def _read_static_manifest(distribution: Any) -> str | None:
         return raw
     matches = [
         item
-        for item in getattr(distribution, "files", None) or ()
-        if str(item) == PLUGIN_MANIFEST_FILENAME
+        for item in files
+        if str(item).replace("\\", "/").split("/")[-1] == PLUGIN_MANIFEST_FILENAME
     ]
     if len(matches) != 1:
         return None

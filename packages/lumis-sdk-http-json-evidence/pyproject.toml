@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lumis-sdk-http-json-evidence"
-version = "0.1.0"
+version = "0.1.1"
 description = "Optional generic HTTP JSON evidence-provider plugin for Lumis SDK."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 dependencies = [
   "httpx>=0.28,<1",
-  "lumis-sdk>=0.0.7,<0.1.0",
+  "lumis-sdk>=0.0.8,<0.1.0",
 ]
 
 [project.entry-points."lumis_sdk.plugins"]
@@ -27,7 +27,7 @@ lumis-sdk = { path = "../..", editable = true }
 packages = ["src/lumis_http_json_evidence"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"lumis-plugin.json" = "lumis-plugin.json"
+"lumis-plugin.json" = "lumis_http_json_evidence/lumis-plugin.json"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -23,6 +23,7 @@ from lumis_sdk.ports import (
 
 _SCHEMA_VERSION = 1
 _MANIFEST_PATHS = (
+    Path(__file__).with_name("lumis-plugin.json"),
     Path(__file__).parents[1] / "lumis-plugin.json",
     Path(__file__).parents[2] / "lumis-plugin.json",
 )
