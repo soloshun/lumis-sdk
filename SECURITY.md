@@ -8,7 +8,10 @@ Lumis SDK is pre-release software. Security fixes are applied to the latest deve
 
 Do not open a public issue for a suspected vulnerability or exposed credential. Until a dedicated private reporting channel is configured, contact the repository maintainers privately through the repository owner's published contact channel. Include a clear description, reproduction steps, impact, and any suggested mitigation.
 
-We will acknowledge the report, investigate it, and coordinate a fix before public disclosure where appropriate.
+The lead maintainer named in `GOVERNANCE.md` owns triage and disclosure, and may delegate a
+private investigation to a release maintainer. We will acknowledge the report, investigate it,
+and coordinate a fix before public disclosure where appropriate. No fixed response SLA is
+promised until a dedicated private reporting channel and security team are established.
 
 ## Secrets
 
