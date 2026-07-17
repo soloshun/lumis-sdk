@@ -16,7 +16,9 @@ plugins, shared memory, or hosted systems only where the adopter explicitly need
 | Author a plugin | [Plugin API](python-api/plugins.md) and [compatibility policy](plugins/compatibility.md) |
 | Review security boundaries | [Threat model](safety/threat-model.md) and [security review](safety/security-review.md) |
 | Understand stability | [Public API inventory](stability/public-api.md) and [compatibility policy](stability/compatibility.md) |
+| Reproduce performance checks | [Phase 1 bounded performance baseline](performance/phase-1-baseline.md) |
 | Contribute or release | [Open-source project guide](architecture/open-source-project-guide.md) and [maintainer runbook](contributing/maintainer-runbook.md) |
+| Review the 1.0 decision | [Release gate and evidence record](releases/1.0-release-gate.md) |
 | See future direction | [Roadmap](../ROADMAP.md) and [candidate mapping](roadmap/candidate-capability-mapping.md) |
 
 ## Python API guides

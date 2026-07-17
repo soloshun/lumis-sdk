@@ -9,6 +9,19 @@ Thanks for contributing. Lumis SDK is a pre-alpha, safety-focused open-source fr
 - Never submit credentials, private logs, customer information, employer/client code, runbooks, or architecture material.
 - Keep the current release focused on diagnosis, recommendations, and guarded-recovery contracts; production remediation is out of scope.
 
+## Contributor provenance
+
+By submitting a contribution, you certify the Developer Certificate of Origin 1.1 statement that
+you have the right to submit the work under this project's Apache-2.0 license. Add a `Signed-off-by`
+trailer to every commit using `git commit -s`. The sign-off is a provenance declaration, not a
+copyright assignment.
+
+Do not submit generated, copied, employer-owned, or model-assisted material unless you have
+reviewed it, can explain it, and have the legal right to contribute it. Maintainers may ask for the
+origin of substantial code, fixtures, documentation, or data and may close a contribution when
+provenance cannot be established. Existing commits are not retroactively invalidated by this
+policy; enforcement begins when this policy is merged.
+
 ## Architecture boundaries
 
 - Put vendor-neutral models and invariants in `lumis_sdk.domain`.

@@ -17,6 +17,8 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
 - Added a navigable documentation index, core concepts, standalone core/plugin adoption evidence,
   a Prometheus/Alertmanager walkthrough, expanded custom PostgreSQL-schema guidance, offline smoke
   paths for every cookbook, and a versioned Phase 1 tutorial/video script.
+- Added explicit core/plugin governance, contributor provenance and support boundaries, a
+  reproducible Phase 1 benchmark harness, and an evidence-based 1.0 release go/no-go record.
 
 ### Changed
 

@@ -44,10 +44,10 @@ protocol is frozen forever.
 - [x] **S6-08 Relatable examples:** add or strengthen examples for data pipelines, ML quality,
       software delivery, webhook evidence, shared PostgreSQL memory, policy proposals, and
       verification replay; add Prometheus/Alertmanager and custom PostgreSQL-schema walkthroughs.
-- [ ] **S6-09 Governance and support:** publish governance, code of conduct, security reporting,
+- [x] **S6-09 Governance and support:** publish governance, code of conduct, security reporting,
       support boundaries, maintainer expectations, contributor DCO/provenance policy, and release
       ownership.
-- [ ] **S6-10 Performance baseline:** record bounded-rule, serialization, SQLite retrieval, plugin
+- [x] **S6-10 Performance baseline:** record bounded-rule, serialization, SQLite retrieval, plugin
       discovery, and replay benchmark methodology without turning microbenchmarks into SLO claims.
 - [ ] **S6-11 Release candidate:** publish a release candidate, run upgrade and plugin compatibility
       rehearsals, gather adopter/security feedback, and resolve or publicly accept findings.
