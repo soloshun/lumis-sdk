@@ -25,6 +25,7 @@ from .plugins import (
     PluginSpec,
     PluginSupportStatus,
     SdkCompatibility,
+    legacy_plugin_manifest_json_schema,
     plugin_manifest_json_schema,
 )
 from .policy import (
@@ -45,6 +46,8 @@ from .policy import (
     ProposalState,
     canonical_digest,
     canonical_json,
+    legacy_playbook_json_schema,
+    legacy_policy_json_schema,
     playbook_json_schema,
     policy_json_schema,
     proposal_json_schema,
@@ -137,9 +140,12 @@ __all__ = [
     "VerificationResult",
     "VerificationStatus",
     "plugin_manifest_json_schema",
+    "legacy_plugin_manifest_json_schema",
     "canonical_digest",
     "canonical_json",
     "playbook_json_schema",
+    "legacy_playbook_json_schema",
+    "legacy_policy_json_schema",
     "policy_json_schema",
     "proposal_json_schema",
 ]

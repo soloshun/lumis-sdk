@@ -4,6 +4,24 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
 
 ## Unreleased
 
+### Added
+
+- Added stable `lumis.dev/v1` schemas for project, rule-set, structured-rule, diagnosis-report,
+  plugin-manifest, playbook, and recovery-policy documents while retaining frozen alpha schemas.
+- Added validated, deterministic, idempotent migration APIs and `lumis config migrate` with
+  non-overwriting output by default.
+- Added a public API stability inventory, compatibility/deprecation policy, and v1 upgrade guide.
+
+### Changed
+
+- New projects, reports, plugin manifests, policies, playbooks, and repository cookbooks now use
+  `lumis.dev/v1`; project/rule alpha loading remains available through `1.x`.
+
+### Deprecated
+
+- `lumis.dev/v1alpha1` project and rule documents now emit
+  `LumisV1Alpha1DeprecationWarning` and are planned for removal in `2.0`.
+
 ## [0.0.8] - 2026-07-16
 
 ### Added

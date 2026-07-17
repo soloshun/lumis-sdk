@@ -100,7 +100,7 @@ spec:
 ```
 
 `lumis diagnose` then writes `incident-report.json`. The strict
-`lumis.dev/v1alpha1` `DiagnosisReport` contains:
+`lumis.dev/v1` `DiagnosisReport` contains:
 
 - normalized incident input;
 - structured diagnosis and triage;
@@ -120,7 +120,7 @@ from lumis_sdk.adapters.reports import (
 ```
 
 The checked schema is
-[`schemas/lumis-diagnosis-report-v1alpha1.schema.json`](../../schemas/lumis-diagnosis-report-v1alpha1.schema.json).
+[`schemas/lumis-diagnosis-report-v1.schema.json`](../../schemas/lumis-diagnosis-report-v1.schema.json).
 
 ## Reusable testkit
 

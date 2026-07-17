@@ -3,6 +3,7 @@
 from .json_report import (
     JsonReportWriter,
     diagnosis_report_json_schema,
+    legacy_diagnosis_report_json_schema,
     parse_json_report,
     render_json_report,
 )
@@ -13,6 +14,7 @@ __all__ = [
     "MarkdownReportWriter",
     "append_resolution",
     "diagnosis_report_json_schema",
+    "legacy_diagnosis_report_json_schema",
     "parse_json_report",
     "render_json_report",
     "render_markdown_report",

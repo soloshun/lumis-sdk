@@ -11,7 +11,8 @@ from pydantic import Field, model_validator
 from .models import DomainModel
 from .recovery import RiskLevel
 
-POLICY_API_VERSION = "lumis.dev/v1alpha1"
+POLICY_API_VERSION = "lumis.dev/v1"
+LEGACY_POLICY_API_VERSION = "lumis.dev/v1alpha1"
 PLAYBOOK_KIND = "Playbook"
 POLICY_KIND = "RecoveryPolicy"
 
@@ -98,7 +99,10 @@ class PlaybookDocument(DomainModel):
 
     @model_validator(mode="after")
     def validate_document(self) -> "PlaybookDocument":
-        if self.api_version != POLICY_API_VERSION or self.kind != PLAYBOOK_KIND:
+        if (
+            self.api_version not in {POLICY_API_VERSION, LEGACY_POLICY_API_VERSION}
+            or self.kind != PLAYBOOK_KIND
+        ):
             raise ValueError("unsupported playbook apiVersion or kind")
         names = [action.name for action in self.actions]
         if len(names) != len(set(names)):
@@ -132,7 +136,10 @@ class PolicyDocument(DomainModel):
 
     @model_validator(mode="after")
     def validate_document(self) -> "PolicyDocument":
-        if self.api_version != POLICY_API_VERSION or self.kind != POLICY_KIND:
+        if (
+            self.api_version not in {POLICY_API_VERSION, LEGACY_POLICY_API_VERSION}
+            or self.kind != POLICY_KIND
+        ):
             raise ValueError("unsupported policy apiVersion or kind")
         if not self.default_deny:
             raise ValueError("recovery policies must fail closed with default_deny=true")
@@ -236,17 +243,35 @@ def canonical_digest(value: DomainModel | dict[str, Any]) -> str:
 
 def playbook_json_schema() -> dict[str, Any]:
     """Return the generated JSON Schema for a playbook document."""
-    return PlaybookDocument.model_json_schema(by_alias=True)
+    return _versioned_schema(PlaybookDocument, POLICY_API_VERSION)
 
 
 def policy_json_schema() -> dict[str, Any]:
     """Return the generated JSON Schema for a recovery policy document."""
-    return PolicyDocument.model_json_schema(by_alias=True)
+    return _versioned_schema(PolicyDocument, POLICY_API_VERSION)
+
+
+def legacy_playbook_json_schema() -> dict[str, Any]:
+    """Return the frozen deprecated playbook schema."""
+    return _versioned_schema(PlaybookDocument, LEGACY_POLICY_API_VERSION)
+
+
+def legacy_policy_json_schema() -> dict[str, Any]:
+    """Return the frozen deprecated recovery-policy schema."""
+    return _versioned_schema(PolicyDocument, LEGACY_POLICY_API_VERSION)
 
 
 def proposal_json_schema() -> dict[str, Any]:
     """Return the generated JSON Schema for an action proposal."""
     return ActionProposal.model_json_schema(by_alias=True)
+
+
+def _versioned_schema(model: type[DomainModel], version: str) -> dict[str, Any]:
+    schema = model.model_json_schema(by_alias=True)
+    marker = schema["properties"]["apiVersion"]
+    marker.pop("default", None)
+    marker["const"] = version
+    return schema
 
 
 def _validate_parameter_type(

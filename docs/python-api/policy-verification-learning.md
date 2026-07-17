@@ -69,8 +69,8 @@ applications should persist `ApprovalDecisionRecord` values in their own auditab
 
 Checked schemas:
 
-- `schemas/lumis-playbook-v1alpha1.schema.json`
-- `schemas/lumis-policy-v1alpha1.schema.json`
+- `schemas/lumis-playbook-v1.schema.json`
+- `schemas/lumis-policy-v1.schema.json`
 - `schemas/lumis-action-proposal-v1alpha1.schema.json`
 
 ## Verification-aware learning

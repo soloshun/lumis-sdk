@@ -1,11 +1,11 @@
 # Lumis SDK configuration reference
 
-Lumis SDK configuration is a versioned public API. `lumis.dev/v1alpha1` documents are strict: unknown fields fail validation, paths resolve from the project document, and model use is disabled unless explicitly enabled and composed with a gateway.
+Lumis SDK configuration is a versioned public API. `lumis.dev/v1` documents are strict: unknown fields fail validation, paths resolve from the project document, and model use is disabled unless explicitly enabled and composed with a gateway. Released `v1alpha1` documents remain readable through `1.x`; see the [migration guide](migrations/config-v1.md).
 
 ## Project document
 
 ```yaml
-apiVersion: lumis.dev/v1alpha1
+apiVersion: lumis.dev/v1
 kind: Project
 metadata:
   name: customer-pipeline
@@ -39,7 +39,7 @@ spec:
 
 | Field | Required | Meaning |
 | --- | --- | --- |
-| `apiVersion` | Yes | Must be `lumis.dev/v1alpha1`. Versioning prevents silent behavior changes. |
+| `apiVersion` | Yes | Must be `lumis.dev/v1`. Versioning prevents silent behavior changes. |
 | `kind` | Yes | Must be `Project`. |
 | `metadata.name` | Yes | Stable project/pipeline identifier used in incidents and reports. |
 | `metadata.labels` | No | Project-owned string labels for future adapters and policy. |
@@ -48,8 +48,8 @@ spec:
 | `spec.memory.path` | No | Local SQLite path, relative to project YAML. SQLite only. |
 | `spec.reports.provider` | No | `markdown` or `json` in the reference package. |
 | `spec.reports.outputDir` | No | Report directory, relative to project YAML. |
-| `spec.incidentSources` | No | Bounded source declarations. v1alpha1 includes `local-log`. |
-| `spec.evidenceProviders` | No | Ordered bounded evidence declarations. v1alpha1 includes `local-json`. |
+| `spec.incidentSources` | No | Bounded source declarations. v1 includes `local-log`. |
+| `spec.evidenceProviders` | No | Ordered bounded evidence declarations. v1 includes `local-json`. |
 | `spec.rules.files` | No | Ordered versioned `DiagnosisRuleSet` documents. |
 | `spec.model.enabled` | No | Explicit policy flag; defaults to `false`. It does not install or select a provider. |
 
@@ -57,7 +57,7 @@ spec:
 
 | Field | Meaning |
 | --- | --- |
-| `provider` | Reference provider name. v1alpha1 supports `local-json`. |
+| `provider` | Reference provider name. v1 supports `local-json`. |
 | `path` | Local JSON file containing an item list or `{"items": [...]}`. |
 | `kinds` | Optional evidence-kind allowlist. Empty means all supplied kinds. |
 | `maxItems` | Maximum accepted items after filtering and duplicate removal. |
@@ -117,7 +117,7 @@ and plugin API. See [RFC 0002](rfcs/0002-postgresql-memory.md).
 ## Rule-set document
 
 ```yaml
-apiVersion: lumis.dev/v1alpha1
+apiVersion: lumis.dev/v1
 kind: DiagnosisRuleSet
 metadata:
   name: customer-pipeline-rules
@@ -202,12 +202,22 @@ uv run lumis rules test --rule path/to/rule.yml --input path/to/fixture.json
 
 `doctor` validates project/rule documents, reports selected local providers, checks the local-log path when configured, and warns when model policy is enabled. It does not write incident state or contact a network service.
 
-The checked [project schema](../schemas/lumis-project-v1alpha1.schema.json),
-[legacy rule-set schema](../schemas/lumis-rules-v1alpha1.schema.json), and
-[structured diagnosis-rule schema](../schemas/lumis-diagnosis-rule-v1alpha1.schema.json) can be
+The checked [project schema](../schemas/lumis-project-v1.schema.json),
+[legacy rule-set schema](../schemas/lumis-rules-v1.schema.json), and
+[structured diagnosis-rule schema](../schemas/lumis-diagnosis-rule-v1.schema.json) can be
 used by editors. JSON report consumers can validate against the
-[diagnosis-report schema](../schemas/lumis-diagnosis-report-v1alpha1.schema.json). CI verifies
+[diagnosis-report schema](../schemas/lumis-diagnosis-report-v1.schema.json). CI verifies
 that all checked schemas match the Pydantic contracts.
+
+## Upgrade from v1alpha1
+
+```bash
+lumis config migrate path/to/lumis.yml --output path/to/lumis.v1.yml
+```
+
+Migrate the project and all referenced rule files together. Mixed-version collections are
+rejected. The migration is validated, idempotent, and refuses to overwrite an existing output
+unless `--force` is explicit. See the complete [v1 migration guide](migrations/config-v1.md).
 
 ## Secrets
 

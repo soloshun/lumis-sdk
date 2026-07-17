@@ -25,12 +25,12 @@ protocol is frozen forever.
 
 **Tracking:** epic #9. Split into implementation issues only when Sprint 6 begins.
 
-- [ ] **S6-01 Public API inventory:** classify imports, protocols, configuration, serialized
+- [x] **S6-01 Public API inventory:** classify imports, protocols, configuration, serialized
       documents, plugin metadata, CLI commands, and schemas as stable, provisional, or internal.
-- [ ] **S6-02 Configuration v1:** publish `lumis.dev/v1` project/rule/report/policy schemas, retain
+- [x] **S6-02 Configuration v1:** publish `lumis.dev/v1` project/rule/report/policy schemas, retain
       bounded `v1alpha1` reading for a documented transition, and provide deterministic migration
       plus validation tooling.
-- [ ] **S6-03 Compatibility and deprecation:** publish Python, config, persistence, plugin, CLI,
+- [x] **S6-03 Compatibility and deprecation:** publish Python, config, persistence, plugin, CLI,
       and schema compatibility guarantees; add typed deprecation notices and contract tests.
 - [ ] **S6-04 Security closure:** perform an internal threat-model review, hostile-input audit,
       authority inventory, secret scan, dependency/license review, and public residual-risk log.

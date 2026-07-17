@@ -8,7 +8,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from lumis_sdk.domain import Severity
 
-PROJECT_API_VERSION = "lumis.dev/v1alpha1"
+PROJECT_API_VERSION = "lumis.dev/v1"
+LEGACY_PROJECT_API_VERSION = "lumis.dev/v1alpha1"
 PROJECT_KIND = "Project"
 RULE_SET_KIND = "DiagnosisRuleSet"
 DIAGNOSIS_RULE_KIND = "DiagnosisRule"
@@ -197,7 +198,7 @@ class DiagnosisRuleMetadata(ObjectMetadata):
 
 
 class ProjectSpec(StrictModel):
-    """The v1alpha1 project specification."""
+    """The stable v1 project specification."""
 
     environment: str = "local"
     memory: ProjectMemoryConfig = Field(default_factory=MemoryConfig)
@@ -213,9 +214,13 @@ class ProjectSpec(StrictModel):
 
 
 class ProjectDocument(StrictModel):
-    """Versioned Lumis SDK project configuration document."""
+    """Versioned Lumis SDK project configuration document.
 
-    api_version: Literal["lumis.dev/v1alpha1"] = Field(alias="apiVersion")
+    The loader accepts the deprecated v1alpha1 marker during the documented
+    compatibility window. New documents and generated schemas use v1.
+    """
+
+    api_version: Literal["lumis.dev/v1", "lumis.dev/v1alpha1"] = Field(alias="apiVersion")
     kind: Literal["Project"]
     metadata: ObjectMetadata
     spec: ProjectSpec
@@ -374,7 +379,7 @@ class StructuredDiagnosisRuleSpec(StrictModel):
 class DiagnosisRuleDocument(StrictModel):
     """One strict, versioned, portable compound diagnosis rule."""
 
-    api_version: Literal["lumis.dev/v1alpha1"] = Field(alias="apiVersion")
+    api_version: Literal["lumis.dev/v1", "lumis.dev/v1alpha1"] = Field(alias="apiVersion")
     kind: Literal["DiagnosisRule"]
     metadata: DiagnosisRuleMetadata
     spec: StructuredDiagnosisRuleSpec
@@ -404,7 +409,7 @@ class RuleSetSpec(StrictModel):
 class DiagnosisRuleSetDocument(StrictModel):
     """Versioned deterministic rule-set configuration document."""
 
-    api_version: Literal["lumis.dev/v1alpha1"] = Field(alias="apiVersion")
+    api_version: Literal["lumis.dev/v1", "lumis.dev/v1alpha1"] = Field(alias="apiVersion")
     kind: Literal["DiagnosisRuleSet"]
     metadata: ObjectMetadata
     spec: RuleSetSpec
@@ -423,7 +428,7 @@ class LumisConfig(StrictModel):
     rules: list[DeterministicRule] = Field(default_factory=list)
     structured_rules: list[DiagnosisRuleDocument] = Field(default_factory=list)
     model: ModelConfig = Field(default_factory=ModelConfig)
-    source_api_version: Literal["lumis.dev/v1alpha1"] = "lumis.dev/v1alpha1"
+    source_api_version: Literal["lumis.dev/v1", "lumis.dev/v1alpha1"] = "lumis.dev/v1"
 
 
 def _normalized_https_origin(value: str) -> str:

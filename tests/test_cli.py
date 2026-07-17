@@ -163,12 +163,44 @@ def test_init_doctor_and_rule_validation_form_a_local_project(tmp_path: Path) ->
 
     doctor_result = runner.invoke(app, ["doctor", "--config", str(config_path)])
     assert doctor_result.exit_code == 0
-    assert "api version: lumis.dev/v1alpha1" in doctor_result.output
+    assert "api version: lumis.dev/v1" in doctor_result.output
     assert "model assistance: disabled" in doctor_result.output
 
     rules_result = runner.invoke(app, ["rules", "validate", "--config", str(config_path), "--json"])
     assert rules_result.exit_code == 0
     assert json.loads(rules_result.output) == {"valid": True, "rules": []}
+
+
+def test_config_migrate_writes_stable_v1_without_overwriting(tmp_path: Path) -> None:
+    """The migration CLI validates input and requires explicit replacement authority."""
+    source = tmp_path / "old.yml"
+    output = tmp_path / "stable.yml"
+    source.write_text(
+        """apiVersion: lumis.dev/v1alpha1
+kind: Project
+metadata:
+  name: migration-fixture
+spec:
+  environment: staging
+""",
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(app, ["config", "migrate", str(source), "--output", str(output)])
+
+    assert result.exit_code == 0
+    assert "Migrated Project" in result.output
+    assert output.read_text(encoding="utf-8").startswith("apiVersion: lumis.dev/v1\n")
+
+    refused = runner.invoke(app, ["config", "migrate", str(source), "--output", str(output)])
+    assert refused.exit_code == 2
+    assert "Refusing to overwrite" in refused.output
+
+    forced = runner.invoke(
+        app,
+        ["config", "migrate", str(source), "--output", str(output), "--force"],
+    )
+    assert forced.exit_code == 0
 
 
 def test_rules_test_emits_machine_readable_compound_explanation(tmp_path: Path) -> None:

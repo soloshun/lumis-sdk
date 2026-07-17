@@ -1,0 +1,174 @@
+{
+  "$defs": {
+    "DeterministicRule": {
+      "additionalProperties": false,
+      "description": "A reproducible diagnosis rule supplied by a consuming project.",
+      "properties": {
+        "all_contains": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "All Contains",
+          "type": "array"
+        },
+        "classification": {
+          "title": "Classification",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "missing_evidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Evidence",
+          "type": "array"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "priority": {
+          "default": 0,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "recommended_next_steps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Recommended Next Steps",
+          "type": "array"
+        },
+        "root_cause_hypothesis": {
+          "title": "Root Cause Hypothesis",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "suggested_playbook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suggested Playbook"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "version": {
+          "default": "1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "id",
+        "all_contains",
+        "classification",
+        "severity",
+        "summary",
+        "root_cause_hypothesis",
+        "confidence"
+      ],
+      "title": "DeterministicRule",
+      "type": "object"
+    },
+    "ObjectMetadata": {
+      "additionalProperties": false,
+      "description": "Portable object metadata shared by versioned configuration documents.",
+      "properties": {
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "object"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ObjectMetadata",
+      "type": "object"
+    },
+    "RuleSetSpec": {
+      "additionalProperties": false,
+      "description": "Rules carried by a versioned rule-set document.",
+      "properties": {
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/DeterministicRule"
+          },
+          "title": "Rules",
+          "type": "array"
+        }
+      },
+      "title": "RuleSetSpec",
+      "type": "object"
+    },
+    "Severity": {
+      "description": "The urgency assigned to an incident.",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Versioned deterministic rule-set configuration document.",
+  "properties": {
+    "apiVersion": {
+      "const": "lumis.dev/v1",
+      "title": "Apiversion",
+      "type": "string"
+    },
+    "kind": {
+      "const": "DiagnosisRuleSet",
+      "title": "Kind",
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "#/$defs/ObjectMetadata"
+    },
+    "spec": {
+      "$ref": "#/$defs/RuleSetSpec"
+    }
+  },
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "title": "DiagnosisRuleSetDocument",
+  "type": "object"
+}

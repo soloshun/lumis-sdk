@@ -19,7 +19,7 @@ Ship `lumis-plugin.json` at distribution root:
 
 ```json
 {
-  "apiVersion": "lumis.dev/v1alpha1",
+  "apiVersion": "lumis.dev/v1",
   "kind": "PluginManifest",
   "metadata": {
     "name": "acme-evidence",

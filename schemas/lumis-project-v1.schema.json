@@ -388,7 +388,7 @@
   "description": "Versioned Lumis SDK project configuration document.\n\nThe loader accepts the deprecated v1alpha1 marker during the documented\ncompatibility window. New documents and generated schemas use v1.",
   "properties": {
     "apiVersion": {
-      "const": "lumis.dev/v1alpha1",
+      "const": "lumis.dev/v1",
       "title": "Apiversion",
       "type": "string"
     },

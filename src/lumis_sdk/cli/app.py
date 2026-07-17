@@ -26,6 +26,8 @@ from lumis_sdk.config import (
     LumisConfig,
     load_config,
     load_diagnosis_rule,
+    migrate_config_file,
+    render_migrated_yaml,
     resolve_project_path,
 )
 from lumis_sdk.domain import (
@@ -47,9 +49,11 @@ app = typer.Typer(
 memory_app = typer.Typer(help="Search local Lumis SDK incident memory.")
 rules_app = typer.Typer(help="Validate and test deterministic diagnosis rules.")
 plugins_app = typer.Typer(help="Inspect installed Lumis SDK plugins without importing them.")
+config_app = typer.Typer(help="Inspect and migrate versioned Lumis SDK configuration.")
 app.add_typer(memory_app, name="memory")
 app.add_typer(rules_app, name="rules")
 app.add_typer(plugins_app, name="plugins")
+app.add_typer(config_app, name="config")
 
 
 def version_callback(value: bool) -> None:
@@ -89,6 +93,37 @@ def initialize(
     rules_path.write_text(_INITIAL_RULES, encoding="utf-8")
     typer.echo(f"Created {config_path}")
     typer.echo(f"Created {rules_path}")
+
+
+@config_app.command("migrate")
+def config_migrate(
+    source: Path = typer.Argument(..., exists=True, readable=True),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Write stable v1 YAML to this path; omit to print it.",
+    ),
+    force: bool = typer.Option(False, "--force", help="Replace an existing output file."),
+) -> None:
+    """Migrate one v1alpha1 Project or rule document deterministically to stable v1."""
+    try:
+        result = migrate_config_file(source)
+    except (OSError, ValueError, ValidationError) as error:
+        raise typer.BadParameter(f"Configuration migration failed: {error}") from error
+    rendered = render_migrated_yaml(result)
+    if output is None:
+        typer.echo(rendered, nl=False)
+        return
+    if output.exists() and not force:
+        raise typer.BadParameter(f"Refusing to overwrite {output}; pass --force to replace it.")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(rendered, encoding="utf-8")
+    state = "migrated" if result.changed else "validated"
+    typer.echo(
+        f"{state.capitalize()} {result.kind} from {result.source_api_version} "
+        f"to {result.target_api_version}: {output}"
+    )
 
 
 @app.command()
@@ -513,7 +548,7 @@ def _telemetry_log_path(config_path: Path, project_config: LumisConfig) -> Path:
     return resolve_project_path(config_path, project_config.incident_sources[0].path)
 
 
-_INITIAL_PROJECT = """apiVersion: lumis.dev/v1alpha1
+_INITIAL_PROJECT = """apiVersion: lumis.dev/v1
 kind: Project
 metadata:
   name: my-pipeline
@@ -534,7 +569,7 @@ spec:
     enabled: false
 """
 
-_INITIAL_RULES = """apiVersion: lumis.dev/v1alpha1
+_INITIAL_RULES = """apiVersion: lumis.dev/v1
 kind: DiagnosisRuleSet
 metadata:
   name: project-rules

@@ -107,7 +107,7 @@ discovery, explicit loading policy, compatibility, and contract testing.
 | Incident input | Local log normalization and typed vendor-neutral incident contracts. |
 | Evidence collection | Async provider port, bounded collection service, safe failures, redaction, and a local JSON reference adapter. |
 | Deterministic diagnosis | Legacy ordered text rules plus structured `all`/`any`/`not` rules with typed comparisons, required evidence, ranking, and candidate explanations. |
-| Versioned configuration | Strict `lumis.dev/v1alpha1` project and rule-set documents; unknown fields fail validation. |
+| Versioned configuration | Strict `lumis.dev/v1` project and rule-set documents; unknown fields fail validation. |
 | Reports | Deterministic Markdown or versioned JSON with facts, evidence, hypotheses, truth state, confidence, review requirement, and safety boundary. |
 | Local memory | SQLite records, human resolutions, visible truth state, and transparent lexical search. |
 | Model boundary | Explicit policy, budgets, schema-validated output, fake CI gateway, and deterministic fallback. |
@@ -183,7 +183,7 @@ uv run lumis memory search "KeyError Close" \
 ## Versioned project configuration
 
 ```yaml
-apiVersion: lumis.dev/v1alpha1
+apiVersion: lumis.dev/v1
 kind: Project
 metadata:
   name: customer-pipeline
@@ -210,9 +210,11 @@ spec:
     enabled: false
 ```
 
-Configuration is strict: misspelled or unknown fields fail with a validation error. Relative paths resolve from the project document. Files larger than the configured safety limit are rejected. Checked schemas for the [project](schemas/lumis-project-v1alpha1.schema.json), [rule set](schemas/lumis-rules-v1alpha1.schema.json), [structured diagnosis rule](schemas/lumis-diagnosis-rule-v1alpha1.schema.json), and [JSON diagnosis report](schemas/lumis-diagnosis-report-v1alpha1.schema.json) support editors and tooling.
+Configuration is strict: misspelled or unknown fields fail with a validation error. Relative paths resolve from the project document. Files larger than the configured safety limit are rejected. Checked stable schemas for the [project](schemas/lumis-project-v1.schema.json), [rule set](schemas/lumis-rules-v1.schema.json), [structured diagnosis rule](schemas/lumis-diagnosis-rule-v1.schema.json), and [JSON diagnosis report](schemas/lumis-diagnosis-report-v1.schema.json) support editors and tooling.
 
-Lumis SDK intentionally accepts only the versioned project and rule-set structures during this pre-release revamp. Read the [configuration reference](docs/configuration.md) for every field and its meaning.
+Released `v1alpha1` documents remain readable during the documented transition. Use
+`lumis config migrate` and the [v1 migration guide](docs/migrations/config-v1.md) to validate and
+upgrade them. Read the [configuration reference](docs/configuration.md), [public API inventory](docs/stability/public-api.md), and [compatibility policy](docs/stability/compatibility.md).
 
 ## CLI
 
@@ -227,6 +229,7 @@ lumis rules validate
 lumis rules test
 lumis plugins list
 lumis plugins doctor
+lumis config migrate
 ```
 
 `doctor` and validation commands do not make network calls or write incident state. Model assistance remains disabled unless application code supplies both an enabled policy and a gateway adapter.

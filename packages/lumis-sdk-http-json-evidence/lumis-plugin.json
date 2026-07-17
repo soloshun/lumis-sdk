@@ -1,5 +1,5 @@
 {
-  "apiVersion": "lumis.dev/v1alpha1",
+  "apiVersion": "lumis.dev/v1",
   "kind": "PluginManifest",
   "metadata": {
     "name": "http-json-evidence",
@@ -13,7 +13,7 @@
     "supportStatus": "experimental",
     "sdk": {
       "minimum": "0.0.8",
-      "maximumExclusive": "0.1.0"
+      "maximumExclusive": "2.0.0"
     },
     "requiredAuthorities": [
       "network",

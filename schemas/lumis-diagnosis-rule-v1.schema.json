@@ -1,0 +1,470 @@
+{
+  "$defs": {
+    "CompoundRuleMatch": {
+      "additionalProperties": false,
+      "description": "Boolean condition groups evaluated without provider-specific logic.",
+      "properties": {
+        "all": {
+          "items": {
+            "$ref": "#/$defs/RuleCondition"
+          },
+          "title": "All",
+          "type": "array"
+        },
+        "any": {
+          "items": {
+            "$ref": "#/$defs/RuleCondition"
+          },
+          "title": "Any",
+          "type": "array"
+        },
+        "not": {
+          "items": {
+            "$ref": "#/$defs/RuleCondition"
+          },
+          "title": "Not",
+          "type": "array"
+        }
+      },
+      "title": "CompoundRuleMatch",
+      "type": "object"
+    },
+    "DiagnosisRuleMetadata": {
+      "additionalProperties": false,
+      "description": "Identity and revision metadata for one portable structured rule.",
+      "properties": {
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "object"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "default": "1",
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "DiagnosisRuleMetadata",
+      "type": "object"
+    },
+    "ElementComparison": {
+      "additionalProperties": false,
+      "description": "One scalar comparison applied to elements of a bounded list.",
+      "properties": {
+        "contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contains"
+        },
+        "equals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Equals"
+        },
+        "greaterThan": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Greaterthan"
+        },
+        "greaterThanOrEqual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Greaterthanorequal"
+        },
+        "lessThan": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lessthan"
+        },
+        "lessThanOrEqual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lessthanorequal"
+        },
+        "matchesRegex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matchesregex"
+        },
+        "prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prefix"
+        }
+      },
+      "title": "ElementComparison",
+      "type": "object"
+    },
+    "RuleCondition": {
+      "additionalProperties": false,
+      "description": "One scalar or quantified comparison against a dot-addressable incident field.",
+      "properties": {
+        "allElements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ElementComparison"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "anyElement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ElementComparison"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contains"
+        },
+        "equals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Equals"
+        },
+        "field": {
+          "minLength": 1,
+          "title": "Field",
+          "type": "string"
+        },
+        "greaterThan": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Greaterthan"
+        },
+        "greaterThanOrEqual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Greaterthanorequal"
+        },
+        "lessThan": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lessthan"
+        },
+        "lessThanOrEqual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lessthanorequal"
+        },
+        "matchesRegex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matchesregex"
+        },
+        "prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prefix"
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "title": "RuleCondition",
+      "type": "object"
+    },
+    "RuleEvidenceRequirements": {
+      "additionalProperties": false,
+      "description": "Evidence kinds that must be present before a rule can match.",
+      "properties": {
+        "required": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required",
+          "type": "array"
+        }
+      },
+      "title": "RuleEvidenceRequirements",
+      "type": "object"
+    },
+    "Severity": {
+      "description": "The urgency assigned to an incident.",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "StructuredDiagnosisRuleSpec": {
+      "additionalProperties": false,
+      "description": "Behavior and result contract for one structured rule.",
+      "properties": {
+        "diagnosis": {
+          "$ref": "#/$defs/StructuredRuleDiagnosis"
+        },
+        "evidence": {
+          "$ref": "#/$defs/RuleEvidenceRequirements"
+        },
+        "match": {
+          "$ref": "#/$defs/CompoundRuleMatch"
+        },
+        "priority": {
+          "default": 0,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "recommendedNextSteps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Recommendednextsteps",
+          "type": "array"
+        },
+        "suggestedPlaybook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suggestedplaybook"
+        }
+      },
+      "required": [
+        "match",
+        "diagnosis"
+      ],
+      "title": "StructuredDiagnosisRuleSpec",
+      "type": "object"
+    },
+    "StructuredRuleDiagnosis": {
+      "additionalProperties": false,
+      "description": "Diagnosis returned when a structured deterministic rule wins.",
+      "properties": {
+        "classification": {
+          "minLength": 1,
+          "title": "Classification",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "confirmedFacts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Confirmedfacts",
+          "type": "array"
+        },
+        "hypothesis": {
+          "minLength": 1,
+          "title": "Hypothesis",
+          "type": "string"
+        },
+        "missingEvidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missingevidence",
+          "type": "array"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "medium"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "classification",
+        "summary",
+        "hypothesis",
+        "confidence"
+      ],
+      "title": "StructuredRuleDiagnosis",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One strict, versioned, portable compound diagnosis rule.",
+  "properties": {
+    "apiVersion": {
+      "const": "lumis.dev/v1",
+      "title": "Apiversion",
+      "type": "string"
+    },
+    "kind": {
+      "const": "DiagnosisRule",
+      "title": "Kind",
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "#/$defs/DiagnosisRuleMetadata"
+    },
+    "spec": {
+      "$ref": "#/$defs/StructuredDiagnosisRuleSpec"
+    }
+  },
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "title": "DiagnosisRuleDocument",
+  "type": "object"
+}

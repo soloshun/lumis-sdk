@@ -76,7 +76,7 @@
   "description": "Strict deterministic policy with an explicit default-deny posture.",
   "properties": {
     "apiVersion": {
-      "const": "lumis.dev/v1alpha1",
+      "const": "lumis.dev/v1",
       "title": "Apiversion",
       "type": "string"
     },

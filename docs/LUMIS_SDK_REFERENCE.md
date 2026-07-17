@@ -33,6 +33,9 @@ Read:
 - [Architecture overview](architecture/overview.md)
 - [Open-source architecture and contribution guide](architecture/open-source-project-guide.md)
 - [Configuration reference](configuration.md)
+- [Public API stability inventory](stability/public-api.md)
+- [Compatibility and deprecation policy](stability/compatibility.md)
+- [v1 migration guide](migrations/config-v1.md)
 - [Threat model](safety/threat-model.md)
 - [Roadmap](../ROADMAP.md)
 
@@ -80,12 +83,14 @@ assertion for independently packaged adapters.
 
 ## Configuration
 
-Projects use strict `lumis.dev/v1alpha1` `Project` and rule documents. Project configuration can
+Projects use strict `lumis.dev/v1` `Project` and rule documents. Project configuration can
 select local JSON evidence and Markdown or JSON reporting. Unknown fields and unversioned
 proof-of-concept configuration are rejected, and checked JSON Schemas cover configuration, rules,
 and reports.
 
-Playbook, policy, and proposal documents also have checked `lumis.dev/v1alpha1` schemas.
+Diagnosis report, plugin manifest, playbook, and policy documents have checked stable
+`lumis.dev/v1` schemas. The standalone action-proposal schema remains provisional because it does
+not yet have a cross-language versioned envelope.
 
 ## Truth and confidence
 

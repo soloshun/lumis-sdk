@@ -9,7 +9,7 @@ and independent of the Lumis hosted product.
 Each file contains one strict `DiagnosisRule`:
 
 ```yaml
-apiVersion: lumis.dev/v1alpha1
+apiVersion: lumis.dev/v1
 kind: DiagnosisRule
 metadata:
   name: missing-required-column

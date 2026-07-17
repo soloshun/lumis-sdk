@@ -1,7 +1,7 @@
 # Plugin compatibility and support policy
 
-The plugin manifest is a checked public contract, but remains `v1alpha1` while Lumis SDK is
-pre-1.0.
+The plugin manifest is a checked stable `lumis.dev/v1` public contract. Historical alpha
+manifests remain readable during the documented compatibility window.
 
 ## Version intervals
 

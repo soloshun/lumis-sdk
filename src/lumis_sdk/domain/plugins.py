@@ -7,7 +7,7 @@ from pydantic import Field, model_validator
 
 from .models import DomainModel
 
-PLUGIN_API_VERSION: Literal["lumis.dev/v1alpha1"] = "lumis.dev/v1alpha1"
+PLUGIN_API_VERSION: Literal["lumis.dev/v1"] = "lumis.dev/v1"
 PLUGIN_KIND: Literal["PluginManifest"] = "PluginManifest"
 
 
@@ -98,7 +98,7 @@ class PluginSpec(DomainModel):
 class PluginManifest(DomainModel):
     """Metadata shipped as ``lumis-plugin.json`` in a plugin distribution."""
 
-    api_version: Literal["lumis.dev/v1alpha1"] = Field(alias="apiVersion")
+    api_version: Literal["lumis.dev/v1", "lumis.dev/v1alpha1"] = Field(alias="apiVersion")
     kind: Literal["PluginManifest"] = PLUGIN_KIND
     metadata: PluginMetadata
     spec: PluginSpec
@@ -129,7 +129,21 @@ class PluginLoadPolicy(DomainModel):
 
 def plugin_manifest_json_schema() -> dict[str, object]:
     """Return the checked JSON Schema for independently packaged plugins."""
-    return PluginManifest.model_json_schema(by_alias=True)
+    return _manifest_schema(PLUGIN_API_VERSION)
+
+
+def legacy_plugin_manifest_json_schema() -> dict[str, object]:
+    """Return the frozen deprecated plugin manifest schema."""
+    return _manifest_schema("lumis.dev/v1alpha1")
+
+
+def _manifest_schema(version: str) -> dict[str, object]:
+    schema = PluginManifest.model_json_schema(by_alias=True)
+    marker = schema["properties"]["apiVersion"]
+    assert isinstance(marker, dict)
+    marker.pop("enum", None)
+    marker["const"] = version
+    return schema
 
 
 def _version_tuple(value: str) -> tuple[int, int, int]:

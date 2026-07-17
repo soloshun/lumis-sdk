@@ -31,7 +31,7 @@ entry points -> application -> domain
 | `lumis_sdk.adapters.evidence` | Bounded local JSON evidence collection. | Reference adapter. |
 | `lumis_sdk.adapters.reports` | Deterministic Markdown and versioned JSON reports. | Reference adapter. |
 | `lumis_sdk.adapters.plugins` | Metadata-only discovery and explicit policy-checked loading. | Experimental plugin SDK. |
-| `lumis_sdk.config` | Strict v1alpha1 documents, bounded loading, and schema. | Versioned configuration API. |
+| `lumis_sdk.config` | Strict v1 documents, bounded loading, alpha migration, and schemas. | Versioned configuration API. |
 | `lumis_sdk.cli` | Local composition and user commands. | Pre-alpha public interface. |
 | `lumis_sdk.testkit` | Deterministic fakes, fixtures, and reusable evidence/report contracts. | Experimental. |
 

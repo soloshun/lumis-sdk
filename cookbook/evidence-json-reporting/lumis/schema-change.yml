@@ -1,4 +1,4 @@
-apiVersion: lumis.dev/v1alpha1
+apiVersion: lumis.dev/v1
 kind: DiagnosisRule
 metadata:
   name: missing-customer-id

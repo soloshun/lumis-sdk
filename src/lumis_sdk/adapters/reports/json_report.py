@@ -55,4 +55,18 @@ def parse_json_report(value: str) -> DiagnosisReportDocument:
 
 def diagnosis_report_json_schema() -> dict[str, object]:
     """Return the JSON Schema used by editors and downstream tooling."""
-    return DiagnosisReportDocument.model_json_schema(by_alias=True)
+    return _report_schema(DIAGNOSIS_REPORT_API_VERSION)
+
+
+def legacy_diagnosis_report_json_schema() -> dict[str, object]:
+    """Return the frozen deprecated diagnosis-report schema."""
+    return _report_schema("lumis.dev/v1alpha1")
+
+
+def _report_schema(version: str) -> dict[str, object]:
+    schema = DiagnosisReportDocument.model_json_schema(by_alias=True)
+    marker = schema["properties"]["apiVersion"]
+    assert isinstance(marker, dict)
+    marker.pop("enum", None)
+    marker["const"] = version
+    return schema
