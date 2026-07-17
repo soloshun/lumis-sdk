@@ -16,11 +16,19 @@ you have the right to submit the work under this project's Apache-2.0 license. A
 trailer to every commit using `git commit -s`. The sign-off is a provenance declaration, not a
 copyright assignment.
 
-Do not submit generated, copied, employer-owned, or model-assisted material unless you have
-reviewed it, can explain it, and have the legal right to contribute it. Maintainers may ask for the
-origin of substantial code, fixtures, documentation, or data and may close a contribution when
-provenance cannot be established. Existing commits are not retroactively invalidated by this
-policy; enforcement begins when this policy is merged.
+AI-assisted contributions are welcome. Contributors may use coding assistants, language models,
+or other AI tools for code, tests, documentation, examples, and review. The human contributor
+remains fully responsible for the submitted result: they must understand it, verify it, follow the
+architecture and safety boundaries, run the required checks, remove secrets/private data, and
+have the legal right to contribute every part under Apache-2.0. AI output is not evidence that a
+change is correct, secure, original, or compatible.
+
+Briefly disclose material AI assistance in the pull-request description so reviewers understand
+the provenance and review context. Do not submit generated, copied, employer-owned, or
+model-assisted material that you cannot explain and defend. Maintainers may ask for the origin of
+substantial code, fixtures, documentation, or data and may close a contribution when provenance
+or human understanding cannot be established. Existing commits are not retroactively invalidated
+by this policy; enforcement begins when this policy is merged.
 
 ## Architecture boundaries
 

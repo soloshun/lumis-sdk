@@ -1,0 +1,18 @@
+apiVersion: lumis.dev/v1alpha1
+kind: DiagnosisRuleSet
+metadata:
+  name: phase-one-upgrade-rules
+spec:
+  rules:
+    - id: release-rehearsal
+      name: release-rehearsal
+      version: "1"
+      priority: 100
+      all_contains: [LUMIS_RELEASE_REHEARSAL]
+      classification: release_rehearsal
+      severity: low
+      summary: The synthetic release-rehearsal marker was observed.
+      root_cause_hypothesis: The bounded upgrade fixture was evaluated.
+      confidence: 0.5
+      recommended_next_steps:
+        - Confirm the migrated project validates under lumis.dev/v1.

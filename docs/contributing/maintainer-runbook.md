@@ -80,9 +80,10 @@ provider dependency.
    `scripts/verify_published_package.sh`.
 8. Retain the SPDX SBOM, provenance/SBOM attestation URLs, clean-install matrix, reproducibility
    comparison, and [security review checklist](../safety/security-review.md) with the release.
-9. For a `1.0` candidate, complete the
-   [release gate and evidence record](../releases/1.0-release-gate.md), including bounded
-   benchmark JSON, upgrade/plugin rehearsals, independent security review, and adopter feedback.
+9. To finish Phase 1, follow the ordered
+   [`0.1.0rc1` to `0.1.0` release guide](../releases/0.1.0-phase-1-release-guide.md), including
+   bounded benchmark JSON, upgrade/plugin rehearsals, independent security review, and adopter
+   feedback. Phase 1 does not imply package version `1.0.0`.
 10. Update Lumis only after the public SDK release is available.
 
 PyPI publication remains a maintainer-controlled manual action through Trusted Publishing.

@@ -18,7 +18,7 @@ plugins, shared memory, or hosted systems only where the adopter explicitly need
 | Understand stability | [Public API inventory](stability/public-api.md) and [compatibility policy](stability/compatibility.md) |
 | Reproduce performance checks | [Phase 1 bounded performance baseline](performance/phase-1-baseline.md) |
 | Contribute or release | [Open-source project guide](architecture/open-source-project-guide.md) and [maintainer runbook](contributing/maintainer-runbook.md) |
-| Review the 1.0 decision | [Release gate and evidence record](releases/1.0-release-gate.md) |
+| Complete the Phase 1 release | [`0.1.0rc1` to `0.1.0` release guide](releases/0.1.0-phase-1-release-guide.md) |
 | See future direction | [Roadmap](../ROADMAP.md) and [candidate mapping](roadmap/candidate-capability-mapping.md) |
 
 ## Python API guides

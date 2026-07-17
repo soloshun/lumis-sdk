@@ -3,7 +3,7 @@
 Status: internal review complete for the current Phase 1 implementation; independent external
 review pending. Last updated: 2026-07-17.
 
-This record is evidence for the stable-release decision, not a claim that the SDK or its
+This record is evidence for the Phase 1 final-release decision, not a claim that the SDK or its
 dependencies are vulnerability-free. Findings must be updated when authority, dependencies,
 wire formats, or execution behavior change.
 

@@ -11,7 +11,7 @@ SDK into the hosted Lumis product or granting ambient production authority.
 
 1. [`docs/roadmap/phase-1-trustworthy-python-foundation.md`](docs/roadmap/phase-1-trustworthy-python-foundation.md)
    covers Sprints 0–6: the delivered deterministic foundation and the final stable-contract,
-   security, documentation, adoption, and `1.0` readiness sprint.
+   security, documentation, adoption, and `0.1.0` readiness sprint.
 2. [`docs/roadmap/phase-2-model-prompt-and-bounded-agents.md`](docs/roadmap/phase-2-model-prompt-and-bounded-agents.md)
    covers Sprints 7–11: provider-neutral model routing, prompt packages, evidence planning,
    read-only tools, loop guards, grounding, and evaluation gates.
@@ -31,7 +31,7 @@ private product documentation.
 
 | Phase | Sprints | Outcome | Exit condition |
 | --- | --- | --- | --- |
-| Phase 1 — trustworthy Python foundation | 0–6 | Stable, secure, documented Python contracts and independently usable reference paths | Stable-contract gates met; external evidence recorded; `1.0` release approved |
+| Phase 1 — trustworthy Python foundation | 0–6 | Stable, secure, documented Python contracts and independently usable reference paths | Phase 1 gates met; external evidence recorded; pre-1.0 `0.1.0` release approved |
 | Phase 2 — model, prompt, and bounded agents | 7–11 | Replayable provider-neutral reasoning and read-only evidence planning with hard budgets | Multiple adapters pass offline conformance; evaluation gates prevent unsafe promotion |
 | Phase 3 — intelligence, memory, and integrations | 12–17 | Explainable cross-system context, quality-aware memory, and useful optional integration packages | Measured standalone value across several domains without mandatory vendor dependencies |
 | Phase 4 — guarded recovery and ecosystem | 18–23 | Portable recovery protocols and a mature multi-language-friendly ecosystem with no default executor | Protocol/security review, multiple independent implementations, and documented `2.0` decision |
@@ -95,7 +95,8 @@ A sprint is complete only when:
 | 3 — durable memory and connectors | Complete | PostgreSQL memory, webhook normalization, HTTP JSON evidence (`0.0.7`) | #2, #6 |
 | 4 — policy and playbook proposals | Complete | Evidence-linked, approval-aware, non-executing proposals (`0.0.8`) | #7, #47, #48 |
 | 5 — verification and learning | Complete | Explicit verification truth, transparent retrieval, replay evaluation (`0.0.8`) | #8, #49, #50 |
-| 6 — stable Python foundation | Active planning | Stable contracts, security/release hardening, adoption evidence, and `1.0` qualification | #9 |
+| 6 — trustworthy Python foundation | In progress | Stable contracts, security/release hardening, adoption evidence, and `0.1.0` qualification | #9 |
 
-Roadmap labels such as `v0.4` and `v0.5` identify capability milestones, not Python package
-versions. Package versions are chosen during release qualification.
+Earlier roadmap labels such as `v0.4` and `v0.5` identify capability milestones, not Python
+package versions. Sprint 6 is explicitly targeted to package release `0.1.0`; a future decision
+after Sprint 7 may consider the path toward `1.0.0`.

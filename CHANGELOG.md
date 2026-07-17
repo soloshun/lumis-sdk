@@ -18,7 +18,9 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
   a Prometheus/Alertmanager walkthrough, expanded custom PostgreSQL-schema guidance, offline smoke
   paths for every cookbook, and a versioned Phase 1 tutorial/video script.
 - Added explicit core/plugin governance, contributor provenance and support boundaries, a
-  reproducible Phase 1 benchmark harness, and an evidence-based 1.0 release go/no-go record.
+  reproducible Phase 1 benchmark harness, and a step-by-step `0.1.0rc1` to `0.1.0` release guide.
+- Explicitly allow responsible AI-assisted contributions while retaining human accountability,
+  provenance, architecture, safety, documentation, and verification requirements.
 
 ### Changed
 

@@ -30,3 +30,11 @@ approval, execution, verification, or audit behavior. Write "No change" when non
 - [ ] Public behavior is documented.
 - [ ] `CHANGELOG.md` is updated for user-visible behavior.
 - [ ] Examples use synthetic or public data only.
+
+## AI assistance and contributor responsibility
+
+- [ ] I understand and can explain every submitted change, whether written manually or with AI.
+- [ ] I verified AI-assisted material for correctness, security, licensing/provenance, private
+      data, architecture boundaries, and project conventions.
+
+Material AI assistance used (write "None" when not used):

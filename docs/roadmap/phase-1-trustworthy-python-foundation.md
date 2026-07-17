@@ -7,7 +7,7 @@ Sprints: 0–6
 An independent Python application can install Lumis SDK, normalize a bounded incident, collect
 typed evidence, diagnose deterministically, produce reports, retain explicit operational memory,
 create a governed proposal, record approval and verification, and learn only confirmed outcomes.
-The SDK is documented, security-reviewed, compatibility-governed, and distributable without a
+The SDK is documented, reviewable, compatibility-governed, and distributable without a
 Lumis account, model provider, or production executor.
 
 ## Delivered foundation
@@ -19,7 +19,7 @@ explicit verification, truth-aware retrieval, and replay metrics through core `0
 
 ## Sprint 6 — Stable contracts, security, documentation, and adopters
 
-**Outcome:** Phase 1 becomes a defensible stable Python foundation. Stability applies to a clearly
+**Outcome:** Phase 1 becomes a defensible pre-1.0 Python foundation. Stability applies to a clearly
 inventoried public surface; it does not promise that every experimental adapter or future recovery
 protocol is frozen forever.
 
@@ -49,10 +49,11 @@ protocol is frozen forever.
       ownership.
 - [x] **S6-10 Performance baseline:** record bounded-rule, serialization, SQLite retrieval, plugin
       discovery, and replay benchmark methodology without turning microbenchmarks into SLO claims.
-- [ ] **S6-11 Release candidate:** publish a release candidate, run upgrade and plugin compatibility
+- [ ] **S6-11 Release candidate:** publish `0.1.0rc1`, run upgrade and plugin compatibility
       rehearsals, gather adopter/security feedback, and resolve or publicly accept findings.
-- [ ] **S6-12 Stable release decision:** publish `1.0` only after all local gates and required
-      external evidence pass; otherwise keep #9 open with explicit blockers.
+- [ ] **S6-12 Phase 1 release decision:** publish final `0.1.0` only after all local gates and
+      required external evidence pass; otherwise keep #9 open with explicit blockers. This does
+      not approve or publish package version `1.0.0`.
 
 ### Acceptance evidence
 
@@ -62,7 +63,7 @@ protocol is frozen forever.
 - Python 3.11–3.13 clean-install and plugin coexistence results.
 - Two independent adoption reports and runnable example smoke tests.
 - Governance/support files, documentation index, video scripts, and benchmark report.
-- Explicit release-candidate and stable-release go/no-go decisions.
+- Explicit `0.1.0rc1` and final `0.1.0` go/no-go decisions.
 
 ### External gates
 

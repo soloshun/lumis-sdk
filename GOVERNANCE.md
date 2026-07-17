@@ -2,7 +2,7 @@
 
 Lumis SDK currently uses a benevolent-maintainer model. Solomon Eshun is the lead maintainer,
 security contact, package owner, and final release authority. Review and merge access may be
-delegated, but PyPI ownership, security embargo decisions, and stable-release approval remain
+delegated, but PyPI ownership, security embargo decisions, and final-release approval remain
 with the lead maintainer until this file records a successor or a multi-maintainer process.
 
 ## Decisions
