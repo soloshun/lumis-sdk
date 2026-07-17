@@ -2,6 +2,10 @@
 
 Lumis SDK uses ports and adapters so that its incident and recovery semantics remain independent of a model provider, database, observability vendor, orchestration system, cloud or agent framework.
 
+The [phased roadmap](../../ROADMAP.md) extends this architecture incrementally. Future model,
+lineage, semantic-retrieval, and recovery protocols must preserve the dependency rule below and
+remain either provider-neutral core contracts or independently installable adapters.
+
 ## Dependency rule
 
 ```text
@@ -67,6 +71,11 @@ approval state, and records verification state. It has no action executor. Evide
 persistence, and Markdown or JSON report writing are composed separately through their ports and
 adapters.
 
-## Pre-release contract
+## Contract maturity
 
-The flat proof-of-concept modules and unversioned YAML shapes are intentionally removed. Lumis SDK has no stable release consumers yet, so the repository exposes one coherent architecture rather than carrying two public APIs. Future breaking changes require a versioned configuration or storage transition.
+Current public contracts remain pre-1.0 until Sprint 6 inventories stable, provisional, and
+internal surfaces and publishes configuration v1 plus migration guarantees. Future breaking
+changes require an explicit compatibility decision, versioned configuration or storage
+transition, deprecation notice, upgrade guide, and contract fixtures. Stability never widens
+runtime authority: plugin installation, approval, and model output remain non-authorizing by
+default.

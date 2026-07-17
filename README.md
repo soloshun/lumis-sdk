@@ -150,6 +150,10 @@ pip install "lumis-sdk==0.0.8"
 
 The repository's GitHub Actions workflow publishes reviewed releases through PyPI Trusted Publishing.
 
+See the [phased roadmap](ROADMAP.md) for the stable Python foundation, bounded model/agent
+contracts, intelligence and integration packages, guarded recovery protocols, TypeScript
+feasibility, documentation, and community plans.
+
 Run the local deterministic example:
 
 ```bash

@@ -52,3 +52,19 @@ uv build
 Changes that add action execution, widen filesystem/network authority, alter approval semantics, or weaken evidence boundaries require a design discussion and explicit threat-model updates before implementation.
 
 We welcome contributions to code, examples, cookbook recipes, and documentation. Changes to homepage messaging, branding, roadmap, sponsorship links, or product positioning are controlled by maintainers and may require prior discussion.
+
+## Roadmap contribution intake
+
+The [phased roadmap](ROADMAP.md) keeps future phases documentation-only until maintainers approve
+one sprint. Before proposing a roadmap capability:
+
+1. show a standalone or second-product use case rather than a Lumis-only requirement;
+2. classify the work as core, official optional package, community package, example, or
+   product-only;
+3. identify authority, privacy, compatibility, dependency, maintenance, and migration impact;
+4. provide synthetic/public fixtures and an offline verification plan; and
+5. explain which existing port or contract is reused before proposing a new one.
+
+Contributions may include written tutorials and reproducible video scripts. Every video must have
+a versioned written equivalent so users can learn and verify the example without relying on an
+external platform.

@@ -1,47 +1,101 @@
-# Lumis SDK roadmap
+# Lumis SDK phased roadmap
 
-## v0.1 - Diagnosis-as-Code foundation
+Date: 2026-07-17
 
-Local logs, deterministic rules, Pydantic models, Markdown reports, SQLite memory, lexical search, optional model boundary, lifecycle contracts, and synthetic cookbooks.
+Lumis SDK is an Apache-2.0, vendor-agnostic Python framework for building evidence-grounded,
+guarded incident-response and pipeline-recovery systems. The roadmap develops reusable contracts,
+reference adapters, optional packages, test utilities, and relatable examples without turning the
+SDK into the hosted Lumis product or granting ambient production authority.
 
-## v0.2 - Structured rules and evidence
+## Roadmap documents
 
-Versioned strict configuration, rule IDs/versions/priorities, explainable matches, evidence-provider port, JSON reporting, doctor and validation commands, generated schema, and stable testkit.
+1. [`docs/roadmap/phase-1-trustworthy-python-foundation.md`](docs/roadmap/phase-1-trustworthy-python-foundation.md)
+   covers Sprints 0–6: the delivered deterministic foundation and the final stable-contract,
+   security, documentation, adoption, and `1.0` readiness sprint.
+2. [`docs/roadmap/phase-2-model-prompt-and-bounded-agents.md`](docs/roadmap/phase-2-model-prompt-and-bounded-agents.md)
+   covers Sprints 7–11: provider-neutral model routing, prompt packages, evidence planning,
+   read-only tools, loop guards, grounding, and evaluation gates.
+3. [`docs/roadmap/phase-3-intelligence-memory-and-integrations.md`](docs/roadmap/phase-3-intelligence-memory-and-integrations.md)
+   covers Sprints 12–17: correlation, lineage, rule analytics, memory quality, semantic retrieval,
+   and demand-led observability, data, orchestration, cloud, and delivery integrations.
+4. [`docs/roadmap/phase-4-guarded-recovery-and-ecosystem.md`](docs/roadmap/phase-4-guarded-recovery-and-ecosystem.md)
+   covers Sprints 18–23: side-effect-aware plugin contracts, executor/verifier protocols, signing,
+   policy conformance, migrations, cross-language schemas, education, and ecosystem maturity.
 
-## v0.3 - Plugin SDK
+An internal backend-authored candidate review was used as design input. The public
+[`candidate mapping`](docs/roadmap/candidate-capability-mapping.md) records how each generally
+useful proposal was independently classified and sequenced without exposing or depending on
+private product documentation.
 
-RFC-governed entry-point discovery, manifests, compatibility checks, contract tests, generic webhook, and one independently packaged evidence connector.
+## Phase model
 
-## v0.4 - Policy and playbook proposals
-
-Typed versioned playbooks, risk tiers, proposals, approval contracts, and sandbox cookbook. No default production execution.
-
-## v0.5 - Verification and learning
-
-Verifier port, explicit truth states persisted in memory, verified outcomes, transparent retrieval scoring, and replay evaluation tools.
-
-## v1.0 criteria
-
-Stable contracts and config v1, upgrade guide, security review, comprehensive docs, multiple independent adopters, tested plugin ecosystem, and no unresolved lifecycle ambiguity.
-
-## Delivery sprint sequence
-
-Dates are planning targets rather than release promises. The private GitHub project keeps the
-durable roadmap epics, while only the active sprint is split into granular implementation work.
-
-| Sprint | Target window | Outcome | Roadmap issues |
+| Phase | Sprints | Outcome | Exit condition |
 | --- | --- | --- | --- |
-| Sprint 0 - Maintainer baseline | Complete | Open-source workflow, structured deterministic rules, and the `0.0.2` release. | #1 |
-| Sprint 1 - Evidence and reporting | Complete | Bounded typed evidence, versioned JSON reports, doctor checks, stable testkit contracts, and releases `0.0.3`/`0.0.4`. | #4, #19 |
-| Sprint 2 - Plugin SDK | Complete | Governed discovery, manifests, compatibility checks, explicit authority policy, plugin contract tests, and an independent package proof. | #5 |
-| Sprint 3 - Durable memory and connector proof | Complete | Optional shared memory, webhook normalization, an independently packaged evidence path, and the `0.0.7` release. | #2, #6 |
-| Sprint 4 - Policy and playbook proposals | Complete in package `0.0.8` | Typed, evidence-linked, approval-aware proposals with no core execution authority. | #7, #47, #48 |
-| Sprint 5 - Verification and learning | Complete in package `0.0.8` | Explicit verification truth, transparent retrieval, and replay evaluation. | #8, #49, #50 |
-| Sprint 6 - v1 stabilization | 2027-03-22 to 2027-06-30 | Stable contracts, secure releases, complete docs, and independent adoption evidence. | #9 |
+| Phase 1 — trustworthy Python foundation | 0–6 | Stable, secure, documented Python contracts and independently usable reference paths | Stable-contract gates met; external evidence recorded; `1.0` release approved |
+| Phase 2 — model, prompt, and bounded agents | 7–11 | Replayable provider-neutral reasoning and read-only evidence planning with hard budgets | Multiple adapters pass offline conformance; evaluation gates prevent unsafe promotion |
+| Phase 3 — intelligence, memory, and integrations | 12–17 | Explainable cross-system context, quality-aware memory, and useful optional integration packages | Measured standalone value across several domains without mandatory vendor dependencies |
+| Phase 4 — guarded recovery and ecosystem | 18–23 | Portable recovery protocols and a mature multi-language-friendly ecosystem with no default executor | Protocol/security review, multiple independent implementations, and documented `2.0` decision |
 
-Feature and fix branches start from `dev` and return to `dev` through review. Reviewed release
-changes are promoted from `dev` to `main`; package publication remains an explicit maintainer
-release action.
+Phase numbers describe capability maturity. They do not imply separate services, a hosted account,
+or a commitment to implement every named integration in core.
 
-Roadmap milestones (`v0.4`, `v0.5`) name capability groups. They do not dictate Python package
-version numbers; Sprints 4 and 5 are intentionally combined in the `0.0.8` release.
+## Working agreement
+
+- Core remains deterministic-first, local-first, model-optional, vendor-neutral, and useful with
+  no plugins installed.
+- A provider, framework, protocol, database extension, cloud, or heavy dependency belongs in an
+  optional package behind a stable port.
+- SaaS tenancy, hosted secrets, billing, entitlements, UI ownership, managed infrastructure,
+  enterprise administration, and commercial operations remain in Lumis—not the SDK.
+- Models may classify, rank, plan evidence, and suggest allowlisted playbooks. They may not verify
+  recovery, manufacture confirmed truth, create arbitrary commands, or grant execution authority.
+- Recovery protocols remain allowlisted, policy-bound, attributable, idempotent, bounded,
+  reversible where possible, independently verified, and fail-closed.
+- Every behavior-changing sprint updates API/reference documentation, schemas where applicable,
+  at least one runnable example, changelog/upgrade notes, and the documentation-site source queue.
+- Tutorial video work is tracked as a release deliverable: each phase gets an overview and each
+  major adoption path gets a reproducible script, repository revision, and written equivalent.
+- TypeScript begins with language-neutral JSON Schema and conformance fixtures. A native runtime
+  starts only after an RFC proves value beyond generated types and avoids semantic drift.
+
+## Definition of done
+
+A sprint is complete only when:
+
+1. public contracts and safety invariants are explicit;
+2. implementation is vendor-neutral or isolated in an optional package;
+3. deterministic unit, contract, integration, hostile-input, and replay tests pass as relevant;
+4. compatibility, migration, authority, and failure behavior are documented;
+5. runnable synthetic/public examples demonstrate the capability without paid keys in CI;
+6. checked schemas and testkit fixtures are current;
+7. security review, dependency audit, SAST, distributions, and clean installs pass;
+8. API docs, cookbook docs, changelog, roadmap status, and video script queue are updated;
+9. GitHub issues and project items link the accepted implementation evidence; and
+10. implemented behavior is not overstated as autonomous recovery or production efficacy.
+
+## Issue promotion workflow
+
+1. Keep future phases documentation-only until the maintainer approves the phase.
+2. Re-check the latest SDK and plugin releases before accepting a candidate.
+3. Validate every candidate against one standalone or second-product use case.
+4. Classify it as core, official optional package, community package, example, or product-only.
+5. Approve one sprint at a time and create only that sprint's implementation issues/project items.
+6. Branch from `dev`, implement and document, merge through a reviewed PR to `dev`, then qualify a
+   separate `dev` → `main` release.
+7. Publish core and optional packages independently through trusted publishing and verify public
+   clean installation before closing release issues.
+
+## Current status
+
+| Sprint | Status | Released outcome | Tracking |
+| --- | --- | --- | --- |
+| 0 — maintainer baseline | Complete | Structured deterministic rules and open-source CI (`0.0.2`) | #1 |
+| 1 — evidence and reporting | Complete | Bounded evidence, JSON reports, doctor checks, stable testkit (`0.0.3`/`0.0.4`) | #4, #19 |
+| 2 — plugin SDK | Complete | Governed discovery, manifests, compatibility and authority checks (`0.0.6`) | #5 |
+| 3 — durable memory and connectors | Complete | PostgreSQL memory, webhook normalization, HTTP JSON evidence (`0.0.7`) | #2, #6 |
+| 4 — policy and playbook proposals | Complete | Evidence-linked, approval-aware, non-executing proposals (`0.0.8`) | #7, #47, #48 |
+| 5 — verification and learning | Complete | Explicit verification truth, transparent retrieval, replay evaluation (`0.0.8`) | #8, #49, #50 |
+| 6 — stable Python foundation | Active planning | Stable contracts, security/release hardening, adoption evidence, and `1.0` qualification | #9 |
+
+Roadmap labels such as `v0.4` and `v0.5` identify capability milestones, not Python package
+versions. Package versions are chosen during release qualification.

@@ -31,6 +31,7 @@ It does not replace a monitoring system or orchestrator. It does not require a m
 Read:
 
 - [Architecture overview](architecture/overview.md)
+- [Open-source architecture and contribution guide](architecture/open-source-project-guide.md)
 - [Configuration reference](configuration.md)
 - [Threat model](safety/threat-model.md)
 - [Roadmap](../ROADMAP.md)
