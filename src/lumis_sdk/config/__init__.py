@@ -2,6 +2,7 @@
 
 from .loader import (
     MAX_CONFIG_BYTES,
+    MAX_CONFIG_DEPTH,
     LumisV1Alpha1DeprecationWarning,
     diagnosis_rule_json_schema,
     legacy_diagnosis_rule_json_schema,
@@ -50,6 +51,7 @@ from .models import (
 
 __all__ = [
     "MAX_CONFIG_BYTES",
+    "MAX_CONFIG_DEPTH",
     "DIAGNOSIS_RULE_KIND",
     "LEGACY_PROJECT_API_VERSION",
     "PROJECT_API_VERSION",

@@ -1,0 +1,40 @@
+name: Pull request dependency review
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: Vulnerability and license review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          version: "0.11.17"
+          enable-cache: true
+      - name: Install Python
+        run: uv python install 3.11
+      - name: Audit locked dependencies
+        run: uv audit --locked
+      - name: Review core dependency licenses
+        run: |
+          uv run --with pip-licenses pip-licenses --format=json --with-system > licenses-core.json
+          uv run python scripts/check_dependency_licenses.py licenses-core.json
+      - name: Review HTTP plugin dependency licenses
+        run: |
+          uv run --project packages/lumis-sdk-http-json-evidence --with pip-licenses \
+            pip-licenses --format=json --with-system > licenses-http.json
+          uv run python scripts/check_dependency_licenses.py licenses-http.json
+      - name: Review PostgreSQL plugin dependency licenses
+        run: |
+          uv run --project packages/lumis-sdk-postgres-memory \
+            --with 'psycopg[binary]>=3.2,<4' --with pip-licenses \
+            pip-licenses --format=json --with-system > licenses-postgres.json
+          uv run python scripts/check_dependency_licenses.py licenses-postgres.json

@@ -32,9 +32,9 @@ protocol is frozen forever.
       plus validation tooling.
 - [x] **S6-03 Compatibility and deprecation:** publish Python, config, persistence, plugin, CLI,
       and schema compatibility guarantees; add typed deprecation notices and contract tests.
-- [ ] **S6-04 Security closure:** perform an internal threat-model review, hostile-input audit,
+- [x] **S6-04 Security closure:** perform an internal threat-model review, hostile-input audit,
       authority inventory, secret scan, dependency/license review, and public residual-risk log.
-- [ ] **S6-05 Release supply chain:** generate an SBOM, retain trusted-publisher attestations,
+- [x] **S6-05 Release supply chain:** generate an SBOM, retain trusted-publisher attestations,
       document reproducible build inputs, verify sdist/wheel contents, and test clean installs on
       every supported Python version.
 - [ ] **S6-06 Documentation system:** complete a navigable API index, concepts, configuration,

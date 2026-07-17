@@ -133,3 +133,32 @@ jobs:
 
       - name: Build independent connector distribution
         run: uv build --project packages/lumis-sdk-http-json-evidence
+
+  plugin-coexistence:
+    name: Independent plugin coexistence
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          version: "0.11.17"
+          enable-cache: true
+      - name: Install Python
+        run: uv python install 3.12
+      - name: Build core and independently packaged plugins
+        run: |
+          uv build --no-sources --out-dir dist/core
+          uv build --project packages/lumis-sdk-postgres-memory --no-sources --out-dir dist/postgres
+          uv build --project packages/lumis-sdk-http-json-evidence --no-sources --out-dir dist/http
+      - name: Verify both plugins coexist in a clean environment
+        run: |
+          uv venv --python 3.12 .venv-coexistence
+          uv pip install --python .venv-coexistence/bin/python \
+            dist/core/*.whl dist/postgres/*.whl dist/http/*.whl
+          output="$(.venv-coexistence/bin/lumis plugins doctor --json)"
+          echo "$output"
+          jq -e \
+            '.valid and (.plugins | length == 2) and all(.plugins[]; .status == "compatible")' \
+            <<< "$output"

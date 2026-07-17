@@ -11,11 +11,15 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
 - Added validated, deterministic, idempotent migration APIs and `lumis config migrate` with
   non-overwriting output by default.
 - Added a public API stability inventory, compatibility/deprecation policy, and v1 upgrade guide.
+- Added release artifact content validation, deterministic rebuild comparison, SPDX SBOMs, signed
+  provenance/SBOM attestations, Python 3.11–3.13 clean wheel/sdist installs, plugin coexistence,
+  PR dependency/license review, secret scanning, and a security/authority review record.
 
 ### Changed
 
 - New projects, reports, plugin manifests, policies, playbooks, and repository cookbooks now use
   `lumis.dev/v1`; project/rule alpha loading remains available through `1.x`.
+- YAML configuration now rejects aliases and nesting deeper than 64 nodes before model validation.
 
 ### Deprecated
 

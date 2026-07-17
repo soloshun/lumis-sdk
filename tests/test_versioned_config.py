@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from lumis_sdk.config import (
     MAX_CONFIG_BYTES,
+    MAX_CONFIG_DEPTH,
     LumisV1Alpha1DeprecationWarning,
     diagnosis_rule_json_schema,
     legacy_project_json_schema,
@@ -185,6 +186,38 @@ def test_oversized_configuration_is_rejected(tmp_path: Path) -> None:
     config_path.write_bytes(b"x" * (MAX_CONFIG_BYTES + 1))
 
     with pytest.raises(ValueError, match="exceeds"):
+        load_config(config_path)
+
+
+def test_yaml_aliases_are_rejected_before_construction(tmp_path: Path) -> None:
+    """Configuration cannot use aliases to amplify or obscure reviewed values."""
+    config_path = tmp_path / "lumis.yml"
+    config_path.write_text(
+        """apiVersion: lumis.dev/v1
+kind: Project
+metadata:
+  name: alias-project
+spec:
+  memory: &shared
+    provider: sqlite
+  reports: *shared
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="aliases are not supported"):
+        load_config(config_path)
+
+
+def test_excessive_yaml_depth_is_rejected(tmp_path: Path) -> None:
+    """Deeply nested YAML fails at a deterministic parser boundary."""
+    nested = "value: leaf\n"
+    for _ in range(MAX_CONFIG_DEPTH + 1):
+        nested = "level:\n" + "".join(f"  {line}\n" for line in nested.splitlines())
+    config_path = tmp_path / "deep.yml"
+    config_path.write_text(nested, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="maximum depth"):
         load_config(config_path)
 
 

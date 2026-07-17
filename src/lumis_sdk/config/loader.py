@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any, cast
 
 import yaml
+from yaml.events import AliasEvent
+from yaml.nodes import Node
 
 from .models import (
     LEGACY_PROJECT_API_VERSION,
@@ -18,6 +20,29 @@ from .models import (
 )
 
 MAX_CONFIG_BYTES = 1_048_576
+MAX_CONFIG_DEPTH = 64
+
+
+class BoundedSafeLoader(yaml.SafeLoader):
+    """Safe YAML loader that rejects aliases and excessive nesting."""
+
+    def __init__(self, stream: Any) -> None:
+        super().__init__(stream)
+        self._lumis_depth = 0
+
+    def compose_node(self, parent: Node | None, index: int) -> Node:
+        if self.check_event(AliasEvent):  # type: ignore[no-untyped-call]
+            raise ValueError("YAML aliases are not supported in Lumis configuration")
+        self._lumis_depth += 1
+        if self._lumis_depth > MAX_CONFIG_DEPTH:
+            raise ValueError(f"YAML configuration exceeds maximum depth {MAX_CONFIG_DEPTH}")
+        try:
+            node = super().compose_node(parent, index)
+            if node is None:
+                raise ValueError("YAML configuration contains an empty node")
+            return node
+        finally:
+            self._lumis_depth -= 1
 
 
 def load_config(path: Path) -> LumisConfig:
@@ -135,7 +160,11 @@ def _load_data(path: Path) -> Any:
     with path.open(encoding="utf-8") as handle:
         if path.suffix.lower() == ".json":
             return json.load(handle)
-        return yaml.safe_load(handle) or {}
+        try:
+            # BoundedSafeLoader is a SafeLoader subclass; Bandit cannot infer that relationship.
+            return yaml.load(handle, Loader=BoundedSafeLoader) or {}  # nosec B506
+        except RecursionError as error:
+            raise ValueError("Configuration nesting exceeds the parser limit") from error
 
 
 def _schema_for_version(model: type[Any], version: str) -> dict[str, Any]:

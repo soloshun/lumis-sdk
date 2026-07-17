@@ -16,7 +16,7 @@ Incident evidence, credentials, local files, operational memory, diagnosis integ
 | --- | --- | --- |
 | Prompt injection in evidence | Evidence is passed as data; model has no core execution tools; cookbooks use bounded tools. | Add adversarial replay/evaluation corpus. |
 | Secret leakage | Conservative recursive redaction and explicit model opt-in. | Organization-specific redactors and provider policy adapters. |
-| Hostile or oversized YAML | `safe_load`, strict schemas, one-MiB limit. | Alias/depth limits and fuzz/property testing. |
+| Hostile or oversized YAML | Safe loader, strict schemas, one-MiB file limit, alias rejection, 64-node nesting limit, and hostile-input tests. | Broader parser fuzz/property testing. |
 | Oversized logs | CLI ten-MiB limit. | Streaming/slicing and configurable bounded readers. |
 | Path traversal | Cookbook file endpoints resolve and enforce a fixed root; config paths are explicit local authority. | Add dedicated security tests for all file adapters. |
 | Unsafe Markdown | Reports are deterministic text, not executed HTML. | Escaping policy for future web renderers. |
@@ -37,3 +37,6 @@ Incident evidence, credentials, local files, operational memory, diagnosis integ
 4. Verification must follow any external execution before verification-confirmed recovery.
 5. Installing or discovering a plugin grants no network, filesystem, secret, model, or execution
    authority.
+
+The detailed [authority inventory and residual-risk review](security-review.md) records the
+Sprint 6 review scope, local evidence, external gate, and adopter-owned controls.

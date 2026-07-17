@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 license = "Apache-2.0"
 dependencies = [
   "httpx>=0.28,<1",
-  "lumis-sdk>=0.0.8,<0.1.0",
+  "lumis-sdk>=0.0.8,<2",
 ]
 
 [project.entry-points."lumis_sdk.plugins"]
