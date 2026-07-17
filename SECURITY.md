@@ -18,4 +18,4 @@ Never commit API keys, access tokens, private URLs, production logs, or customer
 
 Logs, code, runbooks, tickets, configuration obtained from elsewhere, and model output are untrusted input. Do not treat model-generated text or rule confidence as authorization to act. Lumis SDK core intentionally ships no unrestricted shell, cloud, database, or remediation executor.
 
-Local deterministic use makes no network request and needs no credentials. Optional provider adapters must be explicitly installed and configured, minimize exported context, apply redaction, document retention behavior, and enforce time and size bounds. See the [threat model](docs/safety/threat-model.md) for the maintained security assumptions.
+Local deterministic use makes no network request and needs no credentials. Optional provider adapters must be explicitly installed and configured, minimize exported context, apply redaction, document retention behavior, and enforce time and size bounds. See the [threat model](docs/safety/threat-model.md) and [security, authority, and residual-risk review](docs/safety/security-review.md) for the maintained assumptions and open external-review gate.

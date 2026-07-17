@@ -51,6 +51,23 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/lumis_sdk"]
 
+[tool.hatch.build.targets.sdist]
+include = [
+  "/CHANGELOG.md",
+  "/CODE_OF_CONDUCT.md",
+  "/CONTRIBUTING.md",
+  "/GOVERNANCE.md",
+  "/LICENSE",
+  "/README.md",
+  "/ROADMAP.md",
+  "/SECURITY.md",
+  "/SUPPORT.md",
+  "/docs",
+  "/pyproject.toml",
+  "/schemas",
+  "/src",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

@@ -78,7 +78,9 @@ provider dependency.
 6. Publish to TestPyPI first when packaging or metadata changed, then publish to PyPI.
 7. Create the GitHub release and verify the installed package with
    `scripts/verify_published_package.sh`.
-8. Update Lumis only after the public SDK release is available.
+8. Retain the SPDX SBOM, provenance/SBOM attestation URLs, clean-install matrix, reproducibility
+   comparison, and [security review checklist](../safety/security-review.md) with the release.
+9. Update Lumis only after the public SDK release is available.
 
 PyPI publication remains a maintainer-controlled manual action through Trusted Publishing.
 The same workflow publishes `core`, `postgres-memory`, and `http-json-evidence` independently;
