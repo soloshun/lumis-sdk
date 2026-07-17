@@ -1,6 +1,6 @@
 # Independently packaged fixture plugin
 
-This synthetic package demonstrates the v0.3 plugin boundary without a vendor service, network
+This synthetic package demonstrates the stable v1 plugin boundary without a vendor service, network
 request, credential, model, or execution capability.
 
 It contains:

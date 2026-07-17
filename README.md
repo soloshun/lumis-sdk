@@ -9,6 +9,7 @@
   <a href="LICENSE">Apache-2.0</a> ·
   <a href="docs/architecture/overview.md">Architecture</a> ·
   <a href="docs/configuration.md">Configuration</a> ·
+  <a href="docs/README.md">Documentation index</a> ·
   <a href="cookbook/README.md">Cookbooks</a> ·
   <a href="ROADMAP.md">Roadmap</a>
 </p>

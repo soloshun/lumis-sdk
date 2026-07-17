@@ -1,0 +1,30 @@
+apiVersion: lumis.dev/v1
+kind: DiagnosisRule
+metadata:
+  name: orders-etl-failure-rate
+  version: "1"
+spec:
+  priority: 100
+  match:
+    all:
+      - field: alert.name
+        equals: PipelineFailureRateHigh
+      - field: alert.status
+        equals: firing
+      - field: metric.failure_rate
+        greaterThan: 0.2
+  diagnosis:
+    classification: data_pipeline_reliability
+    severity: critical
+    summary: The orders ETL synthetic failure-rate alert is firing.
+    hypothesis: A recent data or deployment change may be causing repeated task failures.
+    confidence: 0.7
+    confirmedFacts:
+      - Alertmanager reported a firing PipelineFailureRateHigh alert.
+    missingEvidence:
+      - recent deployment diff
+      - failed task logs
+  evidence:
+    required: [prometheus_metric]
+  recommendedNextSteps:
+    - Compare recent deploys and failed task logs before proposing recovery.

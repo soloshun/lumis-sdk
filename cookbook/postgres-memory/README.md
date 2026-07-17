@@ -17,3 +17,28 @@ docker compose -f cookbook/postgres-memory/compose.yml down --volumes
 The password and port are synthetic local-only values. Real deployments should use a secret
 manager, TLS, a least-privilege database role, backups, retention policy, and network controls.
 The adapter stores operational memory only; it grants no arbitrary SQL or remediation authority.
+
+## Custom PostgreSQL schema
+
+The checked `lumis.yml` deliberately uses an adopter-owned schema instead of `public`:
+
+```yaml
+spec:
+  memory:
+    provider: postgres
+    connectionUrlEnv: LUMIS_MEMORY_DATABASE_URL
+    schema: lumis_memory_cookbook
+```
+
+Validate the configuration offline, without resolving the secret or connecting to PostgreSQL:
+
+```bash
+uv run lumis doctor --config cookbook/postgres-memory/lumis.yml
+```
+
+Schema names must match the lowercase identifier contract and are validated before the adapter
+quotes them. The plugin runs fixed migrations and statements inside that schema; it does not accept
+arbitrary SQL or depend on the connection's default `search_path`. Separate applications can use
+separate schemas and roles, but schema separation alone is not a tenancy boundary. Production
+operators still own database grants, row-level policy where needed, TLS, rotation, backups,
+retention, migration scheduling, and restore tests.

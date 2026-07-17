@@ -37,11 +37,11 @@ protocol is frozen forever.
 - [x] **S6-05 Release supply chain:** generate an SBOM, retain trusted-publisher attestations,
       document reproducible build inputs, verify sdist/wheel contents, and test clean installs on
       every supported Python version.
-- [ ] **S6-06 Documentation system:** complete a navigable API index, concepts, configuration,
+- [x] **S6-06 Documentation system:** complete a navigable API index, concepts, configuration,
       plugin-author, migration, security, and maintainer guides suitable for a future docs site.
-- [ ] **S6-07 Independent adoption evidence:** validate at least two non-Lumis paths—one core-only
+- [x] **S6-07 Independent adoption evidence:** validate at least two non-Lumis paths—one core-only
       local workflow and one optional-plugin workflow—with reproducible fixtures and limitations.
-- [ ] **S6-08 Relatable examples:** add or strengthen examples for data pipelines, ML quality,
+- [x] **S6-08 Relatable examples:** add or strengthen examples for data pipelines, ML quality,
       software delivery, webhook evidence, shared PostgreSQL memory, policy proposals, and
       verification replay; add Prometheus/Alertmanager and custom PostgreSQL-schema walkthroughs.
 - [ ] **S6-09 Governance and support:** publish governance, code of conduct, security reporting,

@@ -14,6 +14,9 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
 - Added release artifact content validation, deterministic rebuild comparison, SPDX SBOMs, signed
   provenance/SBOM attestations, Python 3.11–3.13 clean wheel/sdist installs, plugin coexistence,
   PR dependency/license review, secret scanning, and a security/authority review record.
+- Added a navigable documentation index, core concepts, standalone core/plugin adoption evidence,
+  a Prometheus/Alertmanager walkthrough, expanded custom PostgreSQL-schema guidance, offline smoke
+  paths for every cookbook, and a versioned Phase 1 tutorial/video script.
 
 ### Changed
 

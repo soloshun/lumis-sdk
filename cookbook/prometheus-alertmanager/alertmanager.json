@@ -1,0 +1,16 @@
+{
+  "pipeline_name": "orders-etl",
+  "environment": "production",
+  "status": "firing",
+  "alerts": [
+    {
+      "labels": {
+        "alertname": "PipelineFailureRateHigh",
+        "severity": "critical"
+      },
+      "annotations": {
+        "summary": "Orders ETL failure rate exceeded its synthetic threshold."
+      }
+    }
+  ]
+}

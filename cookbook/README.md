@@ -16,6 +16,28 @@ Cookbooks are small, runnable teaching projects that use Lumis SDK core in a spe
 | [plugin-package](plugin-package/README.md) | Independently packaged static manifest, lazy discovery, explicit loading, and contract testing. | None |
 | [postgres-memory](postgres-memory/README.md) | Two processes share one explicit confirmed episode through the optional PostgreSQL plugin. | None |
 | [webhook-http-evidence](webhook-http-evidence/README.md) | Authenticated replay-protected webhook normalization plus an offline HTTP JSON evidence plugin fixture. | None |
+| [prometheus-alertmanager](prometheus-alertmanager/README.md) | Alertmanager normalization and synthetic Prometheus metric evidence mapped into a portable rule. | None |
+
+## Offline smoke matrix
+
+Every cookbook has a credential-free check. The check proves only the boundary named here; it is
+not evidence that an external service or optional model works.
+
+| Cookbook | Offline smoke path | What it validates |
+| --- | --- | --- |
+| simple-log-diagnosis | `uv run lumis diagnose --config cookbook/simple-log-diagnosis/lumis/lumis.yml` | Core CLI, rules, report, and SQLite memory. |
+| recording-resolution | Run simple-log diagnosis, then use the printed ID with the documented `resolve` and `report` commands. | Explicit human truth transition; no inferred resolution. |
+| data-pipeline-investigation | `uv run lumis doctor --config cookbook/data-pipeline-investigation/lumis/lumis.yml` | Owned config/rules/local paths; optional Agno/OpenRouter call is not exercised. |
+| ml-regression-monitoring | `uv run lumis doctor --config cookbook/ml-regression-monitoring/lumis/lumis.yml` | Owned config/rules/local paths; optional model call is not exercised. |
+| software-delivery-ci-investigation | `uv run lumis doctor --config cookbook/software-delivery-ci-investigation/lumis/lumis.yml` | Owned config/rules/local paths; optional model call is not exercised. |
+| structured-rule-evaluation | `uv run lumis rules test --rule cookbook/structured-rule-evaluation/schema-change.yml --input cookbook/structured-rule-evaluation/schema-change.json` | Compound rule evaluation and explanation. |
+| evidence-json-reporting | `uv run lumis diagnose --config cookbook/evidence-json-reporting/lumis/lumis.yml` | Bounded evidence, redaction, JSON report, and SQLite memory. |
+| plugin-package | `uv run pytest cookbook/plugin-package/test_contract.py` | Static manifest and factory contract without provider authority. |
+| postgres-memory | `uv run lumis doctor --config cookbook/postgres-memory/lumis.yml` | Secret reference and custom-schema config only; database behavior uses the Docker path. |
+| webhook-http-evidence | CI command in its README using `httpx.MockTransport`. | Webhook and optional HTTP plugin composition without network. |
+| prometheus-alertmanager | `uv run python cookbook/prometheus-alertmanager/demo.py` | Alert authentication, portable mapping, metric evidence, and deterministic rule. |
+| guarded-proposal | `uv run python cookbook/guarded-proposal/demo.py` | Proposal and approval records remain non-executing. |
+| verification-replay | `uv run python cookbook/verification-replay/demo.py` | Exact deterministic replay metrics. |
 
 ## Shared structure
 
@@ -37,4 +59,6 @@ This organization keeps configuration easy to find without mixing it with source
 
 Start with one bounded incident class and synthetic inputs. Explain the domain, the signals being tested, deterministic and unknown paths, safety boundary, and exact commands in the cookbook README. Keep optional providers and frameworks inside the cookbook. Add core functionality only when it is vendor-agnostic and useful to more than one cookbook.
 
-The three initial domains now cover data pipelines, ML regression monitoring, and software delivery. They are synthetic proof-of-concept cookbooks, not production integrations.
+The examples cover data pipelines, ML regression monitoring, software delivery, Prometheus-style
+alerts, webhooks, shared memory, plugins, and governed recovery records. They are synthetic
+teaching projects, not production integrations or external adopter endorsements.
