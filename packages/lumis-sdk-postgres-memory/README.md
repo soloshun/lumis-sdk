@@ -7,7 +7,7 @@ driver.
 Install the independently versioned plugin alongside the released core:
 
 ```bash
-pip install "lumis-sdk==0.0.8" "lumis-sdk-postgres-memory==0.1.1"
+pip install --pre "lumis-sdk==0.1.0rc1" "lumis-sdk-postgres-memory==0.1.2"
 ```
 
 Project YAML references an environment variable rather than containing credentials:

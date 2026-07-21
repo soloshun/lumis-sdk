@@ -3,7 +3,7 @@
   "kind": "PluginManifest",
   "metadata": {
     "name": "http-json-evidence",
-    "version": "0.1.1"
+    "version": "0.1.2"
   },
   "spec": {
     "entryPoint": "http-json-evidence",

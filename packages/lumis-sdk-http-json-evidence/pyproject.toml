@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lumis-sdk-http-json-evidence"
-version = "0.1.1"
+version = "0.1.2"
 description = "Optional generic HTTP JSON evidence-provider plugin for Lumis SDK."
 readme = "README.md"
 requires-python = ">=3.11"

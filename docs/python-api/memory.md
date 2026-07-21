@@ -22,7 +22,7 @@ episode and remains an explicit `ConfirmedResolution`; model text never changes 
 Install the independent package alongside Lumis SDK `0.0.8` or another compatible core release:
 
 ```bash
-pip install "lumis-sdk==0.0.8" "lumis-sdk-postgres-memory==0.1.1"
+pip install --pre "lumis-sdk==0.1.0rc1" "lumis-sdk-postgres-memory==0.1.2"
 ```
 
 ```python
