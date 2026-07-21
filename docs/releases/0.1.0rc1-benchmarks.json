@@ -1,0 +1,54 @@
+{
+  "clock": "time.perf_counter_ns",
+  "fixture_check": {
+    "report_bytes": 1184
+  },
+  "implementation": "CPython",
+  "note": "Microbenchmark observations are not production SLOs.",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "python": "3.11.15",
+  "results": [
+    {
+      "calls_per_sample": 100,
+      "median_ns_per_call": 8960,
+      "name": "deterministic_rule_match_25",
+      "p95_ns_per_call": 9594,
+      "samples": 9,
+      "workload_units_per_call": 25
+    },
+    {
+      "calls_per_sample": 100,
+      "median_ns_per_call": 6492,
+      "name": "diagnosis_report_round_trip",
+      "p95_ns_per_call": 6854,
+      "samples": 9,
+      "workload_units_per_call": 1
+    },
+    {
+      "calls_per_sample": 100,
+      "median_ns_per_call": 101230,
+      "name": "sqlite_incident_get",
+      "p95_ns_per_call": 104041,
+      "samples": 9,
+      "workload_units_per_call": 1
+    },
+    {
+      "calls_per_sample": 100,
+      "median_ns_per_call": 135837,
+      "name": "plugin_discovery_25_manifests",
+      "p95_ns_per_call": 137303,
+      "samples": 9,
+      "workload_units_per_call": 25
+    },
+    {
+      "calls_per_sample": 10,
+      "median_ns_per_call": 139462,
+      "name": "replay_evaluation_1000_cases",
+      "p95_ns_per_call": 141970,
+      "samples": 9,
+      "workload_units_per_call": 1000
+    }
+  ],
+  "schema_version": 1,
+  "sdk_version": "0.1.0rc1"
+}

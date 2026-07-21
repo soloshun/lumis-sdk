@@ -6,6 +6,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
+from lumis_sdk import __version__
 from lumis_sdk.cli import app
 
 runner = CliRunner()
@@ -63,7 +64,7 @@ def test_version_is_available() -> None:
     result = runner.invoke(app, ["--version"])
 
     assert result.exit_code == 0
-    assert result.output.strip() == "0.0.8"
+    assert result.output.strip() == __version__
 
 
 def test_diagnose_writes_an_evidence_grounded_report(tmp_path: Path) -> None:

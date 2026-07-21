@@ -4,6 +4,8 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
 
 ## Unreleased
 
+## [0.1.0rc1] - 2026-07-21
+
 ### Added
 
 - Added stable `lumis.dev/v1` schemas for project, rule-set, structured-rule, diagnosis-report,
