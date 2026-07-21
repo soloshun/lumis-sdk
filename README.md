@@ -133,7 +133,7 @@ uv run lumis --help
 Lumis SDK is published to PyPI as `lumis-sdk`. Add it to a project managed by `uv`:
 
 ```bash
-uv add "lumis-sdk>=0.0.1,<0.1.0"
+uv add "lumis-sdk>=0.1.0rc1,<0.2"
 ```
 
 Or install it into an existing environment with pip:

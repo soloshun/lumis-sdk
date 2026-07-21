@@ -4,6 +4,12 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
 
 ## Unreleased
 
+### Fixed
+
+- Republished both official plugins as `0.1.2` with package metadata that accepts the Phase 1
+  `0.1.0rc1`/`0.1.0` core line; the immutable `0.1.1` PyPI artifacts retain their older
+  `<0.1.0` dependency bound.
+
 ## [0.1.0rc1] - 2026-07-21
 
 ### Added

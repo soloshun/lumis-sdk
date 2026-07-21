@@ -6,7 +6,7 @@ allowlisted HTTPS JSON endpoint. Core does not install an HTTP client.
 Install the independently versioned plugin alongside the released core:
 
 ```bash
-pip install "lumis-sdk==0.0.8" "lumis-sdk-http-json-evidence==0.1.1"
+pip install --pre "lumis-sdk==0.1.0rc1" "lumis-sdk-http-json-evidence==0.1.2"
 ```
 
 The connector:
