@@ -91,6 +91,19 @@ escalation. They never report recovery and never become reusable.
 `MemoryMatch.score_components` exposes `lexical`, `filters`, and `truth` components, while
 `reasons` includes the truth state and matched terms.
 
+## Recurrence and deterministic-rule promotion
+
+The paper describes recurring, verified diagnosis/remediation patterns as candidates for promotion
+into deterministic policy. This SDK release does **not** expose an API that counts recurrences,
+generates rules, or activates them automatically. `learn_from_verification` promotes truth state in
+operational memory only; it does not modify project rule files or grant execution authority.
+
+The planned capability will keep pattern detection and rule activation separate. A candidate must
+carry its source episodes and verification provenance, a versioned signature, configurable
+threshold evidence, proposed conditions/playbook/risk, replay results including counterexamples,
+and an explicit review decision. Five matching verified episodes may be configured as a review
+trigger, but frequency alone cannot establish correctness.
+
 ## Replay evaluation
 
 `lumis_sdk.evaluation.evaluate_replay` accepts `ReplayCase` values and returns exact deterministic

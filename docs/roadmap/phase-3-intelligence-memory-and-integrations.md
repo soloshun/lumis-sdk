@@ -47,15 +47,25 @@ contracts and bounded traversal independent of a graph database or lineage vendo
 **Acceptance evidence:** the same graph fixture is traversed and cited consistently by the
 reference adapter and at least one optional adapter.
 
-## Sprint 14 — Rule analytics and semantic audit events
+## Sprint 14 — Rule analytics, recurrence candidates, and semantic audit events
 
-**Outcome:** immutable events explain rule behavior and lifecycle activity without remote telemetry
-or hosted analytics.
+**Outcome:** immutable events explain rule behavior and lifecycle activity, and recurring verified
+episodes can produce reviewable deterministic-rule candidates without remote telemetry, hosted
+analytics, or automatic activation.
 
 - [ ] Define matched, missed, conflicted, shadow, and error rule-evaluation events with revision,
       feature facts, decision, and latency.
 - [ ] Add pure reducers for coverage, shadow comparison, stale-rule signals, and explicitly named
       precision proxies.
+- [ ] Define a versioned, explainable recurrence signature over comparable diagnosis, evidence,
+      remediation, approval, and verification fields.
+- [ ] Add configurable recurrence thresholds and candidate-rule documents with source episode IDs,
+      verification provenance, proposed conditions/playbook/risk, and known counterexamples; use
+      five verified recurrences only as an example configuration, not a universal default.
+- [ ] Require positive, negative, contradictory, and historical replay evidence plus an explicit
+      review decision before activation; frequency or model output alone cannot create a rule.
+- [ ] Represent candidate acceptance, rejection, revision, disabling, and rollback as immutable
+      events without rewriting incident history or project-owned rules silently.
 - [ ] Define semantic events across evidence, model invocation, correlation, policy, proposal,
       external execution, verification, and learning.
 - [ ] Include causation/correlation IDs, actor/automation identity, artifact hashes, and
@@ -63,7 +73,8 @@ or hosted analytics.
 - [ ] Add JSONL/reference report output and deterministic reducer fixtures.
 
 **Acceptance evidence:** analytics derive entirely from immutable public events; proxy metrics are
-not mislabeled as ground-truth precision.
+not mislabeled as ground-truth precision; repeated verified fixtures produce the same candidate,
+counterexamples block unsafe promotion, and no candidate is activated without accountable review.
 
 ## Sprint 15 — Memory feedback and semantic retrieval
 

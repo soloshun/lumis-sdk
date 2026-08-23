@@ -2,6 +2,12 @@
 
 Lumis SDK uses ports and adapters so that its incident and recovery semantics remain independent of a model provider, database, observability vendor, orchestration system, cloud or agent framework.
 
+It is an experimental implementation companion to the
+[published reference architecture](https://arxiv.org/abs/2608.01955). The paper's seven logical
+layers describe responsibilities rather than required products. The
+[research-alignment guide](research-alignment.md) maps those layers to current SDK behavior and
+clearly separates implemented contracts from roadmap work.
+
 The [phased roadmap](../../ROADMAP.md) extends this architecture incrementally. Future model,
 lineage, semantic-retrieval, and recovery protocols must preserve the dependency rule below and
 remain either provider-neutral core contracts or independently installable adapters.
@@ -63,6 +69,12 @@ Rules are evaluated by descending priority and then configured order. Each requi
 ## Memory truth
 
 An incident without a human resolution is exposed as `unconfirmed_hypothesis`; adding a human resolution exposes `human_confirmed`. Later schema versions can persist rejected, superseded, and verification-confirmed states explicitly.
+
+Repeated verified episodes may eventually produce a deterministic-rule **candidate**, reflecting
+the paper's learning feedback path. The current SDK does not generate or activate such rules.
+Future promotion requires explainable grouping, configurable thresholds, source-episode
+provenance, positive and negative replay fixtures, and accountable review. Frequency alone cannot
+confirm truth or authorize remediation.
 
 ## Guarded lifecycle
 

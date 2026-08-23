@@ -7,6 +7,11 @@ guarded incident-response and pipeline-recovery systems. The roadmap develops re
 reference adapters, optional packages, test utilities, and relatable examples without turning the
 SDK into the hosted Lumis product or granting ambient production authority.
 
+The project is an experimental implementation companion to
+[arXiv:2608.01955](https://arxiv.org/abs/2608.01955). The paper's explicit learning feedback path
+is scheduled incrementally: repeated verified episodes may create reviewable deterministic-rule
+candidates, but frequency alone never confirms truth or activates a rule.
+
 ## Roadmap documents
 
 1. [`docs/roadmap/phase-1-trustworthy-python-foundation.md`](docs/roadmap/phase-1-trustworthy-python-foundation.md)
@@ -16,8 +21,9 @@ SDK into the hosted Lumis product or granting ambient production authority.
    covers Sprints 7–11: provider-neutral model routing, prompt packages, evidence planning,
    read-only tools, loop guards, grounding, and evaluation gates.
 3. [`docs/roadmap/phase-3-intelligence-memory-and-integrations.md`](docs/roadmap/phase-3-intelligence-memory-and-integrations.md)
-   covers Sprints 12–17: correlation, lineage, rule analytics, memory quality, semantic retrieval,
-   and demand-led observability, data, orchestration, cloud, and delivery integrations.
+   covers Sprints 12–17: correlation, lineage, recurrence-aware rule candidates, rule analytics,
+   memory quality, semantic retrieval, and demand-led observability, data, orchestration, cloud,
+   and delivery integrations.
 4. [`docs/roadmap/phase-4-guarded-recovery-and-ecosystem.md`](docs/roadmap/phase-4-guarded-recovery-and-ecosystem.md)
    covers Sprints 18–23: side-effect-aware plugin contracts, executor/verifier protocols, signing,
    policy conformance, migrations, cross-language schemas, education, and ecosystem maturity.

@@ -1,17 +1,22 @@
 # Lumis SDK open-source architecture and contribution guide
 
-Date: 2026-07-17
+Date: 2026-08-23
 
-Status: Phase 1 foundation released through core `0.0.8`; Sprint 6 stable-contract qualification
-is planned. This document supersedes the original pre-alpha planning guide where implementation
-has moved on.
+Status: Experimental research companion; Phase 1 foundation is available through `0.1.0rc1`, and
+final `0.1.0` remains evidence-gated. This document supersedes the original pre-alpha planning
+guide where implementation has moved on.
 
 ## Project purpose
 
-Lumis SDK is the Apache-2.0 Python implementation companion to the agentic self-healing research.
+Lumis SDK is the Apache-2.0 Python implementation companion to the
+[published agentic self-healing research](https://arxiv.org/abs/2608.01955).
 It packages vendor-neutral contracts, deterministic reference behavior, optional adapter
 boundaries, reusable tests, and synthetic examples for guarded incident response and pipeline
 recovery.
+
+The project is intentionally public while experimental so others can inspect, reproduce, test,
+criticize, and contribute to the design. Neither the paper nor this SDK should be represented as a
+production-ready autonomous remediation system.
 
 The SDK must remain useful without Lumis, a cloud account, a model provider, or production
 credentials. Lumis is one product built on these contracts; it does not own or narrow them.

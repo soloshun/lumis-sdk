@@ -4,6 +4,12 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
 
 ## Unreleased
 
+### Documentation
+
+- Linked the published reference-architecture paper, made the SDK's experimental/work-in-progress
+  status prominent, and documented the paper's verified-recurrence to deterministic-rule feedback
+  path without overstating it as currently implemented or automatically safe.
+
 ### Fixed
 
 - Republished both official plugins as `0.1.2` with package metadata that accepts the Phase 1
