@@ -6,6 +6,7 @@
 
 <p align="center">
   <a href="https://github.com/soloshun/lumis-sdk/actions">CI</a> ·
+  <a href="https://arxiv.org/abs/2608.01955">Research paper</a> ·
   <a href="LICENSE">Apache-2.0</a> ·
   <a href="docs/architecture/overview.md">Architecture</a> ·
   <a href="docs/configuration.md">Configuration</a> ·
@@ -14,14 +15,54 @@
   <a href="ROADMAP.md">Roadmap</a>
 </p>
 
-Lumis SDK is an open-source Python implementation companion to the **agentic recovery and incident response** reference architecture proposed in the accompanying research. It provides reusable contracts and local reference adapters for diagnosing failures in data, machine-learning, and software-delivery pipelines while keeping models optional and consequential actions under explicit control.
+> [!IMPORTANT]
+> **Experimental research companion:** Lumis SDK is under active development and evaluation. Its
+> APIs, adapters, and proposed recovery workflows may change before broader production readiness.
+> It is published so researchers, practitioners, and contributors can inspect, reproduce, test,
+> and improve the work; it is not a claim of autonomous or production-ready remediation.
+
+Lumis SDK is an open-source Python implementation companion to the **Agentic Recovery and Incident
+Response** reference architecture proposed in
+[the research paper](https://arxiv.org/abs/2608.01955) ([arXiv:2608.01955](https://doi.org/10.48550/arXiv.2608.01955)).
+It provides reusable contracts and local reference adapters for diagnosing failures in data,
+machine-learning, and software-delivery pipelines while keeping models optional and consequential
+actions under explicit control.
 
 Lumis SDK starts with Diagnosis-as-Code: bounded incident evidence becomes a structured,
 reviewable diagnosis, Markdown or JSON report, and operational-memory record. Its direction is
 Healing-as-Code: a guarded lifecycle for detect, triage, diagnose, plan, approve, remediate,
 verify, and learn.
 
-> **Pre-alpha:** Lumis SDK does not perform unrestricted or default production remediation. Current execution-related models are recommendation and verification contracts, not an authority granted to an LLM.
+Lumis SDK does not perform unrestricted or default production remediation. Current
+execution-related models are recommendation and verification contracts, not authority granted to
+an LLM. See [research alignment and maturity](docs/architecture/research-alignment.md) for the
+paper-to-SDK boundary and current implementation status.
+
+## Research paper
+
+The reference architecture was published on arXiv on 3 August 2026:
+
+> Solomon Eshun, Dennis Murage, Sharleen Muoki, Chih-Chun Chen, Stephen Adjignon, Matteo Staar,
+> and Oliver Angélil. “Agentic Self-Healing for Data & AI Pipelines: An Affordable Vendor-Agnostic
+> Architecture using Open-Source Software.” arXiv:2608.01955, 2026.
+> [Paper](https://arxiv.org/abs/2608.01955) ·
+> [PDF](https://arxiv.org/pdf/2608.01955) ·
+> [DOI](https://doi.org/10.48550/arXiv.2608.01955)
+
+```bibtex
+@misc{eshun2026agentic,
+  title         = {Agentic Self-Healing for Data \& AI Pipelines: An Affordable
+                   Vendor-Agnostic Architecture using Open-Source Software},
+  author        = {Eshun, Solomon and Murage, Dennis and Muoki, Sharleen and
+                   Chen, Chih-Chun and Adjignon, Stephen and Staar, Matteo and
+                   Ang{\'e}lil, Oliver},
+  year          = {2026},
+  eprint        = {2608.01955},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.ET},
+  doi           = {10.48550/arXiv.2608.01955}
+}
+```
 
 ## Research and implementation boundary
 
@@ -39,6 +80,8 @@ verify, and learn.
 - **Local first.** SQLite and Markdown are inspectable defaults, not mandatory hosted services.
 - **Guarded recovery.** Plans are allowlisted recommendations; approval and verification are explicit boundaries.
 - **Confirmed memory.** Model output is never silently promoted into confirmed operational truth.
+- **Learn toward determinism.** Repeated, verified episodes may become reviewable rule candidates;
+  frequency alone never creates or activates a rule.
 - **Vendor agnostic.** Domain and application packages import no observability, orchestration, cloud, or agent SDK.
 
 ## Architecture

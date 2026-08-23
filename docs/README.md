@@ -4,11 +4,17 @@ Lumis SDK is a vendor-agnostic Python framework for deterministic, evidence-grou
 diagnosis and carefully governed recovery workflows. Start with a core-only path; add models,
 plugins, shared memory, or hosted systems only where the adopter explicitly needs them.
 
+> [!IMPORTANT]
+> Lumis SDK is an experimental, work-in-progress companion to
+> [the published reference-architecture paper](https://arxiv.org/abs/2608.01955), not a
+> production-ready autonomous remediation system.
+
 ## Start here
 
 | Goal | Guide |
 | --- | --- |
 | Understand the framework | [Core concepts](concepts/core-concepts.md) and [architecture overview](architecture/overview.md) |
+| Relate the SDK to the paper | [Research alignment and experimental status](architecture/research-alignment.md) |
 | Install and run an example | [Cookbook guide](../cookbook/README.md) and [standalone adoption evidence](adoption/phase-1-standalone-paths.md) |
 | Configure a project | [Configuration reference](configuration.md) |
 | Migrate alpha documents | [v1 migration guide](migrations/config-v1.md) |
