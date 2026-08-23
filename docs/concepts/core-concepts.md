@@ -38,6 +38,17 @@ Human-confirmed or verification-confirmed outcomes may become reusable memory. F
 timed-out, rejected, or superseded outcomes cannot silently become truth. Retrieval exposes score
 components and truth filters rather than hiding ranking behind a provider.
 
+## Learning toward deterministic rules
+
+The research architecture closes a second feedback loop: a recurring, verified diagnosis and
+remediation pattern can become a candidate deterministic rule. A threshold such as five verified
+recurrences can trigger review, but it must remain project-configurable and is not proof by itself.
+
+Promotion must retain source-episode provenance, explain the shared signature, cite verification
+results, survive positive and negative replay tests, declare its playbook and risk tier, and
+receive an accountable activation decision. The current SDK implements verified memory and replay
+foundations; recurrence analysis and rule-candidate generation remain planned work.
+
 ## Framework versus product
 
 Lumis SDK is the Apache-2.0 framework. Loomis/Lumis platform is one consumer. Tenancy, billing,
