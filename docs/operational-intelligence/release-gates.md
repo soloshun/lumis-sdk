@@ -9,7 +9,7 @@ The current package identifier remains `0.1.0rc1` until a new RC is deliberately
 | Gate | Evidence required | Reset status |
 | --- | --- | --- |
 | Preserved history | Remote legacy branch and original release tags | Legacy branch created at `8a371d1`; tags unchanged |
-| Schema/control substrate | Old and new tests, strict mypy, generated schema checks | Local verification; attach PR CI before promotion |
+| Schema/control substrate | Old and new tests, strict mypy, generated schema checks | 129 tests on Python 3.11–3.13; PR #93 merged after all ten checks |
 | New external connectors | Bounded reads, HTTP mocks, Kubernetes/OTLP format tests | Contract tests; live deployment not implied |
 | Live GridCast slice | Scoped graph, 3–5 actual model candidates, observations and abstention run | Pending separate running estate/model run |
 | Comparative evaluation | Independent 8–15 incidents, hidden labels, budget-matched baselines | Planned OI-2; no performance claims yet |
