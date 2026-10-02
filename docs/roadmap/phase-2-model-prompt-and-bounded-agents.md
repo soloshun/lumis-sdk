@@ -1,5 +1,9 @@
 # Phase 2 — Model, prompt, and bounded-agent contracts
 
+> **Historical plan, superseded 2026-10-02.** Unfinished work here is not an active commitment.
+> See the [operational-intelligence phases and OI sprints](../../ROADMAP.md). Completed evidence
+> remains credited; this document is retained for research/compatibility reference.
+
 Sprints: 7–11
 
 ## Phase outcome

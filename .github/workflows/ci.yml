@@ -60,6 +60,10 @@ jobs:
           uv venv --python ${{ matrix.python-version }} .venv-smoke
           uv pip install --python .venv-smoke/bin/python dist/*.whl
           .venv-smoke/bin/lumis --version
+          .venv-smoke/bin/lumis investigate \
+            --project examples/gridcast-readonly/project.yaml \
+            --incident examples/gridcast-readonly/incident.json \
+            --observations examples/gridcast-readonly/observations.json
 
   postgres-memory:
     name: PostgreSQL memory plugin contract

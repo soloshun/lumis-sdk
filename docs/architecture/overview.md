@@ -1,5 +1,9 @@
 # Lumis SDK architecture
 
+> Superseded as the active build plan on 2026-10-02. This page describes the retained compatibility
+> substrate. Read the [operational-intelligence architecture](../operational-intelligence/architecture.md)
+> for the new graph, hypothesis registry, bounded evidence loop and external GridCast boundary.
+
 Lumis SDK uses ports and adapters so that its incident and recovery semantics remain independent of a model provider, database, observability vendor, orchestration system, cloud or agent framework.
 
 It is an experimental implementation companion to the

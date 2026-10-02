@@ -20,6 +20,7 @@ from lumis_sdk.adapters.reports import (
 )
 from lumis_sdk.adapters.sqlite import IncidentNotFoundError, SQLiteIncidentStore, search_incidents
 from lumis_sdk.application import EvidenceService
+from lumis_sdk.cli.operational import discover, investigate
 from lumis_sdk.config import (
     MAX_CONFIG_BYTES,
     EvidenceProviderConfig,
@@ -43,7 +44,7 @@ DEFAULT_CONFIG_PATH = Path("lumis.yml")
 
 app = typer.Typer(
     name="lumis",
-    help="Turn pipeline failures into structured incident reports.",
+    help="Investigate operational incidents and produce structured incident reports.",
     no_args_is_help=True,
 )
 memory_app = typer.Typer(help="Search local Lumis SDK incident memory.")
@@ -54,6 +55,8 @@ app.add_typer(memory_app, name="memory")
 app.add_typer(rules_app, name="rules")
 app.add_typer(plugins_app, name="plugins")
 app.add_typer(config_app, name="config")
+app.command("discover")(discover)
+app.command("investigate")(investigate)
 
 
 def version_callback(value: bool) -> None:

@@ -16,6 +16,7 @@ from lumis_sdk.config import (
     project_json_schema,
     rules_json_schema,
 )
+from lumis_sdk.core import Investigation
 from lumis_sdk.domain import (
     legacy_playbook_json_schema,
     legacy_plugin_manifest_json_schema,
@@ -25,9 +26,13 @@ from lumis_sdk.domain import (
     policy_json_schema,
     proposal_json_schema,
 )
+from lumis_sdk.runtime.project import OperationalProject
 
 SCHEMA_DIR = Path(__file__).parents[1] / "schemas"
 SCHEMAS = {
+    SCHEMA_DIR
+    / "lumis-operational-project-v1alpha1.schema.json": OperationalProject.model_json_schema,
+    SCHEMA_DIR / "lumis-investigation-v1alpha1.schema.json": Investigation.model_json_schema,
     SCHEMA_DIR / "lumis-project-v1.schema.json": project_json_schema,
     SCHEMA_DIR / "lumis-rules-v1.schema.json": rules_json_schema,
     SCHEMA_DIR / "lumis-diagnosis-rule-v1.schema.json": diagnosis_rule_json_schema,

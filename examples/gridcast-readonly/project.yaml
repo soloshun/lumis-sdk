@@ -1,0 +1,66 @@
+api_version: lumis.dev/operational-v1alpha1
+name: gridcast-readonly
+graph:
+  entities:
+    - {id: forecast-pipeline, kind: pipeline, name: Forecast pipeline}
+    - {id: feature-service, kind: service, name: Feature service}
+    - {id: postgres, kind: database, name: PostgreSQL}
+    - {id: deployment-v17, kind: deployment, name: Feature release v1.7}
+    - {id: weather-feed, kind: service, name: Weather feed}
+  relationships:
+    - {source: postgres, target: feature-service, kind: feeds}
+    - {source: feature-service, target: forecast-pipeline, kind: produces}
+    - {source: deployment-v17, target: feature-service, kind: deploys}
+    - {source: weather-feed, target: feature-service, kind: feeds}
+queries:
+  - id: database-health
+    provider: snapshot
+    entity_id: postgres
+    key: healthy
+    description: Is PostgreSQL available during the incident?
+  - id: feature-change
+    provider: snapshot
+    entity_id: feature-service
+    key: recently_deployed
+    description: Did the feature deployment precede the observed latency?
+  - id: query-volume
+    provider: snapshot
+    entity_id: postgres
+    key: read_multiplier
+    description: Database reads relative to the healthy baseline
+  - id: resource-pressure
+    provider: snapshot
+    entity_id: feature-service
+    key: cpu_pressure
+    description: Is the feature service CPU constrained?
+initial_query_ids: [database-health]
+rule_hypotheses:
+  - id: deployment-regression
+    statement: A recent feature release may have amplified database reads.
+    causal_path: [deployment-v17, feature-service, postgres, forecast-pipeline]
+    predictions:
+      - {entity_id: feature-service, key: recently_deployed, operator: eq, value: true}
+      - {entity_id: postgres, key: read_multiplier, operator: gt, value: 5}
+    evidence_needed: [feature-change, query-volume, database-health]
+    falsifiers:
+      - {entity_id: postgres, key: healthy, operator: eq, value: false}
+  - id: database-outage
+    statement: Database unavailability may be delaying the feature pipeline.
+    causal_path: [postgres, feature-service, forecast-pipeline]
+    predictions:
+      - {entity_id: postgres, key: healthy, operator: eq, value: false}
+    evidence_needed: [database-health]
+    falsifiers:
+      - {entity_id: postgres, key: healthy, operator: eq, value: true}
+  - id: resource-exhaustion
+    statement: Feature-service CPU pressure may be delaying feature generation.
+    causal_path: [feature-service, forecast-pipeline]
+    predictions:
+      - {entity_id: feature-service, key: cpu_pressure, operator: eq, value: true}
+    evidence_needed: [resource-pressure]
+    falsifiers:
+      - {entity_id: feature-service, key: cpu_pressure, operator: eq, value: false}
+budget:
+  max_queries: 4
+  max_hypotheses: 5
+  graph_hops: 3

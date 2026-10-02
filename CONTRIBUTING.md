@@ -1,6 +1,7 @@
 # Contributing to Lumis SDK
 
-Thanks for contributing. Lumis SDK is a pre-alpha, safety-focused open-source framework and research companion. Small, reviewable, well-tested changes are preferred.
+Thanks for contributing. Lumis SDK is an experimental, evidence-grounded operational-intelligence
+framework and research companion. Small, reviewable, well-tested changes are preferred.
 
 ## Before you contribute
 
@@ -32,6 +33,14 @@ by this policy; enforcement begins when this policy is merged.
 
 ## Architecture boundaries
 
+- New operational work uses `lumis_sdk.core`, `graph`, `reasoning`, `connectors`, `models` and
+  `runtime`. See the [active architecture](docs/operational-intelligence/architecture.md).
+- Rules, memory and models must produce the same falsifiable candidate contract. Models do not
+  manufacture facts, confirm truth or weaken independent action approval.
+- Keep estate/application code in separate repositories; connect through read-only ports and
+  standard telemetry. Never import testbed ground truth into a reasoning context.
+- Retain old namespaces below for compatibility until an explicit tested migration is accepted.
+
 - Put vendor-neutral models and invariants in `lumis_sdk.domain`.
 - Put orchestration in `lumis_sdk.application` and abstract dependencies behind `lumis_sdk.ports`.
 - Put SQLite, Markdown, deterministic engines, and future provider implementations in `lumis_sdk.adapters`.
@@ -41,7 +50,8 @@ by this policy; enforcement begins when this policy is merged.
 
 ## Documentation and public claims
 
-- Treat [`docs/LUMIS_SDK_REFERENCE.md`](docs/LUMIS_SDK_REFERENCE.md) as the canonical narrative for the framework.
+- Treat [operational-intelligence docs](docs/operational-intelligence/README.md) as the canonical
+  new narrative. `docs/LUMIS_SDK_REFERENCE.md` remains the legacy/control-substrate reference.
 - Keep the README accurate, task-oriented, and consistent with the core reference when public behavior changes.
 - Distinguish implemented functionality from lifecycle contracts, cookbook demonstrations, and roadmap ideas. Do not describe a future connector, autonomous action, or hosted product as present functionality.
 - Keep project-specific logs, rules, runbooks, and playbooks in a cookbook or consuming project; do not move scenario-specific material into `src/lumis_sdk`.

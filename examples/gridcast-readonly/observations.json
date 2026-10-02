@@ -1,0 +1,6 @@
+[
+  {"id": "obs-db-health", "query_id": "database-health", "entity_id": "postgres", "key": "healthy", "value": true, "observed_at": "2026-10-02T12:20:00Z", "source": "synthetic-postgres-health", "retrieval_method": "fixture-replay"},
+  {"id": "obs-deployment", "query_id": "feature-change", "entity_id": "feature-service", "key": "recently_deployed", "value": true, "observed_at": "2026-10-02T12:20:00Z", "source": "synthetic-deployment-timeline", "retrieval_method": "fixture-replay"},
+  {"id": "obs-read-rate", "query_id": "query-volume", "entity_id": "postgres", "key": "read_multiplier", "value": 16.0, "observed_at": "2026-10-02T12:20:00Z", "source": "synthetic-prometheus", "retrieval_method": "fixture-replay"},
+  {"id": "obs-cpu", "query_id": "resource-pressure", "entity_id": "feature-service", "key": "cpu_pressure", "value": false, "observed_at": "2026-10-02T12:20:00Z", "source": "synthetic-kubernetes-metrics", "retrieval_method": "fixture-replay"}
+]

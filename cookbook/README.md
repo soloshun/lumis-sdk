@@ -1,5 +1,12 @@
 # Lumis SDK cookbooks
 
+# Legacy cookbook collection
+
+These pre-reset examples remain as compatibility/regression references, not the active sprint
+track. The new entry point is [GridCast read-only](../examples/gridcast-readonly/README.md).
+Larger estate tutorials may later move to a maintainer-created cookbooks repository. Existing
+paths remain intact so published references and paper regressions do not break silently.
+
 Cookbooks are small, runnable teaching projects that use Lumis SDK core in a specific domain. They are not part of the core package's runtime dependency set. Each cookbook owns its synthetic data, domain rules, knowledge documents, optional integrations, and setup instructions.
 
 ## Current cookbook domains

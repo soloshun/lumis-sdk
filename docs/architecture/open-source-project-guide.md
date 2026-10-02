@@ -1,5 +1,18 @@
 # Lumis SDK open-source architecture and contribution guide
 
+## Operational-intelligence reset (2026-10-02)
+
+The active SDK builds evidence-grounded operational-intelligence primitives. Use
+[`core/graph/connectors/reasoning/models/runtime`](../operational-intelligence/architecture.md)
+for new work and the [OI sprint roadmap](../../ROADMAP.md) for planning. The older APIs below
+remain the compatibility/control substrate; their uncompleted sprint plans are historical.
+Current package publication does not contain the reset until a new RC is qualified.
+
+Contributions must name the incident/research need, preserve external estate separation, retain
+provenance and falsifiability, document budgets and abstention, and distinguish contract tests
+from live/research findings. Update public API docs, schemas, examples and the docs-site source
+queue in the same PR. AI assistance is welcome with human understanding and accountability.
+
 Date: 2026-08-23
 
 Status: Experimental research companion; Phase 1 foundation is available through `0.1.0rc1`, and

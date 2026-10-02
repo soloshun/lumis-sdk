@@ -1,5 +1,9 @@
 # Lumis SDK core reference
 
+> Historical/control-substrate reference retained for released APIs. The active experimental
+> kernel is documented in [Operational intelligence](operational-intelligence/README.md).
+> Use that guide for graph/hypothesis APIs and GridCast integration; types below are distinct.
+
 ## Identity
 
 - **Agentic recovery and incident response** is the technology-flexible reference architecture proposed by the accompanying research.
