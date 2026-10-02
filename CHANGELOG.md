@@ -4,6 +4,21 @@ All notable changes to Lumis SDK are recorded here. The project follows the spir
 
 ## Unreleased
 
+### Operational-intelligence reset
+
+- Added strict falsifiable candidates, operational graphs, incident windows, provenance-bearing
+  observations, shared rule/memory/model source contracts and deterministic assessments.
+- Added bounded read-only investigation, registered query selection/audit, normal abstention,
+  and local SQLite investigation retention. Supported candidates remain unconfirmed.
+- Added namespace-scoped Kubernetes discovery, OTLP/JSON topology import, optional Prometheus
+  and structured OpenRouter adapters, plus `lumis discover` and `lumis investigate`.
+- Added checked operational-v1alpha1 schemas, an offline GridCast contract replay, API/runbook
+  documentation and a new evidence-led OI sprint plan targeting eventual `0.1.0`.
+- Preserved pre-reset history on `legacy/pre-operational-intelligence-2026-10-02`; retained
+  released APIs/tests and clearly marked old roadmap/cookbooks as historical compatibility work.
+- HTTP remains optional. No remediation executor, live GridCast result, benchmark superiority,
+  new published release or automatic recurrence-to-rule promotion is claimed.
+
 ### Documentation
 
 - Linked the published reference-architecture paper, made the SDK's experimental/work-in-progress

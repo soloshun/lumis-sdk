@@ -1,5 +1,9 @@
 # Candidate capability mapping
 
+> **Historical plan, superseded 2026-10-02.** Unfinished work here is not an active commitment.
+> See the [operational-intelligence phases and OI sprints](../../ROADMAP.md). Completed evidence
+> remains credited; this document is retained for research/compatibility reference.
+
 Date: 2026-07-17
 
 This review maps thirty generally reusable candidate capabilities into the public SDK roadmap.

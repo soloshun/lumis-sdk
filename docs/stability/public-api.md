@@ -1,5 +1,12 @@
 # Public API stability inventory
 
+## Operational reset
+
+The new `core/graph/reasoning/connectors/models/runtime` APIs and
+`lumis.dev/operational-v1alpha1` documents are **provisional**. Existing stable/intended-stable
+surfaces below are retained; a package version does not silently promote the new APIs.
+See [reset migration](../operational-intelligence/migration.md).
+
 This inventory defines what Lumis SDK intends to keep compatible across the `1.x` release line.
 It separates portable framework contracts from reference implementations and implementation
 details. A public import is not automatically stable unless it appears here or in the generated

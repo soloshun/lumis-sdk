@@ -106,6 +106,32 @@ def test_high_risk_cannot_be_configured_for_auto_approval() -> None:
         )
 
 
+def test_maximum_diagnosis_confidence_cannot_weaken_high_risk_gate() -> None:
+    """Analysis confidence is not an input to the independent risk approval decision."""
+    from lumis_sdk.domain import DiagnosisResult, Severity, TriageResult
+
+    diagnosis = DiagnosisResult(
+        triage=TriageResult(classification="model", severity=Severity.HIGH, summary="Candidate"),
+        root_cause_hypothesis="Model claims certainty",
+        confidence=1.0,
+    )
+    service = _service(RiskLevel.HIGH, approval_required=True, auto_approve_up_to=None)
+    proposal = service.propose(
+        proposal_id="high-confidence",
+        diagnosis_id="diagnosis-1",
+        diagnosis_digest=canonical_digest(diagnosis),
+        evidence=[EvidenceReference(id="log-1", source="fixture", digest=DIGEST)],
+        action_name="restart",
+        parameters={"replicas": 2},
+        created_at=NOW,
+        expires_at=NOW + timedelta(minutes=30),
+    )
+    assert diagnosis.confidence == 1.0
+    assert proposal.state is ProposalState.PENDING
+    assert proposal.approval_required
+    assert not proposal.execution_allowed
+
+
 def test_unknown_action_and_unbounded_parameter_fail_closed() -> None:
     service = _service(
         RiskLevel.MEDIUM,

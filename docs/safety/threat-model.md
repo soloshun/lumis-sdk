@@ -1,5 +1,32 @@
 # Lumis SDK threat model
 
+## Operational-intelligence read-only slice
+
+The new runtime has no executor. Models receive redacted scoped context and registered query
+descriptions, not private query parameters, credentials, action tools or testbed ground truth.
+Candidates cannot carry supporting evidence IDs; mechanical evaluation assigns those references.
+Scope, timestamps, observation identity, byte/character budgets and query/source/total deadlines
+are enforced. Invalid/unavailable provider output stays auditable abstention, not confirmed truth.
+
+Kubernetes discovery invokes only namespace-scoped `kubectl get` via argv without a shell;
+stdout is bounded and timed-out/cancelled children are killed. It requests no Secrets/ConfigMaps.
+Kubeconfig plugins are still operator-trusted programs: read-only SDK code does not make a
+malicious kubeconfig safe. Use restricted lab credentials and RBAC.
+
+HTTP endpoints/PromQL belong to reviewed operator configuration. Local HTTP is permitted for the
+lab, but configured network authority must be restricted by the deployment. Responses are bounded
+and redirects denied. OpenRouter uses a fixed endpoint and an explicit opt-in key; it has no
+tool/retry/fallback authority. Redaction is conservative, not a proof that arbitrary operational
+data contains no secrets. Never encode secrets in structural IDs, and review external processing.
+
+Observation sources are trusted for measurement integrity, not causal conclusions. Conflicting
+or degraded facts remain unresolved. A returned observation within a requested window does not
+prove that the provider is honest; authenticity/access controls are adapter/deployment concerns.
+SQLite records are local single-environment files; permissions/backups/customer isolation remain
+operator responsibilities. New investigation truth is always unconfirmed. See
+[architecture](../operational-intelligence/architecture.md) and
+[release gates](../operational-intelligence/release-gates.md) for pending live/review evidence.
+
 ## Assets
 
 Incident evidence, credentials, local files, operational memory, diagnosis integrity, rules, playbooks, reports, plugin packages, and any future approved action.

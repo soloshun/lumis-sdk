@@ -1,351 +1,93 @@
-<h1 align="center">Lumis SDK</h1>
+# Lumis SDK
 
-<p align="center">
-  <strong>Deterministic-first, evidence-grounded incident recovery for data, ML, and software pipelines.</strong>
-</p>
+Experimental, open-source Python primitives for **evidence-grounded operational intelligence**.
+Data & AI infrastructure is the first focus; GridCast is the synthetic reference estate.
 
-<p align="center">
-  <a href="https://github.com/soloshun/lumis-sdk/actions">CI</a> ·
-  <a href="https://arxiv.org/abs/2608.01955">Research paper</a> ·
-  <a href="LICENSE">Apache-2.0</a> ·
-  <a href="docs/architecture/overview.md">Architecture</a> ·
-  <a href="docs/configuration.md">Configuration</a> ·
-  <a href="docs/README.md">Documentation index</a> ·
-  <a href="cookbook/README.md">Cookbooks</a> ·
-  <a href="ROADMAP.md">Roadmap</a>
-</p>
+**LLM proposes. Lumis tests against observations.** Models, rules and retrieved precedents produce
+the same falsifiable hypotheses. A bounded operational graph, provenance-bearing evidence,
+deterministic checks and an inspectable trace make uncertainty explicit.
 
-> [!IMPORTANT]
-> **Experimental research companion:** Lumis SDK is under active development and evaluation. Its
-> APIs, adapters, and proposed recovery workflows may change before broader production readiness.
-> It is published so researchers, practitioners, and contributors can inspect, reproduce, test,
-> and improve the work; it is not a claim of autonomous or production-ready remediation.
+This is active research, not a production autonomous operator. The read-only MVP has no action
+executor. Supported candidates remain `unconfirmed_hypothesis`; support is not causal proof,
+a calibrated probability, or permission to change infrastructure.
 
-Lumis SDK is an open-source Python implementation companion to the **Agentic Recovery and Incident
-Response** reference architecture proposed in
-[the research paper](https://arxiv.org/abs/2608.01955) ([arXiv:2608.01955](https://doi.org/10.48550/arXiv.2608.01955)).
-It provides reusable contracts and local reference adapters for diagnosing failures in data,
-machine-learning, and software-delivery pipelines while keeping models optional and consequential
-actions under explicit control.
+## Run the new offline slice
 
-Lumis SDK starts with Diagnosis-as-Code: bounded incident evidence becomes a structured,
-reviewable diagnosis, Markdown or JSON report, and operational-memory record. Its direction is
-Healing-as-Code: a guarded lifecycle for detect, triage, diagnose, plan, approve, remediate,
-verify, and learn.
-
-Lumis SDK does not perform unrestricted or default production remediation. Current
-execution-related models are recommendation and verification contracts, not authority granted to
-an LLM. See [research alignment and maturity](docs/architecture/research-alignment.md) for the
-paper-to-SDK boundary and current implementation status.
-
-## Research paper
-
-The reference architecture was published on arXiv on 3 August 2026:
-
-> Solomon Eshun, Dennis Murage, Sharleen Muoki, Chih-Chun Chen, Stephen Adjignon, Matteo Staar,
-> and Oliver Angélil. “Agentic Self-Healing for Data & AI Pipelines: An Affordable Vendor-Agnostic
-> Architecture using Open-Source Software.” arXiv:2608.01955, 2026.
-> [Paper](https://arxiv.org/abs/2608.01955) ·
-> [PDF](https://arxiv.org/pdf/2608.01955) ·
-> [DOI](https://doi.org/10.48550/arXiv.2608.01955)
-
-```bibtex
-@misc{eshun2026agentic,
-  title         = {Agentic Self-Healing for Data \& AI Pipelines: An Affordable
-                   Vendor-Agnostic Architecture using Open-Source Software},
-  author        = {Eshun, Solomon and Murage, Dennis and Muoki, Sharleen and
-                   Chen, Chih-Chun and Adjignon, Stephen and Staar, Matteo and
-                   Ang{\'e}lil, Oliver},
-  year          = {2026},
-  eprint        = {2608.01955},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.ET},
-  doi           = {10.48550/arXiv.2608.01955}
-}
-```
-
-## Research and implementation boundary
-
-| Artefact | Role | Repository boundary |
-| --- | --- | --- |
-| **Reference architecture** | Agentic recovery and incident response lifecycle. | Technology-flexible design described by the paper. |
-| **Lumis SDK** | Apache-2.0 framework and local implementation companion. | Domain contracts, application services, ports, safe reference adapters, CLI, testkit, and cookbooks. |
-
-
-## Design principles
-
-- **Deterministic first.** Known signatures and project rules run before optional model reasoning.
-- **Evidence grounded.** Facts, evidence, hypotheses, confidence, contradictions, and missing evidence remain distinguishable.
-- **Model optional.** The core works offline; provider integrations implement a narrow gateway port.
-- **Local first.** SQLite and Markdown are inspectable defaults, not mandatory hosted services.
-- **Guarded recovery.** Plans are allowlisted recommendations; approval and verification are explicit boundaries.
-- **Confirmed memory.** Model output is never silently promoted into confirmed operational truth.
-- **Learn toward determinism.** Repeated, verified episodes may become reviewable rule candidates;
-  frequency alone never creates or activates a rule.
-- **Vendor agnostic.** Domain and application packages import no observability, orchestration, cloud, or agent SDK.
-
-## Architecture
-
-```mermaid
-flowchart LR
-    subgraph USERS[Project entry points]
-        CLI[Lumis SDK CLI]
-        PY[Python application]
-    end
-    subgraph CORE[Lumis SDK framework]
-        CFG[Strict project and rule configuration]
-        APP[Application services]
-        DOMAIN[Domain contracts]
-        PORTS[Optional provider ports]
-    end
-    subgraph LOCAL[Local reference adapters]
-        DET[Deterministic diagnosis]
-        MEM[SQLite incident memory]
-        EVIDENCE[Bounded local JSON evidence]
-        REPORT[Markdown and JSON reports]
-        REDACT[Evidence redaction]
-    end
-
-    CLI --> CFG
-    CLI --> DET
-    CLI --> EVIDENCE
-    CLI --> MEM
-    CLI --> REPORT
-    PY --> APP
-    APP --> DOMAIN
-    APP --> PORTS
-    APP --> DET
-    CFG --> DET
-    EVIDENCE --> PORTS
-    REDACT --> PORTS
-```
-
-Canonical package boundaries:
-
-```text
-src/lumis_sdk/
-├── domain/       # strict vendor-neutral models
-├── application/  # use-case orchestration
-├── ports/        # replaceable provider interfaces
-├── adapters/     # deterministic, SQLite, evidence, report, and local adapters
-├── config/       # versioned strict configuration
-├── cli/          # command composition
-├── security/     # redaction and evidence-safety utilities
-└── testkit/      # deterministic test doubles
-```
-
-The proof-of-concept flat modules have been removed. New code imports the explicit domain, application, port, adapter, configuration, and security packages shown above.
-
-Read the [architecture overview](docs/architecture/overview.md), [SDK reference](docs/LUMIS_SDK_REFERENCE.md), and [configuration reference](docs/configuration.md).
-The [structured-rules API guide](docs/python-api/structured-rules.md) covers compound incident
-fields, evidence, fixture testing, and migration from `all_contains`.
-The [evidence and JSON reports guide](docs/python-api/evidence-and-json-reports.md) documents the
-provider contract, bounded collection behavior, report schema, and reusable testkit.
-The [plugin SDK guide](docs/python-api/plugins.md) covers static manifests, metadata-only
-discovery, explicit loading policy, compatibility, and contract testing.
-
-## Current capabilities
-
-| Capability | Current behavior |
-| --- | --- |
-| Incident input | Local log normalization and typed vendor-neutral incident contracts. |
-| Evidence collection | Async provider port, bounded collection service, safe failures, redaction, and a local JSON reference adapter. |
-| Deterministic diagnosis | Legacy ordered text rules plus structured `all`/`any`/`not` rules with typed comparisons, required evidence, ranking, and candidate explanations. |
-| Versioned configuration | Strict `lumis.dev/v1` project and rule-set documents; unknown fields fail validation. |
-| Reports | Deterministic Markdown or versioned JSON with facts, evidence, hypotheses, truth state, confidence, review requirement, and safety boundary. |
-| Local memory | SQLite records, human resolutions, visible truth state, and transparent lexical search. |
-| Model boundary | Explicit policy, budgets, schema-validated output, fake CI gateway, and deterministic fallback. |
-| Guarded lifecycle | Context, policy, approval, verification, and audit ports with no core action executor. |
-| Plugin SDK | Static strict manifests, lazy entry-point discovery, compatibility/support checks, default-denied sensitive authorities, and reusable factory contracts. |
-| CLI | Initialization, diagnosis, doctor, rule validation, reports, resolution, and memory search. |
-| Cookbooks | Synthetic data, ML regression, and software-delivery investigations with optional Agno/OpenRouter paths. |
-
-## Quick start
-
-Lumis SDK supports Python 3.11+ and uses [uv](https://docs.astral.sh/uv/).
+Python 3.11–3.13, [uv](https://docs.astral.sh/uv/), no cluster or paid model key needed:
 
 ```bash
 git clone https://github.com/soloshun/lumis-sdk.git
 cd lumis-sdk
+git checkout dev
 uv sync --all-groups
-uv run lumis --help
+uv run lumis investigate \
+  --project examples/gridcast-readonly/project.yaml \
+  --incident examples/gridcast-readonly/incident.json \
+  --observations examples/gridcast-readonly/observations.json
 ```
 
-## Install Lumis SDK
+Expected: three candidate assessments, one supported and two contradicted, four audited queries,
+and explicitly unconfirmed truth. This is a **synthetic contract replay**, not a live GridCast
+deployment result. [Walkthrough](examples/gridcast-readonly/README.md).
 
-Lumis SDK is published to PyPI as `lumis-sdk`. Add it to a project managed by `uv`:
+## What is implemented
 
-```bash
-uv add "lumis-sdk>=0.1.0rc1,<0.2"
-```
+- Strict entities, relationships, incident windows, queries, observations, falsifiable candidates,
+  budgets, terminal investigations and checked JSON Schemas.
+- Indexed, cycle-safe graph traversal with explicit hop/entity limits and serialized scoped graphs.
+- Declared/discovered topology merging with conflict rejection.
+- Namespace-scoped Kubernetes discovery and exported OTLP/JSON service-topology normalization.
+- Prometheus instant-query adapter; registered query IDs keep query construction operator-owned.
+- Uniform rule, memory and model candidate sources; candidate validation/deduplication.
+- Bounded active evidence collection, deterministic support/contradiction and first-class abstention.
+- Optional structured OpenRouter generation (3–5 candidates), opt-in network/model use.
+- Local SQLite investigation records and machine-readable CLI output.
 
-Or install it into an existing environment with pip:
+Live GridCast validation, baseline comparisons, calibrated reasoning, Prefect/Git collectors,
+recovery execution and recurrence-to-rule promotion remain [roadmap work](ROADMAP.md).
+Existing proposal/approval/verification APIs are preserved, but the new read-only runtime does
+not connect them to actuation.
 
-```bash
-pip install lumis-sdk
-```
-
-For a specific reproducible release, pin the version:
-
-```bash
-uv add "lumis-sdk==0.0.8"
-pip install "lumis-sdk==0.0.8"
-```
-
-The repository's GitHub Actions workflow publishes reviewed releases through PyPI Trusted Publishing.
-
-See the [phased roadmap](ROADMAP.md) for the stable Python foundation, bounded model/agent
-contracts, intelligence and integration packages, guarded recovery protocols, TypeScript
-feasibility, documentation, and community plans.
-
-Run the local deterministic example:
-
-```bash
-uv run lumis doctor \
-  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
-
-uv run lumis diagnose \
-  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
-```
-
-The command reads a synthetic local log, writes a Markdown report, saves an unconfirmed incident episode to local SQLite, and prints its incident ID. It makes no network or model call.
-
-```bash
-uv run lumis report <incident-id> \
-  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
-
-uv run lumis resolve <incident-id> \
-  --resolution "Human-confirmed cause, action, and outcome." \
-  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
-
-uv run lumis memory search "KeyError Close" \
-  --config cookbook/simple-log-diagnosis/lumis/lumis.yml
-```
-
-
-
-## Versioned project configuration
-
-```yaml
-apiVersion: lumis.dev/v1
-kind: Project
-metadata:
-  name: customer-pipeline
-spec:
-  environment: local
-  memory:
-    provider: sqlite
-    path: .lumis/incidents.db
-  reports:
-    provider: markdown
-    outputDir: .lumis/reports
-  incidentSources:
-    - provider: local-log
-      path: logs/latest-failure.log
-  evidenceProviders:
-    - provider: local-json
-      path: evidence/schema-diff.json
-      kinds: [schema-diff]
-      maxItems: 20
-      maxTotalCharacters: 50000
-  rules:
-    files: [rules.yml]
-  model:
-    enabled: false
-```
-
-Configuration is strict: misspelled or unknown fields fail with a validation error. Relative paths resolve from the project document. Files larger than the configured safety limit are rejected. Checked stable schemas for the [project](schemas/lumis-project-v1.schema.json), [rule set](schemas/lumis-rules-v1.schema.json), [structured diagnosis rule](schemas/lumis-diagnosis-rule-v1.schema.json), and [JSON diagnosis report](schemas/lumis-diagnosis-report-v1.schema.json) support editors and tooling.
-
-Released `v1alpha1` documents remain readable during the documented transition. Use
-`lumis config migrate` and the [v1 migration guide](docs/migrations/config-v1.md) to validate and
-upgrade them. Read the [configuration reference](docs/configuration.md), [public API inventory](docs/stability/public-api.md), and [compatibility policy](docs/stability/compatibility.md).
-
-## CLI
+## Architecture and usage
 
 ```text
-lumis init
-lumis doctor
-lumis diagnose
-lumis report
-lumis resolve
-lumis memory search
-lumis rules validate
-lumis rules test
-lumis plugins list
-lumis plugins doctor
-lumis config migrate
+lumis_sdk/
+  core/         strict operational contracts
+  graph/        indexed bounded topology
+  connectors/   external read-only observations/discovery
+  reasoning/    uniform sources and mechanical evidence checks
+  models/       optional structured providers
+  runtime/      scope → propose → seek → assess → retain
+  cli/          investigate/discover plus retained legacy commands
 ```
 
-`doctor` and validation commands do not make network calls or write incident state. Model assistance remains disabled unless application code supplies both an enabled policy and a gateway adapter.
+No GridCast application imports are needed. Deploy Lumis beside an instrumented estate and
+connect through APIs, exported telemetry and explicit declarations. No graph database,
+agent framework, or hosted Lumis account is mandatory.
 
-## Python API
+- [Architecture and decisions](docs/operational-intelligence/architecture.md)
+- [Python API and schemas](docs/operational-intelligence/python-api.md)
+- [GridCast integration contract](docs/operational-intelligence/gridcast-integration.md)
+- [Roadmap and sprints](ROADMAP.md)
+- [0.1.0 release gates](docs/operational-intelligence/release-gates.md)
+- [Documentation index](docs/README.md)
+- [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Apache-2.0](LICENSE)
 
-```python
-import asyncio
-from pathlib import Path
+HTTP/model adapters require `lumis-sdk[http]`. For this **unreleased** architecture, install the
+reviewed Git revision or build its wheel; the existing PyPI `0.1.0rc1` does not contain it.
+The package version is intentionally unchanged until a new RC is qualified.
 
-from lumis_sdk.application import DiagnosisService
-from lumis_sdk.config import load_config
-from lumis_sdk.domain import IncidentInput
+## Compatibility and research
 
-config = load_config(Path("lumis.yml"))
-service = DiagnosisService(rules=config.rules)
-incident = IncidentInput(
-    source_tool="local-log",
-    pipeline_name=config.project,
-    raw_payload={"log": "ERROR KeyError: Close"},
-)
-diagnosis = asyncio.run(service.diagnose(incident))
-```
+The pre-reset release is preserved on `legacy/pre-operational-intelligence-2026-10-02`.
+Existing `domain/application/ports/adapters` imports and `lumis.dev/v1` documents remain
+available for consumers and existing research regressions. New operational documents use
+`lumis.dev/operational-v1alpha1`; they are provisional and not drop-in replacements.
+[Migration boundary](docs/operational-intelligence/migration.md).
+Legacy cookbooks remain tested but are no longer the primary development track.
 
-## Cookbooks
-
-- [Simple local diagnosis](cookbook/simple-log-diagnosis/README.md)
-- [Data pipeline investigation](cookbook/data-pipeline-investigation/README.md)
-- [ML regression monitoring](cookbook/ml-regression-monitoring/README.md)
-- [Software-delivery CI investigation](cookbook/software-delivery-ci-investigation/README.md)
-- [Structured rule evaluation](cookbook/structured-rule-evaluation/README.md)
-- [Evidence collection and JSON reporting](cookbook/evidence-json-reporting/README.md)
-- [Recording a human resolution](cookbook/recording-resolution/README.md)
-
-Start with a cookbook for a runnable demonstration, then use the architecture and core references above to examine the framework contracts behind it. All examples are synthetic, executable research demonstrations: they show how a consuming application can use Lumis SDK without claiming to be production control planes or autonomous remediation systems. Agent frameworks and model providers remain cookbook-only optional dependencies.
-
-## Safety
-
-Lumis SDK treats logs, tickets, runbooks, source files, and model output as untrusted input.
-
-- No direct shell, cloud-admin, Kubernetes-admin, or database actuation in core.
-- No live model key or billable request in CI.
-- No telemetry export by default.
-- Bounded configuration and log reads.
-- Conservative redaction before optional model use.
-- Model output remains an unconfirmed hypothesis until a human or verifier confirms it.
-- Execution capability requires a future RFC, allowlisted typed actions, policy, approval, audit, limits, and verification.
-
-Read the [threat model](docs/safety/threat-model.md) and [security policy](SECURITY.md).
-
-## Development
-
-```bash
-uv sync --all-groups
-uv run ruff format --check .
-uv run ruff check .
-uv run mypy src
-uv run python scripts/generate_config_schema.py --check
-uv run pytest
-uv build
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md), [SUPPORT.md](SUPPORT.md), [CHANGELOG.md](CHANGELOG.md), and [ROADMAP.md](ROADMAP.md).
-
-## Releases
-
-Lumis SDK releases are manually dispatched through GitHub Actions and published with PyPI Trusted Publishing.
-
-## Research and standards context
-
-Lumis SDK is informed by [OpenTelemetry](https://opentelemetry.io/), [OpenLineage](https://openlineage.io/), [Prometheus](https://prometheus.io/), [Site Reliability Engineering](https://sre.google/sre-book/table-of-contents/), [ReAct](https://arxiv.org/abs/2210.03629), and [LLM-based incident RCA research](https://doi.org/10.1145/3627703.3629553). These are design influences, not mandatory dependencies or claims of conformance.
-
-## Maintainer and license
-
-Lumis SDK is currently maintained by [Solomon Eshun](mailto:solomoneshun373@gmail.com) and licensed under [Apache License 2.0](LICENSE).
+Lumis began as an implementation companion to
+[Agentic Self-Healing for Data & AI Pipelines](https://arxiv.org/abs/2608.01955).
+The guarded-control substrate remains relevant; the operational-intelligence work extends the
+research direction without claiming empirical superiority or conference acceptance.
+[Research alignment](docs/architecture/research-alignment.md).

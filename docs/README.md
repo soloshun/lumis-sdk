@@ -1,5 +1,13 @@
 # Lumis SDK documentation
 
+## Active direction: operational intelligence
+
+Start with the [operational-intelligence documentation](operational-intelligence/README.md),
+[GridCast runbook](operational-intelligence/gridcast-integration.md),
+[new Python API](operational-intelligence/python-api.md), and [current roadmap](../ROADMAP.md).
+The legacy references below remain for compatibility and historical research reproduction.
+They are not the active sprint plan or the release qualification for the repurposed SDK.
+
 Lumis SDK is a vendor-agnostic Python framework for deterministic, evidence-grounded incident
 diagnosis and carefully governed recovery workflows. Start with a core-only path; add models,
 plugins, shared memory, or hosted systems only where the adopter explicitly needs them.
