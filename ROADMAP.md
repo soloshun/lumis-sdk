@@ -39,7 +39,8 @@ budgets, terminal investigation and audit trace. Preserve independent policy/ver
 
 Acceptance: reject empty falsifiers, unknown fields, stale facts, orphan relationships and invalid
 references. Preserve old tests/paper imports; check generated schemas in CI.
-Status: implemented in reset branch; merge/CI evidence pending.
+Status: complete; merged through [PR #93](https://github.com/soloshun/lumis-sdk/pull/93)
+at `ad01fda`, with all ten PR checks passing and the retained paper regression unchanged.
 
 ### OI-1 — external GridCast slice
 
@@ -51,7 +52,8 @@ mechanical support/contradiction and persisted abstention. No executor.
 Acceptance: independently running GridCast supplies topology/observations through public ports;
 produce 3–5 falsifiable model candidates, inspect scoped graph and query trace, replay withheld
 evidence. Estate application services must not import Lumis or reveal injected fault labels.
-Status: SDK/offline/transport slice implemented; live GridCast and paid-model evidence pending.
+Status: SDK/offline/transport slice merged through PR #93. Live GridCast and actual model evidence
+remain open in [#92](https://github.com/soloshun/lumis-sdk/issues/92); this sprint is not complete.
 
 ## Phase B: benchmark and diagnosis
 

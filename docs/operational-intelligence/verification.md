@@ -1,7 +1,10 @@
 # Reset implementation verification
 
 Local record: 2026-10-02, branch `feat/operational-intelligence-mvp`, based on `8a371d1` from
-`origin/dev`. The PR/CI revision is the authoritative review artifact; this record is not a release.
+`origin/dev`. [PR #93](https://github.com/soloshun/lumis-sdk/pull/93) merged into `dev` at
+`ad01fda7486224406b4df9cb0c3095953571f26b`; all ten PR checks passed, including both plugin
+contracts/coexistence and the Python matrix. This record is not a release. Live gates remain
+tracked in [#92](https://github.com/soloshun/lumis-sdk/issues/92).
 
 ## Passed locally
 
