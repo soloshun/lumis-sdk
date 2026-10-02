@@ -111,4 +111,3 @@ A sprint is complete only when:
 Earlier roadmap labels such as `v0.4` and `v0.5` identify capability milestones, not Python
 package versions. Sprint 6 is explicitly targeted to package release `0.1.0`; a future decision
 after Sprint 7 may consider the path toward `1.0.0`.
-
