@@ -40,6 +40,9 @@ class AgentBudget(Contract):
     output_tokens_limit: int = Field(default=12000, ge=100, le=100000)
     max_tool_characters: int = Field(default=8000, ge=100, le=64000)
     max_total_tool_characters: int = Field(default=32000, ge=100, le=256000)
+    # Malformed tool arguments or a rejected final answer are returned to the model this many
+    # times (the validation error is the retry message); attempts still count toward the budgets.
+    validation_retries: int = Field(default=2, ge=0, le=5)
 
 
 class InspectRequest(Contract):

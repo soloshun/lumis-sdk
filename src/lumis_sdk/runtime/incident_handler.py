@@ -12,7 +12,7 @@ from lumis_sdk.checks import TriageGuard, evaluate_checks, sufficient_finding
 from lumis_sdk.core import Incident, IncidentContext
 from lumis_sdk.graph import OperationalGraph
 from lumis_sdk.investigation.contracts import AgentOutput, Finding, IncidentReport
-from lumis_sdk.investigation.tools import InvestigationTools
+from lumis_sdk.investigation.tools import InvestigationTools, InvestigatorStopped
 from lumis_sdk.reasoning import assess
 from lumis_sdk.runtime.investigation import EvidenceConnector
 from lumis_sdk.runtime.project import OperationalProject
@@ -78,6 +78,7 @@ async def handle_incident(
     output = AgentOutput()
     route = "human"
     stop = "agent_not_enabled"
+    notes: list[str] = []
     try:
         async with asyncio.timeout(project.budget.total_timeout_seconds):
             required = dict.fromkeys(
@@ -106,21 +107,29 @@ async def handle_incident(
                     stop_reason="sufficient_terminal_signature",
                     metrics=tools.metrics(),
                 )
-            if investigator is not None:
-                route = "agent"
-                output = await investigator.investigate(tools, findings)
-                stop = "agent_completed"
-            elif use_agent:
-                route = "agent"
-                if project.models is None:
-                    raise ValueError("explicit model configuration required")
-                from lumis_sdk.investigation.providers import configured_investigator
+            try:
+                if investigator is not None:
+                    route = "agent"
+                    output = await investigator.investigate(tools, findings)
+                    stop = "agent_completed"
+                elif use_agent:
+                    route = "agent"
+                    if project.models is None:
+                        raise ValueError("explicit model configuration required")
+                    from lumis_sdk.investigation.providers import configured_investigator
 
-                async with configured_investigator(
-                    project.models, timeout=project.budget.source_timeout_seconds
-                ) as agent:
-                    output = await agent.investigate(tools, findings)
-                stop = "agent_completed"
+                    async with configured_investigator(
+                        project.models,
+                        timeout=project.budget.source_timeout_seconds,
+                        retries=project.investigator.budget.validation_retries,
+                    ) as agent:
+                        output = await agent.investigate(tools, findings)
+                    stop = "agent_completed"
+            except InvestigatorStopped as exc:
+                # Budget exhausted or the model could not produce valid output: keep what the run
+                # registered and collected; no final answer means no suggestions.
+                stop = exc.stop_reason
+                notes.append(f"Investigator stopped before a final answer ({stop}): {exc}")
             payload = output.model_dump()
             for hypothesis in payload["hypotheses"]:
                 hypothesis["statement"] = redact_text(hypothesis["statement"])
@@ -132,20 +141,25 @@ async def handle_incident(
                 redact_text(question) for question in payload["unresolved_questions"]
             ]
             output = AgentOutput.model_validate(payload)
+            # Accept per candidate: an invalid hypothesis (and suggestions that depend on it) is
+            # dropped with its reason; valid candidates and suggestions are kept.
             for candidate in output.hypotheses:
-                tools.register(candidate)
-            known_evidence = {item.id for item in tools.context.evidence}
-            known_receipts = {item.id for item in tools.receipts}
+                try:
+                    tools.register(candidate)
+                except ValueError as exc:
+                    notes.append(f"Lumis rejected candidate {candidate.id}: {exc}")
+            accepted = set(tools.candidates)
+            kept = []
             for suggestion in output.suggestions:
-                if (
-                    suggestion.hypothesis_id not in tools.candidates
-                    or not set(suggestion.evidence_ids) <= known_evidence
-                    or not set(suggestion.receipt_ids) <= known_receipts
-                ):
-                    raise ValueError("suggestion requires known candidate/evidence/receipts")
+                problem = tools.suggestion_problem(suggestion, accepted)
+                if problem is None:
+                    kept.append(suggestion)
+                else:
+                    notes.append(f"Lumis rejected a suggestion: {problem}")
+            output = output.model_copy(update={"suggestions": tuple(kept)})
             # Validate evidence independently of the agent's narrative; optionally fill requested
             # operator-owned checks under the same remaining query budget. Never execute a fix.
-            for candidate in output.hypotheses:
+            for candidate in tuple(tools.candidates.values()):
                 for query in candidate.evidence_needed:
                     if len(tools.tried) >= project.budget.max_queries:
                         break
@@ -171,7 +185,10 @@ async def handle_incident(
             "assessments": assessments,
             "receipts": tuple(tools.receipts),
             "suggestions": output.suggestions,
-            "unresolved_questions": output.unresolved_questions,
+            "unresolved_questions": (
+                *output.unresolved_questions,
+                *(redact_text(note)[:4000] for note in notes),
+            ),
             "route": route,
             "conclusion": "supported_diagnosis"
             if supported and stop == "agent_completed"

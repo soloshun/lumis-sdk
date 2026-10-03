@@ -200,6 +200,59 @@ def test_real_pydantic_agent_uses_dynamic_tools_and_structured_output(tmp_path):
     assert report.route == "agent" and report.conclusion == "supported_diagnosis"
 
 
+def test_agent_repairs_rejected_output_and_malformed_tool_calls(tmp_path):
+    """Issues seen with DeepSeek on OpenRouter: an empty optional tool argument, and a final
+    answer that reuses a registered ID for a revised hypothesis / cites a receipt as evidence."""
+    project, event, facts = estate(tmp_path)
+    hypothesis = project.config.checks[0].hypothesis.model_dump(mode="json")
+    revised = hypothesis | {"statement": hypothesis["statement"] + " (revised)"}
+    calls, settings = [], []
+
+    def model(messages, info):
+        calls.append(messages)
+        settings.append(dict(info.model_settings or {}))
+        step = len(calls)
+        if step == 1:  # invalid: empty identifier -> validation error returned to the model
+            request = {"operation": "graph", "target": ""}
+            return ModelResponse(parts=[ToolCallPart("inspect", {"request": request})])
+        if step == 2:
+            request = {"operation": "hypothesis.register", "hypothesis": hypothesis}
+            return ModelResponse(parts=[ToolCallPart("inspect", {"request": request})])
+        if step == 3:  # rejected: same ID, different content; evidence_needed names a receipt
+            bad = revised | {"evidence_needed": [*revised["evidence_needed"], "tool-1"]}
+            answer = {"hypotheses": [bad]}
+            return ModelResponse(parts=[ToolCallPart(info.output_tools[0].name, answer)])
+        assert "new ID" in str(messages[-1]) and "registered query" in str(messages[-1])
+        answer = {
+            "hypotheses": [hypothesis, revised | {"id": "revised"}],
+            "suggestions": [
+                {"hypothesis_id": "revised", "description": "Review.", "receipt_ids": ["tool-1"]}
+            ],
+        }
+        return ModelResponse(parts=[ToolCallPart(info.output_tools[0].name, answer)])
+
+    agent = PydanticInvestigator(FunctionModel(model))
+    report = asyncio.run(project.handle_incident(event, observations=facts, investigator=agent))
+    assert len(calls) == 4 and report.stop_reason == "agent_completed"
+    assert {item.hypothesis.id for item in report.assessments} == {hypothesis["id"], "revised"}
+    assert report.suggestions[0].hypothesis_id == "revised"
+    # parallel_tool_calls would make OpenRouter's require_parameters exclude DeepSeek endpoints.
+    assert all("parallel_tool_calls" not in item for item in settings)
+    assert agent.messages and "(revised)" in str(agent.messages)
+
+
+def test_agent_retries_are_bounded(tmp_path):
+    project, event, facts = estate(tmp_path)
+
+    def broken(messages, info):
+        return ModelResponse(parts=[ToolCallPart(info.output_tools[0].name, {"hypotheses": 1})])
+
+    agent = PydanticInvestigator(FunctionModel(broken), retries=1)
+    report = asyncio.run(project.handle_incident(event, observations=facts, investigator=agent))
+    assert report.stop_reason == "agent_output_invalid"
+    assert report.conclusion == "insufficient_evidence" and report.context.evidence == facts
+
+
 def test_request_limit_preserves_facts_and_never_accepts_invented_evidence(tmp_path):
     project, event, facts = estate(tmp_path)
     config = project.config.model_dump(mode="json")
@@ -216,7 +269,10 @@ def test_request_limit_preserves_facts_and_never_accepts_invented_evidence(tmp_p
             event, observations=facts, investigator=PydanticInvestigator(FunctionModel(looping))
         )
     )
-    assert report.stop_reason == "investigator_rejected_or_unavailable"
+    # Budget exhaustion is reported as such; collected facts survive.
+    assert report.stop_reason == "agent_budget_exhausted"
+    assert report.conclusion == "insufficient_evidence" and not report.suggestions
+    assert any("agent_budget_exhausted" in note for note in report.unresolved_questions)
     assert report.metrics.model_requests == 1 and report.context.evidence == facts
 
     class Inventor:
@@ -237,7 +293,13 @@ def test_request_limit_preserves_facts_and_never_accepts_invented_evidence(tmp_p
     rejected = asyncio.run(
         project.handle_incident(event, observations=facts, investigator=Inventor())
     )
-    assert not rejected.suggestions and rejected.conclusion == "insufficient_evidence"
+    # The suggestion citing invented evidence is dropped (with its reason); the valid candidate is
+    # kept and assessed only against collected facts.
+    assert not rejected.suggestions and rejected.stop_reason == "agent_completed"
+    assert [item.hypothesis.id for item in rejected.assessments] == [
+        project.config.checks[0].hypothesis.id
+    ]
+    assert any("unknown evidence ['made-up']" in note for note in rejected.unresolved_questions)
     with pytest.raises(ValueError):
         AgentOutput.model_validate({"evidence": [{"value": True}]})
 

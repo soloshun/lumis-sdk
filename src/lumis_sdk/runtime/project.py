@@ -143,6 +143,8 @@ class ModelSettings(Contract):
     provider: Literal["openrouter", "openai", "anthropic", "gemini"] = "openrouter"
     model: Identifier
     api_key_env: Annotated[str, StringConstraints(pattern=r"^[A-Z][A-Z0-9_]*$")] | None = None
+    # Provider reasoning effort for the reference agent; None leaves the provider default.
+    reasoning: Literal["minimal", "low", "medium", "high"] | None = None
 
     @property
     def credential_env(self) -> str:

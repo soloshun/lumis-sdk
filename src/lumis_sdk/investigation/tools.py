@@ -14,7 +14,14 @@ from lumis_sdk.core import Evidence, EvidenceQuery, Hypothesis, IncidentContext,
 from lumis_sdk.core.contracts import validate_hypothesis
 from lumis_sdk.graph import OperationalGraph
 from lumis_sdk.investigation.config import InvestigatorSettings
-from lumis_sdk.investigation.contracts import InspectRequest, ProbeSpec, RunMetrics, ToolReceipt
+from lumis_sdk.investigation.contracts import (
+    AgentOutput,
+    InspectRequest,
+    ProbeSpec,
+    RunMetrics,
+    Suggestion,
+    ToolReceipt,
+)
 from lumis_sdk.runtime.investigation import EvidenceConnector
 from lumis_sdk.sandbox.runner import ProbeRunner, code_digest
 from lumis_sdk.security.operational import redact_context
@@ -23,6 +30,15 @@ from lumis_sdk.security.redaction import redact_text
 
 class ToolBudgetExceeded(ValueError):
     pass
+
+
+class InvestigatorStopped(RuntimeError):
+    """The investigator ended without a final answer. Registered candidates and receipts remain;
+    `stop_reason` becomes the report's stop reason."""
+
+    def __init__(self, stop_reason: str, detail: str) -> None:
+        super().__init__(detail)
+        self.stop_reason = stop_reason
 
 
 class InvestigationTools:
@@ -119,7 +135,8 @@ class InvestigationTools:
             self.snapshots[repository.id] = CodeSnapshot(repository, self.base)
         return self.snapshots[repository.id]
 
-    def register(self, hypothesis: Hypothesis) -> None:
+    def _admissible(self, hypothesis: Hypothesis, pending: int = 0) -> Hypothesis:
+        """The redacted candidate, or ValueError with the reason Lumis would reject it."""
         payload = hypothesis.model_dump()
         payload["statement"] = redact_text(hypothesis.statement)
         candidate = Hypothesis.model_validate(payload)
@@ -129,9 +146,50 @@ class InvestigationTools:
             raise ValueError(
                 "revised hypothesis requires a new ID; existing probe bindings are immutable"
             )
-        if previous is None and len(self.candidates) >= self.budget.max_hypotheses:
+        if previous is None and len(self.candidates) + pending >= self.budget.max_hypotheses:
             raise ValueError("hypothesis budget exhausted")
+        return candidate
+
+    def register(self, hypothesis: Hypothesis) -> None:
+        candidate = self._admissible(hypothesis)
         self.candidates[candidate.id] = candidate
+
+    def acceptance_problems(self, output: AgentOutput) -> list[str]:
+        """Every reason the final output would be (partly) rejected, without registering anything.
+        The reference agent returns these to the model before its run ends."""
+        problems: list[str] = []
+        accepted = set(self.candidates)
+        pending = 0
+        for hypothesis in output.hypotheses:
+            try:
+                candidate = self._admissible(hypothesis, pending)
+            except ValueError as exc:
+                problems.append(f"hypothesis {hypothesis.id}: {exc}")
+                continue
+            if candidate.id not in accepted:
+                pending += 1
+            accepted.add(candidate.id)
+        problems.extend(self.suggestion_problems(output, accepted))
+        return problems
+
+    def suggestion_problems(self, output: AgentOutput, accepted: set[str]) -> list[str]:
+        return [
+            f"suggestion {index + 1}: {problem}"
+            for index, suggestion in enumerate(output.suggestions)
+            if (problem := self.suggestion_problem(suggestion, accepted)) is not None
+        ]
+
+    def suggestion_problem(self, suggestion: Suggestion, accepted: set[str]) -> str | None:
+        evidence = {item.id for item in self.context.evidence}
+        receipts = {item.id for item in self.receipts}
+        reasons = []
+        if suggestion.hypothesis_id not in accepted:
+            reasons.append(f"unknown or rejected hypothesis {suggestion.hypothesis_id}")
+        if unknown := sorted(set(suggestion.evidence_ids) - evidence):
+            reasons.append(f"unknown evidence {unknown}")
+        if unknown := sorted(set(suggestion.receipt_ids) - receipts):
+            reasons.append(f"unknown receipts {unknown}")
+        return ", ".join(reasons) or None
 
     async def collect(self, query_id: str) -> ToolReceipt:
         """Internal triage calls share the query budget but do not spend agent tool attempts."""
