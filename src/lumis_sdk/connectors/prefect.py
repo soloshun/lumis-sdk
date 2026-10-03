@@ -73,6 +73,18 @@ class PrefectConnector(RemoteConnector):
             # Current-state APIs cannot reconstruct a historical state. Refuse a state that
             # transitioned outside the incident; do not relabel it as an incident-time fact.
             state = row["state"]
+            if state["type"] not in {
+                "SCHEDULED",
+                "PENDING",
+                "RUNNING",
+                "COMPLETED",
+                "FAILED",
+                "CANCELLED",
+                "CRASHED",
+                "PAUSED",
+                "CANCELLING",
+            }:
+                raise ValueError("unknown Prefect state type")
             at = timestamp(state["timestamp"])
             if not timestamp(row["start_time"]) <= at <= incident.ended_at:
                 raise ValueError("Prefect state transition is outside incident window")

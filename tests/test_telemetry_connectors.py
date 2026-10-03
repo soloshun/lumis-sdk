@@ -599,6 +599,37 @@ def test_discovery_failure_is_not_usable_partial_graph():
     assert "secret" not in error.value.report.model_dump_json()
 
 
+def test_unknown_prefect_state_cannot_become_zero_failures():
+    payload = run()
+    payload["state"]["type"] = "INVALID_STATE"
+    with pytest.raises(ValueError, match="unknown Prefect state"):
+        collect(
+            PrefectConnector,
+            PrefectSource(
+                enabled=True, endpoint="http://prefect.test/api", flow_names=("forecast",)
+            ),
+            query("prefect", flow_name="forecast", output="failed_count"),
+            [payload],
+        )
+
+
+def test_discovery_http_read_obeys_project_byte_budget():
+    payload = YamlProject.from_file(EXAMPLE).config.model_dump()
+    payload["sources"]["prefect"].update(discover_topology=True, namespace="demo-estate")
+    payload["discovery"]["max_response_bytes"] = 1
+
+    async def execute():
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(lambda request: httpx.Response(200, json=[run()]))
+        ) as client:
+            return await YamlProject(
+                OperationalProject.model_validate(payload), EXAMPLE.parent
+            ).prepare(at=incident().ended_at, client=client)
+
+    with pytest.raises(DiscoveryError):
+        asyncio.run(execute())
+
+
 def test_missing_auth_byte_limit_redirect_and_span_budget(monkeypatch):
     monkeypatch.delenv("MISSING_AUTH", raising=False)
     registered = query("loki", logql='{job="forecast"}')
