@@ -318,6 +318,172 @@
       "title": "InvestigationBudget",
       "type": "object"
     },
+    "KubernetesSource": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "namespace": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Namespace"
+        }
+      },
+      "title": "KubernetesSource",
+      "type": "object"
+    },
+    "ModelSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key_env": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z][A-Z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Key Env"
+        },
+        "model": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "provider": {
+          "default": "openrouter",
+          "enum": [
+            "openrouter",
+            "openai",
+            "anthropic",
+            "gemini"
+          ],
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model"
+      ],
+      "title": "ModelSettings",
+      "type": "object"
+    },
+    "OpenTelemetrySource": {
+      "additionalProperties": false,
+      "description": "Normalize an OTLP JSON export; this is not a live OTLP receiver.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "export_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Export File"
+        }
+      },
+      "title": "OpenTelemetrySource",
+      "type": "object"
+    },
+    "Policies": {
+      "additionalProperties": false,
+      "description": "The current kernel cannot execute actions, regardless of model confidence.",
+      "properties": {
+        "default_action_mode": {
+          "const": "read_only",
+          "default": "read_only",
+          "title": "Default Action Mode",
+          "type": "string"
+        }
+      },
+      "title": "Policies",
+      "type": "object"
+    },
+    "ProjectIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "environment": {
+          "default": "local",
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Environment",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ProjectIdentity",
+      "type": "object"
+    },
+    "PrometheusSource": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        }
+      },
+      "title": "PrometheusSource",
+      "type": "object"
+    },
     "Relationship": {
       "additionalProperties": false,
       "description": "A directed observed or declared relationship, not an inferred causal conclusion.",
@@ -358,10 +524,25 @@
       ],
       "title": "Relationship",
       "type": "object"
+    },
+    "Sources": {
+      "additionalProperties": false,
+      "properties": {
+        "kubernetes": {
+          "$ref": "#/$defs/KubernetesSource"
+        },
+        "opentelemetry": {
+          "$ref": "#/$defs/OpenTelemetrySource"
+        },
+        "prometheus": {
+          "$ref": "#/$defs/PrometheusSource"
+        }
+      },
+      "title": "Sources",
+      "type": "object"
     }
   },
   "additionalProperties": false,
-  "description": "Explicit normalized topology, observation catalog, and optional provider configuration.",
   "properties": {
     "api_version": {
       "const": "lumis.dev/operational-v1alpha1",
@@ -385,35 +566,22 @@
       "title": "Initial Query Ids",
       "type": "array"
     },
-    "name": {
-      "maxLength": 256,
-      "minLength": 1,
-      "title": "Name",
-      "type": "string"
-    },
-    "openrouter_model": {
+    "models": {
       "anyOf": [
         {
-          "type": "string"
+          "$ref": "#/$defs/ModelSettings"
         },
         {
           "type": "null"
         }
       ],
-      "default": null,
-      "title": "Openrouter Model"
+      "default": null
     },
-    "prometheus_endpoint": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Prometheus Endpoint"
+    "policies": {
+      "$ref": "#/$defs/Policies"
+    },
+    "project": {
+      "$ref": "#/$defs/ProjectIdentity"
     },
     "queries": {
       "default": [],
@@ -430,11 +598,13 @@
       },
       "title": "Rule Hypotheses",
       "type": "array"
+    },
+    "sources": {
+      "$ref": "#/$defs/Sources"
     }
   },
   "required": [
-    "name",
-    "graph"
+    "project"
   ],
   "title": "OperationalProject",
   "type": "object"

@@ -1,0 +1,53 @@
+{
+  "additionalProperties": false,
+  "description": "An explicit bounded observation window; synthetic ground truth is never a field.",
+  "properties": {
+    "affected_entities": {
+      "items": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Affected Entities",
+      "type": "array"
+    },
+    "ended_at": {
+      "format": "date-time",
+      "title": "Ended At",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "started_at": {
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+    },
+    "symptoms": {
+      "items": {
+        "maxLength": 4000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Symptoms",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "affected_entities",
+    "symptoms",
+    "started_at",
+    "ended_at"
+  ],
+  "title": "Incident",
+  "type": "object"
+}

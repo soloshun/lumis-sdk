@@ -9,23 +9,23 @@ with the lead maintainer until this file records a successor or a multi-maintain
 
 Small, reversible changes use issues and pull requests. Cross-cutting changes require an RFC
 before implementation, including new core ports, breaking domain or configuration changes,
-plugin-system changes, execution capability, default model behavior, remote telemetry, and
+connector-system changes, execution capability, default model behavior, remote telemetry, and
 governance or licensing changes. The lead maintainer resolves deadlocks after documenting the
 trade-off in the issue, pull request, RFC, or an architecture decision record.
 
 Accepted architectural decisions should be recorded in `docs/adr/` as the contributor base grows.
 
-## Core and plugin ownership
+## Core and integration ownership
 
-- `lumis-sdk` core and packages published from this repository are official and maintained under
+- `lumis-sdk` core and bundled optional adapters are maintained under
   this governance and security policy.
-- An official optional plugin must live in the Lumis SDK organization/repository set, name its
+- A future official optional adapter package must live in the Lumis SDK repository set, name its
   maintainers, pass the public contract suite, declare its authorities, and follow the SDK release
   and security process. Official does not mean installed by default.
-- A community plugin is owned, supported, secured, versioned, and released by its publisher. It
+- A community integration is owned, supported, secured, versioned, and released by its publisher. It
   must not imply official endorsement or use reserved Lumis branding. Compatibility is a claim by
   that publisher unless this project records an independent verification.
-- Inactivity, unresolved security risk, or an unavailable maintainer may move an official plugin
+- Inactivity, unresolved security risk, or an unavailable maintainer may move an official adapter
   to deprecated or archived status through a public issue and migration notice.
 
 Contributions remain subject to the Apache-2.0 license, clean-room policy, and contributor

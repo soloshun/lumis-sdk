@@ -1,150 +1,69 @@
-# Lumis SDK operational-intelligence roadmap
+# Operational-intelligence roadmap
 
-Updated 2026-10-02. Experimental, research-driven Python SDK. Data & AI infrastructure is the
-first wedge. GridCast is the synthetic reference estate, not a customer or energy-grid
-deployment. **LLM proposes; Lumis tests against evidence.** Support is not causal proof.
+Lumis is an independent, experimental SDK. Applications integrate the framework; they do not
+control its development schedule. Target release: `0.1.0` (pre-1.0). Old sprints are superseded
+and preserved on the [legacy branch](https://github.com/soloshun/lumis-sdk/tree/legacy/pre-operational-intelligence-2026-10-02).
 
-## Reset and preservation
+## Phase A — standalone read-only foundation
 
-The [July roadmap](docs/legacy/2026-07-roadmap.md) and old Phase 1–4 plans are historical.
-Completed work stays credited. Unfinished legacy Sprints 6–23 are superseded, not completed.
-New sprints use `OI-*` identifiers. The exact pre-reset code is preserved remotely on
-`legacy/pre-operational-intelligence-2026-10-02` at `8a371d1`.
+Goal: inspect an operational estate and test falsifiable explanations without action authority.
 
-Existing `domain`, `application`, `ports`, `adapters`, and v1 configuration APIs remain usable
-for released consumers and paper regression experiments. New APIs use `core`, `graph`,
-`connectors`, `reasoning`, `models`, and `runtime`. Removal requires migration and adoption
-review. The new wire version is `lumis.dev/operational-v1alpha1`; old v1 documents retain meaning.
-Legacy cookbooks remain as tested compatibility examples; GridCast is the active example track.
+- **OI-0: clean architecture reset.** Retain only current graph/evidence/reasoning contracts;
+  remove old framework, cookbook and plugin surfaces; fresh CLI/YAML/API docs.
+- **OI-1: independently verifiable kernel.** Scoped topology; interchangeable rule/memory/model
+  candidates; bounded observation acquisition; deterministic assessments and abstention;
+  audit persistence; Kubernetes/OTLP/Prometheus and optional OpenRouter/OpenAI/Anthropic/Gemini.
+- Exit: independent tests and clean-wheel CLI pass on supported Python; docs reflect actual
+  shipped interfaces and mock-vs-live limitations. SDK work does not wait for GridCast.
+- Status: implemented in development; publication and live consumer qualification are separate.
 
-## Phases
+## Phase B — evidence depth and extensibility
 
-| Phase | Goal | Sprints | Exit evidence |
-| --- | --- | --- | --- |
-| A — read-only foundation | External connection, scoped graph, falsifiable candidates | OI-0–1 | Offline conformance plus live GridCast incident run |
-| B — benchmark and diagnosis | Measure evidence-seeking value against simpler approaches | OI-2–3 | Repeatable corpus, baselines, abstention and evidence-efficiency results |
-| C — guarded recovery | Earn recommendation and controlled-lab actuation | OI-4–5 | Independent policy gate, bounded executor, post-action verification |
-| D — adoption and learning | Usability, reviewed reuse, qualified 0.1.0 release | OI-6–7 | External walkthrough, trajectory controls, release evidence |
-| E — evidence-led extension | Extend only when a measured incident needs it | OI-8 onward | Accepted RFC and benchmark/adoption evidence |
+Goal: improve reusable external observations and bounded investigation, not add product coupling.
 
-Sprint size is outcome-driven, not a calendar commitment.
+- **OI-2: connector contracts and identity enrichment.** Capability/readiness reporting,
+  stable external identity mapping, standardized query provenance and adapter contract kit.
+  Prioritize a Git/recent-change adapter and another externally justified integration.
+- **OI-3: stronger seek loop and evaluation.** Query selection baselines, explicit uncertainty,
+  multi-source contradictions, budget/performance measurements and withheld-evidence scenarios.
+  Evaluate proposed hypotheses against synthetic/public incident corpora.
+- Exit: two independent integrations or reproducible contract fixtures, documented operational
+  limits, no hidden ground-truth access, and comparable measured baselines.
+- Status: planned; starts from SDK contracts, not consumer project completion.
 
-## Phase A: read-only foundation
+## Phase C — reusable memory and controlled learning
 
-### OI-0 — reset and contracts
+Goal: reuse prior incidents without mistaking repetition for truth.
 
-Deliver: architecture decision, legacy snapshot, honest research-status labels, strict schemas for
-entities/relationships, incident windows, observations/provenance, queries, falsifiable hypotheses,
-budgets, terminal investigation and audit trace. Preserve independent policy/verification.
+- **OI-4: retrieval and precedent.** Versioned investigation retrieval, provenance, tenant/context
+  separation, invalidation and revalidation of retrieved candidates.
+- **OI-5: incident-to-rule promotion.** Candidate patterns from repeated incidents; explicit minimum
+  examples, evidence/quality requirements, falsifier review, human approval, versioning and rollback.
+  “Happened five times” alone is insufficient to create a trusted deterministic rule.
+- Exit: promotion/withdrawal tests, contradictory recurrence checks, reproducible quality and
+  cost measurements; no automatic operational authority.
+- Status: planned.
 
-Acceptance: reject empty falsifiers, unknown fields, stale facts, orphan relationships and invalid
-references. Preserve old tests/paper imports; check generated schemas in CI.
-Status: complete; merged through [PR #93](https://github.com/soloshun/lumis-sdk/pull/93)
-at `ad01fda`, with all ten PR checks passing and the retained paper regression unchanged.
+## Phase D — independently governed proposals and verification
 
-### OI-1 — external GridCast slice
+Goal: introduce safe proposal boundaries only after diagnosis has measurable quality.
 
-Deliver: declared/discovered topology merge, indexed bounded traversal, namespace-scoped Kubernetes
-discovery, OTLP/JSON topology import, Prometheus read adapter, uniform rule/memory/model source port,
-optional structured OpenRouter generation, offline CLI example, budgeted evidence-query selection,
-mechanical support/contradiction and persisted abstention. No executor.
+- **OI-6: typed proposals and independent policy.** Allow/deny scopes, risk, human approval,
+  immutable decision record and authority separated from model/source confidence.
+- **OI-7: bounded verification and artifact qualification.** Explicit success/failure/inconclusive
+  criteria, before/after evidence, reproducible experiment package and rollback contracts.
+  A real executor requires a separate approved threat-model/design review.
+- Exit: independent policy cannot be bypassed by model output; replayable verification evidence;
+  clear research/production boundary. Consider 1.0 only after explicit API/release review.
+- Status: planned; not an executor commitment.
 
-Acceptance: independently running GridCast supplies topology/observations through public ports;
-produce 3–5 falsifiable model candidates, inspect scoped graph and query trace, replay withheld
-evidence. Estate application services must not import Lumis or reveal injected fault labels.
-Status: SDK/offline/transport slice merged through PR #93. Live GridCast and actual model evidence
-remain open in [#92](https://github.com/soloshun/lumis-sdk/issues/92); this sprint is not complete.
+## Documentation and external examples in every sprint
 
-## Phase B: benchmark and diagnosis
+Every sprint updates architecture decisions, Python API, CLI/YAML, schemas, migration/release
+notes, safety limits and verification instructions. Add cookbook scenarios in the separate
+Lumis cookbooks project, not in core. Written equivalents accompany future demonstration videos.
 
-### OI-2 — benchmark before platform
-
-Deliver 8–15 reproducible independent incident fixtures: query amplification, stale upstream data,
-credential/configuration failure, resource pressure, model slowdown, compound/irrelevant concurrent
-changes. Keep ground truth out of runtime inputs; separate development and held-out incidents.
-
-Compare rule/runbook, single-pass LLM, tool-using LLM without hypothesis management, and Lumis using
-equal observation surfaces/budgets. Define top-k recall, causal-path match, unsupported claims,
-abstention in both directions, query count, time, tokens/cost and deterministic replay metrics.
-Pin dependencies and include negative findings.
-
-Acceptance: clean reproduction with label definitions and hidden ground truth. Contract tests are
-not a comparative research benchmark. No superiority claim before experimental evidence.
-Status: planned.
-
-### OI-3 — evidence-seeking diagnosis
-
-Deliver query policies justified by OI-2, candidate revision, explicit uncertainty, deployment/Git
-and Prefect adapters needed by actual incidents, historical graph/change context, source ablations.
-
-Acceptance: measured query efficiency and false-confident diagnosis against baselines. Scores are
-not called calibrated probabilities without calibration data. Missing evidence yields abstention.
-Status: planned.
-
-## Phase C: guarded recovery
-
-### OI-4 — bounded recommendations
-
-Bridge investigated candidates to typed allowlisted proposals with preconditions, risk,
-rollback and verification plans. Abstention emits no actionable plan. Support/model confidence
-cannot lower approval requirements.
-
-Acceptance: maximum-confidence high-risk proposal remains pending; unknown actions fail closed;
-each proposal pins policy and evidence. Status: planned.
-
-### OI-5 — controlled-lab execution and verification
-
-Deliver RFC-reviewed reversible executor, idempotency, approval revision checks, execution limits,
-cancellation, audit, rollback and independently gathered post-action evidence. Check downstream
-forecast freshness/completeness as well as process health. Introduce durable workflow machinery
-only when restart/retry experiments require it.
-
-Acceptance: selected injected failures recover reproducibly; failed/unknown verification never
-marks resolution. No production authority is implied. Deliberately outside the initial SEAMS
-control-substrate implementation. Status: planned.
-
-## Phase D: adoption and learning
-
-### OI-6 — external usability and documentation
-
-Deliver clean installs, operator diagnostics, connector security review, independent engineer
-walkthrough, contributor examples, version-pinned artifact runbook and written/video scripts.
-Keep small offline examples here; move large GridCast cookbooks to a separate repository only
-once that repository exists.
-
-Acceptance: external engineer runs a controlled estate unaided; record feedback. Status: planned.
-
-### OI-7 — reviewed trajectory learning and 0.1.0 qualification
-
-Deliver episode retrieval without importing prior evidence as current truth, environment isolation,
-reviewed truth transitions and recurrence-to-rule *candidate* generation from repeated verified
-incidents. Frequency alone never confirms a rule; review and regression evaluation are required.
-Resolve compatibility/migration for legacy APIs.
-
-Acceptance: distribution/plugin compatibility, clean installs, threat review, reproducibility,
-live GridCast and external adoption/review gates have attached records.
-Target **0.1.0**, not 1.0.0. `0.1.0rc1` is a historical release candidate, not a release of this
-new architecture. Qualify a new RC before final release; never overwrite a PyPI version.
-Status: planned. [Reset release gates](docs/operational-intelligence/release-gates.md).
-
-## Phase E: extension earned by evidence
-
-OI-8 onward may cover OpenLineage, additional observability/model providers, larger graph storage,
-calibration, TypeScript/wire conformance, edge/SLM constraints and simulated sensors. Each requires
-a specific measured failure, dependency/authority budget and accepted RFC.
-
-Enterprise tenancy/identity/billing/fleet/UI belong to the product. Physical actuation, large agent
-taxonomies, graph/vector databases and custom foundation models are not current SDK deliverables.
-
-## Every sprint's definition of done
-
-1. Name the incident or research requirement that needs the component.
-2. Specify types, provenance, uncertainty, authority, privacy and failure behavior.
-3. Pass unit/contract, hostile-input, timeout and replay tests; record live evidence separately.
-4. Update API docs, schemas, migration notes, changelog, runnable example and docs-site source queue.
-5. Pin SDK/provider/testbed versions; keep ground truth hidden.
-6. Branch from `dev`, PR to `dev`, wait for checks, qualify a separate release promotion.
-7. Link evidence on issues/board; implementation merge does not close live/external review gates.
-
-The original research remains the guarded-control substrate. The new hypothesis-and-evidence
-architecture is experimental; this roadmap claims neither benchmark superiority nor acceptance.
+GridCast is the first external consumer qualification track. Its telemetry/live-model evidence
+can inform priorities and reveal bugs, but is not a gate for framework implementation.
+Future connectors, providers and language clients are incremental, evidence-led work, not claims
+of current support. Issues/project board should preserve this SDK/consumer distinction.

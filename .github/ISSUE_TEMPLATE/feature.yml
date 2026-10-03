@@ -14,7 +14,7 @@ body:
     id: capability
     attributes:
       label: Proposed public capability
-      description: Name the Python, CLI, configuration, schema, adapter, or testkit contract needed.
+      description: Name the current Python, CLI, configuration, schema or connector contract needed.
     validations:
       required: true
   - type: textarea

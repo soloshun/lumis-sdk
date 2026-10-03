@@ -240,14 +240,24 @@ class Investigation(Contract):
 
 def validate_hypothesis(hypothesis: Hypothesis, context: IncidentContext) -> None:
     """Enforce graph and tool-catalog membership before accepting a candidate."""
-    ids = {entity.id for entity in context.graph.entities}
+    validate_hypothesis_catalog(hypothesis, context.graph, context.queries)
+
+
+def validate_hypothesis_catalog(
+    hypothesis: Hypothesis, graph: GraphSnapshot, catalog: tuple[EvidenceQuery, ...]
+) -> None:
+    """Validate candidate references without constructing a fictitious incident context."""
+    ids = {entity.id for entity in graph.entities}
     targets = {check.entity_id for check in (*hypothesis.predictions, *hypothesis.falsifiers)}
     if not (set(hypothesis.causal_path) | targets) <= ids:
         raise ValueError("hypothesis references entity outside incident graph")
-    queries = {query.id: query for query in context.queries}
+    queries = {query.id: query for query in catalog}
     if not set(hypothesis.evidence_needed) <= queries.keys():
         raise ValueError("hypothesis requests unregistered evidence")
-    available = {(query.entity_id, query.key) for query in queries.values()}
+    available = {
+        (queries[query_id].entity_id, queries[query_id].key)
+        for query_id in hypothesis.evidence_needed
+    }
     if any(
         (check.entity_id, check.key) not in available
         for check in (*hypothesis.predictions, *hypothesis.falsifiers)

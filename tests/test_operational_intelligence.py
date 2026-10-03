@@ -1,4 +1,4 @@
-"""New kernel invariants and reproducible read-only GridCast contract."""
+"""Standalone kernel invariants using only synthetic operational contracts."""
 
 import asyncio
 import json
@@ -28,11 +28,11 @@ from lumis_sdk.reasoning import MemoryHypothesisSource, ModelHypothesisSource, R
 from lumis_sdk.runtime import InvestigationRuntime, InvestigationStore
 from lumis_sdk.runtime.project import load_project
 
-EXAMPLE = Path(__file__).parents[1] / "examples/gridcast-readonly"
+EXAMPLE = Path(__file__).parent / "fixtures/operational"
 
 
 def fixture():
-    project = load_project(EXAMPLE / "project.yaml")
+    project = load_project(EXAMPLE / "lumis.yaml")
     incident = Incident.model_validate_json((EXAMPLE / "incident.json").read_text())
     facts = TypeAdapter(tuple[Evidence, ...]).validate_json(
         (EXAMPLE / "observations.json").read_text()
@@ -70,7 +70,7 @@ def test_hypotheses_require_falsifiers_and_graph_membership():
         validate_hypothesis(hypothesis.model_copy(update={"evidence_needed": ("shell",)}), context)
 
 
-def test_gridcast_competing_candidates_are_tested_without_confirmation():
+def test_competing_candidates_are_tested_without_confirmation():
     result = run()
     assert result.outcome == "supported"
     assert [item.state for item in result.assessments] == [
@@ -260,7 +260,7 @@ def test_cli_offline_outputs_structured_result():
         [
             "investigate",
             "--project",
-            str(EXAMPLE / "project.yaml"),
+            str(EXAMPLE / "lumis.yaml"),
             "--incident",
             str(EXAMPLE / "incident.json"),
             "--observations",

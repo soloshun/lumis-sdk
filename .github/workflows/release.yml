@@ -3,38 +3,26 @@ name: Release package
 on:
   workflow_dispatch:
     inputs:
-      package:
-        description: Distribution to publish
-        required: true
-        default: core
-        type: choice
-        options:
-          - core
-          - postgres-memory
-          - http-json-evidence
       version:
-        description: Version declared in pyproject.toml (for example, 0.0.1)
+        description: Exact version declared in pyproject.toml
         required: true
         type: string
       target:
-        description: Package index to publish to
+        description: Package index
         required: true
         default: testpypi
         type: choice
-        options:
-          - testpypi
-          - pypi
+        options: [testpypi, pypi]
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ inputs.package }}-${{ inputs.target }}-${{ inputs.version }}
+  group: release-${{ inputs.target }}-${{ inputs.version }}
   cancel-in-progress: false
 
 jobs:
   verify-and-build:
-    name: Verify and build ${{ inputs.package }} ${{ inputs.version }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -42,151 +30,71 @@ jobs:
       attestations: write
       artifact-metadata: write
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "0.11.17"
-          enable-cache: true
-
-      - name: Install Python
-        run: uv python install 3.11
-
-      - name: Select package
-        id: package
-        shell: bash
+      - run: uv python install 3.11
+      - name: Verify release source and declared version
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
         run: |
-          case "${{ inputs.package }}" in
-            core)
-              project_dir="."
-              distribution="lumis-sdk"
-              ;;
-            postgres-memory)
-              project_dir="packages/lumis-sdk-postgres-memory"
-              distribution="lumis-sdk-postgres-memory"
-              ;;
-            http-json-evidence)
-              project_dir="packages/lumis-sdk-http-json-evidence"
-              distribution="lumis-sdk-http-json-evidence"
-              ;;
-            *)
-              echo "Unsupported package selection: ${{ inputs.package }}" >&2
-              exit 1
-              ;;
-          esac
-          echo "project-dir=$project_dir" >> "$GITHUB_OUTPUT"
-          echo "distribution=$distribution" >> "$GITHUB_OUTPUT"
-
-      - name: Check declared version
-        run: |
-          test "$(uv version --project '${{ steps.package.outputs.project-dir }}' --short)" = "${{ inputs.version }}"
-
-      - name: Sync locked dependencies
-        run: uv sync --locked --all-groups
-
-      - name: Verify source
-        shell: bash
-        run: |
-          case "${{ inputs.package }}" in
-            core)
-              uv run ruff format --check .
-              uv run ruff check .
-              uv run mypy src
-              uv run python scripts/generate_config_schema.py --check
-              uv run pytest
-              ;;
-            postgres-memory)
-              PYTHONPATH=packages/lumis-sdk-postgres-memory/src \
-                uv run --with 'psycopg[binary]>=3.2,<4' \
-                mypy packages/lumis-sdk-postgres-memory/src
-              PYTHONPATH=packages/lumis-sdk-postgres-memory/src \
-                uv run --with 'psycopg[binary]>=3.2,<4' \
-                pytest packages/lumis-sdk-postgres-memory/tests
-              ;;
-            http-json-evidence)
-              PYTHONPATH=packages/lumis-sdk-http-json-evidence/src \
-                uv run --with 'httpx>=0.28,<1' \
-                mypy packages/lumis-sdk-http-json-evidence/src
-              PYTHONPATH=packages/lumis-sdk-http-json-evidence/src \
-                uv run --with 'httpx>=0.28,<1' \
-                pytest packages/lumis-sdk-http-json-evidence/tests
-              PYTHONPATH=packages/lumis-sdk-http-json-evidence/src \
-                uv run --with 'httpx>=0.28,<1' \
-                python cookbook/webhook-http-evidence/demo.py
-              ;;
-          esac
-
-      - name: Build publishable distributions
-        run: |
-          source_date_epoch="$(git log -1 --pretty=%ct)"
-          export SOURCE_DATE_EPOCH="$source_date_epoch"
-          uv build \
-            --project "${{ steps.package.outputs.project-dir }}" \
-            --no-sources \
-            --out-dir "dist/${{ inputs.package }}"
-
-      - name: Verify archive contents
-        run: >-
-          uv run python scripts/verify_release_artifacts.py
-          "dist/${{ inputs.package }}"
-          --distribution "${{ steps.package.outputs.distribution }}"
-          --version "${{ inputs.version }}"
-
-      - name: Rebuild and compare reproducible inputs
+          test "$GITHUB_REF_NAME" = main
+          test "$(uv version --short)" = "$RELEASE_VERSION"
+          uv sync --locked --all-groups
+          uv run ruff format --check .
+          uv run ruff check .
+          uv run mypy src
+          uv run python scripts/generate_config_schema.py --check
+          uv run pytest
+          uv audit --locked
+          uv run bandit --recursive --severity-level medium --confidence-level medium src
+      - name: Build and verify reproducibility
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           export SOURCE_DATE_EPOCH="$(git log -1 --pretty=%ct)"
-          uv build \
-            --project "${{ steps.package.outputs.project-dir }}" \
-            --no-sources \
-            --out-dir "dist-rebuild/${{ inputs.package }}"
-          diff \
-            <(cd "dist/${{ inputs.package }}" && sha256sum *.whl *.tar.gz) \
-            <(cd "dist-rebuild/${{ inputs.package }}" && sha256sum *.whl *.tar.gz)
-
+          uv build --no-sources --out-dir dist
+          uv run python scripts/verify_release_artifacts.py dist \
+            --distribution lumis-sdk --version "$RELEASE_VERSION"
+          uv build --no-sources --out-dir dist-rebuild
+          diff <(cd dist && sha256sum *.whl *.tar.gz) \
+               <(cd dist-rebuild && sha256sum *.whl *.tar.gz)
       - name: Generate SPDX SBOM
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
-          path: dist/${{ inputs.package }}
+          path: dist
           format: spdx-json
-          output-file: dist/${{ inputs.package }}/sbom.spdx.json
+          output-file: sbom.spdx.json
           upload-artifact: false
           upload-release-assets: false
-
-      - name: Attest build provenance
+      - name: Attest provenance
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
         with:
           subject-path: |
-            dist/${{ inputs.package }}/*.whl
-            dist/${{ inputs.package }}/*.tar.gz
-
+            dist/*.whl
+            dist/*.tar.gz
       - name: Attest SBOM
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
         with:
           subject-path: |
-            dist/${{ inputs.package }}/*.whl
-            dist/${{ inputs.package }}/*.tar.gz
-          sbom-path: dist/${{ inputs.package }}/sbom.spdx.json
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@v7
+            dist/*.whl
+            dist/*.tar.gz
+          sbom-path: sbom.spdx.json
+      - uses: actions/upload-artifact@v7
         with:
-          name: python-dist-${{ inputs.package }}-${{ inputs.version }}
+          name: python-dist
           path: |
-            dist/${{ inputs.package }}/*.whl
-            dist/${{ inputs.package }}/*.tar.gz
+            dist/*.whl
+            dist/*.tar.gz
           if-no-files-found: error
-
-      - name: Upload SBOM
-        uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7
         with:
-          name: sbom-${{ inputs.package }}-${{ inputs.version }}
-          path: dist/${{ inputs.package }}/sbom.spdx.json
+          name: release-sbom
+          path: sbom.spdx.json
           if-no-files-found: error
 
   clean-install:
-    name: Clean install ${{ inputs.package }} (Python ${{ matrix.python-version }})
     needs: verify-and-build
     runs-on: ubuntu-latest
     strategy:
@@ -194,64 +102,42 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
     steps:
-      - name: Install uv
-        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "0.11.17"
-      - name: Install Python
-        run: uv python install ${{ matrix.python-version }}
-      - name: Download distributions
-        uses: actions/download-artifact@v8
+      - run: uv python install ${{ matrix.python-version }}
+      - uses: actions/download-artifact@v8
         with:
-          name: python-dist-${{ inputs.package }}-${{ inputs.version }}
-          path: dist/
-      - name: Install wheel in an empty environment
+          name: python-dist
+          path: dist
+      - name: Verify wheel and source archive in empty environments
         run: |
           uv venv --python ${{ matrix.python-version }} .venv-wheel
           uv pip install --python .venv-wheel/bin/python dist/*.whl
-          uv pip show --python .venv-wheel/bin/python \
-            "$(case '${{ inputs.package }}' in core) echo lumis-sdk;; postgres-memory) echo lumis-sdk-postgres-memory;; *) echo lumis-sdk-http-json-evidence;; esac)"
-      - name: Install source archive in an empty environment
-        run: |
+          .venv-wheel/bin/lumis init --directory /tmp/lumis-wheel
+          .venv-wheel/bin/lumis doctor --project /tmp/lumis-wheel/lumis.yaml
+          .venv-wheel/bin/lumis investigate --project /tmp/lumis-wheel/lumis.yaml \
+            --incident /tmp/lumis-wheel/incident.json --observations /tmp/lumis-wheel/observations.json
           uv venv --python ${{ matrix.python-version }} .venv-sdist
           uv pip install --python .venv-sdist/bin/python dist/*.tar.gz
-          uv pip show --python .venv-sdist/bin/python \
-            "$(case '${{ inputs.package }}' in core) echo lumis-sdk;; postgres-memory) echo lumis-sdk-postgres-memory;; *) echo lumis-sdk-http-json-evidence;; esac)"
+          .venv-sdist/bin/lumis --version
 
-  publish-testpypi:
-    name: Publish ${{ inputs.package }} ${{ inputs.version }} to TestPyPI
+  publish:
     needs: [verify-and-build, clean-install]
-    if: inputs.target == 'testpypi'
     runs-on: ubuntu-latest
-    environment: testpypi
+    environment: ${{ inputs.target }}
     permissions:
       id-token: write
     steps:
-      - name: Download distributions
-        uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@v8
         with:
-          name: python-dist-${{ inputs.package }}-${{ inputs.version }}
-          path: dist/
-
-      - name: Publish distributions
+          name: python-dist
+          path: dist
+      - name: Publish to TestPyPI
+        if: inputs.target == 'testpypi'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-
-  publish-pypi:
-    name: Publish ${{ inputs.package }} ${{ inputs.version }} to PyPI
-    needs: [verify-and-build, clean-install]
-    if: inputs.target == 'pypi'
-    runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      id-token: write
-    steps:
-      - name: Download distributions
-        uses: actions/download-artifact@v8
-        with:
-          name: python-dist-${{ inputs.package }}-${{ inputs.version }}
-          path: dist/
-
-      - name: Publish distributions
+      - name: Publish to PyPI
+        if: inputs.target == 'pypi'
         uses: pypa/gh-action-pypi-publish@release/v1

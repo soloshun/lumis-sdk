@@ -27,14 +27,3 @@ jobs:
         run: |
           uv run --with pip-licenses pip-licenses --format=json --with-system > licenses-core.json
           uv run python scripts/check_dependency_licenses.py licenses-core.json
-      - name: Review HTTP plugin dependency licenses
-        run: |
-          uv run --project packages/lumis-sdk-http-json-evidence --with pip-licenses \
-            pip-licenses --format=json --with-system > licenses-http.json
-          uv run python scripts/check_dependency_licenses.py licenses-http.json
-      - name: Review PostgreSQL plugin dependency licenses
-        run: |
-          uv run --project packages/lumis-sdk-postgres-memory \
-            --with 'psycopg[binary]>=3.2,<4' --with pip-licenses \
-            pip-licenses --format=json --with-system > licenses-postgres.json
-          uv run python scripts/check_dependency_licenses.py licenses-postgres.json

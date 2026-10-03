@@ -26,32 +26,35 @@ def test_kubernetes_normalizes_selectors_and_owners_without_secret_fields():
             "items": [
                 {
                     "kind": "Service",
-                    "metadata": {"name": "feature", "namespace": "gridcast"},
+                    "metadata": {"name": "feature", "namespace": "demo-estate"},
                     "spec": {"selector": {"app": "feature"}},
                 },
                 {
                     "kind": "Pod",
                     "metadata": {
                         "name": "feature-1",
-                        "namespace": "gridcast",
+                        "namespace": "demo-estate",
                         "labels": {"app": "feature", "app.kubernetes.io/name": "feature"},
                         "ownerReferences": [{"kind": "ReplicaSet", "name": "feature-rs"}],
                     },
                     "spec": {"containers": [{"env": [{"value": "must-not-export"}]}]},
                 },
-                {"kind": "ReplicaSet", "metadata": {"name": "feature-rs", "namespace": "gridcast"}},
-                {"kind": "Secret", "metadata": {"name": "secret", "namespace": "gridcast"}},
+                {
+                    "kind": "ReplicaSet",
+                    "metadata": {"name": "feature-rs", "namespace": "demo-estate"},
+                },
+                {"kind": "Secret", "metadata": {"name": "secret", "namespace": "demo-estate"}},
                 {"kind": "Pod", "metadata": {"name": "other", "namespace": "other"}},
             ]
         },
-        namespace="gridcast",
+        namespace="demo-estate",
     )
     assert len(snapshot.entities) == 3
     assert {edge.kind for edge in snapshot.relationships} == {"routes_to", "owns"}
     assert "must-not-export" not in snapshot.model_dump_json()
     assert "secret" not in snapshot.model_dump_json()
     with pytest.raises(ValueError):
-        KubernetesDiscovery(namespace="--all-namespaces", context="kind-gridcast")
+        KubernetesDiscovery(namespace="--all-namespaces", context="kind-demo-estate")
 
 
 def test_prometheus_uses_only_registered_query_and_incident_time():
@@ -59,14 +62,14 @@ def test_prometheus_uses_only_registered_query_and_incident_time():
     query = project.queries[2].model_copy(
         update={
             "provider": "prometheus",
-            "parameters": {"promql": "sum(gridcast_db_read_ratio)"},
+            "parameters": {"promql": "sum(demo-estate_db_read_ratio)"},
         }
     )
 
     def handle(request):
         assert request.method == "GET"
         assert request.url.path == "/api/v1/query"
-        assert request.url.params["query"] == "sum(gridcast_db_read_ratio)"
+        assert request.url.params["query"] == "sum(demo-estate_db_read_ratio)"
         assert float(request.url.params["time"]) == incident.ended_at.timestamp()
         return httpx.Response(
             200,
@@ -214,7 +217,7 @@ def test_otlp_joins_only_same_trace_parents_and_preserves_dependency_direction()
             "resource": {
                 "attributes": [
                     {"key": "service.name", "value": {"stringValue": name}},
-                    {"key": "service.namespace", "value": {"stringValue": "gridcast"}},
+                    {"key": "service.namespace", "value": {"stringValue": "demo-estate"}},
                     {"key": "private", "value": {"stringValue": "do-not-export"}},
                 ]
             },
@@ -235,8 +238,8 @@ def test_otlp_joins_only_same_trace_parents_and_preserves_dependency_direction()
     }
     graph = topology_from_otlp(payload)
     assert len(graph.relationships) == 1
-    assert graph.relationships[0].source == "service:gridcast:features"
-    assert graph.relationships[0].target == "service:gridcast:forecast"
+    assert graph.relationships[0].source == "service:demo-estate:features"
+    assert graph.relationships[0].target == "service:demo-estate:forecast"
     assert "do-not-export" not in graph.model_dump_json()
     with pytest.raises(ValueError, match="budget"):
         topology_from_otlp(payload, max_spans=1)
