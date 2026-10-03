@@ -44,6 +44,13 @@
           "minimum": 1,
           "title": "Tool Calls Limit",
           "type": "integer"
+        },
+        "validation_retries": {
+          "default": 2,
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Validation Retries",
+          "type": "integer"
         }
       },
       "title": "AgentBudget",
@@ -134,6 +141,11 @@
           "minLength": 1,
           "title": "Id",
           "type": "string"
+        },
+        "include_commit_subjects": {
+          "default": false,
+          "title": "Include Commit Subjects",
+          "type": "boolean"
         },
         "root": {
           "maxLength": 4000,
@@ -667,6 +679,24 @@
           ],
           "title": "Provider",
           "type": "string"
+        },
+        "reasoning": {
+          "anyOf": [
+            {
+              "enum": [
+                "minimal",
+                "low",
+                "medium",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reasoning"
         }
       },
       "required": [
@@ -1004,6 +1034,9 @@
         "prometheus": {
           "$ref": "#/$defs/PrometheusSource"
         },
+        "sql": {
+          "$ref": "#/$defs/SqlSource"
+        },
         "tempo": {
           "$ref": "#/$defs/TempoSource"
         },
@@ -1012,6 +1045,53 @@
         }
       },
       "title": "Sources",
+      "type": "object"
+    },
+    "SqlSource": {
+      "additionalProperties": false,
+      "description": "One PostgreSQL database, read through operator-registered scalar queries only.\n\nThe connection string comes from the environment (`dsn_env`), never from configuration.\nEvery query runs in a read-only transaction with a statement timeout; use a read-only role\nas well, because the transaction mode is a guard, not a permission boundary.",
+      "properties": {
+        "connect_timeout_seconds": {
+          "default": 5,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Connect Timeout Seconds",
+          "type": "integer"
+        },
+        "dsn_env": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z][A-Z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dsn Env"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "max_requests": {
+          "default": 32,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "statement_timeout_ms": {
+          "default": 5000,
+          "maximum": 60000,
+          "minimum": 100,
+          "title": "Statement Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "title": "SqlSource",
       "type": "object"
     },
     "TempoSource": {

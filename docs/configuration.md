@@ -230,13 +230,16 @@ models:
   provider: openrouter
   model: your-explicit-provider/model-id
   api_key_env: OPENROUTER_API_KEY
+  reasoning: high        # optional: minimal | low | medium | high; omitted = provider default
 ```
 
-No default model, auto-fallback or hidden call is used. Only `--use-model` or Python
+`reasoning` sets the reference agent's reasoning effort through Pydantic AI's unified `thinking`
+setting (OpenRouter: its `reasoning` request field). No default model, auto-fallback or hidden call is used. Only `--use-model` or Python
 `use_model=True` invokes this source.
 Provider-specific key defaults and native configuration are in [model providers](models.md).
 The environment variable name must use uppercase letters/digits/underscores and start with a letter.
-Structured model output must contain 3–5 valid candidates. Availability, cost, privacy,
+Structured model output must propose 3–5 candidates; each is validated on its own, invalid ones
+are dropped with a traced reason and the source is rejected only if none is valid. Availability, cost, privacy,
 schema support and quality remain operator responsibilities.
 
 ## Incident and observations
@@ -251,7 +254,8 @@ CLI `--observations` or Python `observations=` overrides it; `observations=()` f
 
 Checked editor schemas are in [schemas](../schemas). Regenerate with
 `uv run python scripts/generate_config_schema.py`.
-Loki, Tempo and Prefect are supported optional sources; follow their [setup guide](telemetry-connectors.md).
+Loki, Tempo, Prefect and read-only SQL are supported optional sources; follow their
+[setup guide](telemetry-connectors.md).
 Basic Git/code inspection uses explicit investigator repository/file allowlists, not an unrestricted
 `sources.git.repository` shortcut. Approval-required execution and automatic rule promotion are not
 accepted working configuration; no executor is shipped.

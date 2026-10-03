@@ -29,10 +29,16 @@ span observations, malformed/empty/capped responses, optional topology and publi
 wiring. See [connector setup](telemetry-connectors.md); no live backend/consumer qualification is
 implied by deterministic HTTP transports.
 
+The [SQL connector suite](../tests/test_sql_connector.py) covers the query contract (single
+read-only statement, window parameters only), transaction guards and value normalization with a
+scripted driver. Its PostgreSQL test runs only with `LUMIS_TEST_POSTGRES_DSN` set (use a read-only
+role); it also checks that a write is refused.
+
 Tests for the retired architecture are removed with their code, not counted as current coverage.
 
 The agent suite uses the real Pydantic AI loop with a scripted FunctionModel: dynamic tools,
-structured output, budget exhaustion, malformed claims, triage escalation, source failure,
+structured output, budget exhaustion, repair of rejected output and malformed tool arguments,
+per-candidate acceptance, malformed claims, triage escalation, source failure,
 scoped code/Git, immutable candidate/probe bindings and separate manual resolution persistence.
 Both notebooks execute offline. Scripted responses test protocol, not model quality.
 Opt-in real Docker tests cover no network/credential forwarding, unprivileged execution,
