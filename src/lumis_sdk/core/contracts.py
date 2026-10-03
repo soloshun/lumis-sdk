@@ -16,6 +16,7 @@ from pydantic import (
     StrictInt,
     StrictStr,
     StringConstraints,
+    ValidationError,
     model_validator,
 )
 
@@ -241,6 +242,16 @@ class Investigation(Contract):
 def validate_hypothesis(hypothesis: Hypothesis, context: IncidentContext) -> None:
     """Enforce graph and tool-catalog membership before accepting a candidate."""
     validate_hypothesis_catalog(hypothesis, context.graph, context.queries)
+
+
+def rejection_reason(exc: Exception) -> str:
+    """A reason without model-authored text: schema locations/types, or the SDK's own message."""
+    if isinstance(exc, ValidationError):
+        return "; ".join(
+            f"{'.'.join(str(part) for part in error['loc']) or 'candidate'}: {error['type']}"
+            for error in exc.errors()[:5]
+        )
+    return str(exc)[:300]
 
 
 def validate_hypothesis_catalog(

@@ -95,6 +95,11 @@ Exactly one bounded request is sent to the configured provider. No retries, mode
 paid fallback or provider switching occurs. Input is redacted and character-limited; response
 reads and output tokens are bounded. Provider refusal, truncation, malformed JSON,
 incorrect candidate count and invalid graph/query references cannot become trusted candidates.
+Candidates are judged individually: an invalid one is dropped and its reason (schema location and
+error type, or the SDK's own validation message; never model text) is kept on the adapter's
+`rejections` and traced by the runtime, while valid ones proceed. The raw answer text of the last
+call is available as `last_response` for evaluation. Response reads are capped by
+`max_response_bytes` (default 1 MB; reasoning models return their reasoning with the answer).
 Runtime source failures are audited and can result in abstention.
 
 Wire schemas use a portable subset of structural JSON Schema; full length/count/range and

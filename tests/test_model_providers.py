@@ -63,7 +63,7 @@ def envelope(provider, text, *, complete=True):
     }
 
 
-def invoke(provider, handler, *, max_input_characters=20000):
+def invoke(provider, handler, *, max_input_characters=20000, on_model=None):
     context, _, _ = context_and_text()
 
     async def generate():
@@ -76,6 +76,8 @@ def invoke(provider, handler, *, max_input_characters=20000):
                 max_output_tokens=1000,
                 max_input_characters=max_input_characters,
             )
+            if on_model is not None:
+                on_model(model)
             return await model.generate(context)
 
     return asyncio.run(generate())
@@ -135,7 +137,7 @@ def test_native_providers_reject_unusable_or_forged_output(provider, kind):
         batch["hypotheses"] = batch["hypotheses"][:2]
         text = json.dumps(batch)
     elif kind == "unknown-entity":
-        batch["hypotheses"][0]["causal_path"] = ["forged-entity"]
+        batch["hypotheses"] = [batch["hypotheses"][0] | {"causal_path": ["forged-entity"]}] * 3
         text = json.dumps(batch)
     with pytest.raises(ValueError):
         invoke(
@@ -204,3 +206,25 @@ def test_openrouter_is_default_and_unrecognized_providers_are_rejected():
                 )
 
     asyncio.run(construct())
+
+
+@pytest.mark.parametrize("provider", PROVIDERS)
+def test_one_invalid_candidate_does_not_discard_the_batch(provider):
+    _, text, hypotheses = context_and_text()
+    batch = json.loads(text)
+    batch["hypotheses"][0]["causal_path"] = ["forged-entity"]
+    holder = {}
+
+    def capture(model):
+        holder["model"] = model
+
+    kept = invoke(
+        provider,
+        lambda request: httpx.Response(200, json=envelope(provider, json.dumps(batch))),
+        on_model=capture,
+    )
+    assert kept == hypotheses[1:]
+    model = holder["model"]
+    assert model.rejections and model.rejections[0].startswith("candidate 1:")
+    assert "forged-entity" not in " ".join(model.rejections)  # no model-authored text
+    assert json.loads(model.last_response) == batch

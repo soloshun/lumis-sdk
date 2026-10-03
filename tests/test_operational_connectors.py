@@ -93,6 +93,58 @@ def test_prometheus_uses_only_registered_query_and_incident_time():
     assert result[0].query_id == query.id
 
 
+def test_kubernetes_skips_completed_job_pods():
+    def pod(name, phase):
+        return {
+            "kind": "Pod",
+            "metadata": {
+                "name": name,
+                "namespace": "demo",
+                "labels": {"app.kubernetes.io/name": name.rsplit("-", 1)[0]},
+                "ownerReferences": [{"kind": "Job", "name": name.rsplit("-", 1)[0]}],
+            },
+            "status": {"phase": phase},
+        }
+
+    snapshot = topology_from_kubernetes(
+        {"items": [pod("db-migrate-x1", "Succeeded"), pod("model-train-x2", "Failed")]},
+        namespace="demo",
+    )
+    assert [entity.name for entity in snapshot.entities] == ["model-train-x2"]
+
+
+def test_prometheus_millisecond_echo_stays_inside_the_incident_window():
+    project, incident, _ = fixture()
+    incident = incident.model_copy(
+        update={"ended_at": incident.ended_at.replace(microsecond=855917)}
+    )
+    query = project.queries[2].model_copy(update={"parameters": {"promql": "up"}})
+    echoed = round(incident.ended_at.timestamp(), 3)  # what Prometheus returns: .856
+    assert echoed > incident.ended_at.timestamp()
+
+    async def collect():
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(
+                lambda request: httpx.Response(
+                    200,
+                    json={
+                        "status": "success",
+                        "data": {"resultType": "vector", "result": [{"value": [echoed, "1"]}]},
+                    },
+                )
+            )
+        ) as client:
+            return await PrometheusConnector("http://localhost:9090", client).collect(
+                query, incident
+            )
+
+    (fact,) = asyncio.run(collect())
+    assert incident.started_at <= fact.observed_at <= incident.ended_at
+    IncidentContext(
+        incident=incident, graph=project.graph, queries=project.queries, evidence=(fact,)
+    )
+
+
 @pytest.mark.parametrize("result", [[], [{"value": [1, "1"]}, {"value": [1, "2"]}]])
 def test_prometheus_ambiguous_vector_does_not_invent_aggregation(result):
     project, incident, _ = fixture()

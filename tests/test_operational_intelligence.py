@@ -291,3 +291,13 @@ def test_duplicate_graph_and_query_ids_are_rejected():
         IncidentContext(
             incident=incident, graph=project.graph, queries=(project.queries[0], project.queries[0])
         )
+
+
+def test_one_invalid_source_candidate_is_traced_not_fatal():
+    project, _, _ = fixture()
+    valid = project.rule_hypotheses
+    forged = valid[0].model_copy(update={"id": "forged", "causal_path": ("forged-entity",)})
+    result = run(sources=[RuleSource((forged, *valid))], generation_only=True)
+    assert len(result.assessments) == len(valid)
+    rejected = [step for step in result.trace if step.status == "rejected"]
+    assert [step.reason[:12] for step in rejected] == ["candidate 1:"]

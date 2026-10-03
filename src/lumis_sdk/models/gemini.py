@@ -16,7 +16,7 @@ class GeminiHypothesisModel(StructuredHypothesisModel):
             self.client,
             "POST",
             f"https://generativelanguage.googleapis.com/v1beta/models/{model_id}:generateContent",
-            max_bytes=100000,
+            max_bytes=self.max_response_bytes,
             headers={"x-goog-api-key": self._api_key.get_secret_value()},
             json={
                 "systemInstruction": {"parts": [{"text": INSTRUCTIONS}]},

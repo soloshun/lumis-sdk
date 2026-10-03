@@ -3,7 +3,7 @@
 from pathlib import PurePosixPath
 from typing import Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, StrictBool, model_validator
 
 from lumis_sdk.core.contracts import Contract, Identifier, Text
 from lumis_sdk.investigation.contracts import AgentBudget
@@ -33,6 +33,9 @@ class CodeRepository(Contract):
     root: Text
     entity_ids: tuple[Identifier, ...] = Field(min_length=1, max_length=100)
     files: tuple[Identifier, ...] = Field(min_length=1, max_length=100)
+    # git.log returns commit IDs and timestamps; opt in to add each commit's subject line
+    # (redacted, truncated). Saves the agent a git.diff per commit to find the relevant change.
+    include_commit_subjects: StrictBool = False
 
     @model_validator(mode="after")
     def validate_files(self) -> Self:

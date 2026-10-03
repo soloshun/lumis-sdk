@@ -1,4 +1,4 @@
-"""HTTP source and registered-query contracts; importable without HTTP extras."""
+"""Source and registered-query contracts; importable without HTTP or SQL extras."""
 
 import re
 from typing import Annotated, Literal, Self
@@ -140,3 +140,114 @@ class PrefectQuery(Contract):
 
             UUID(self.flow_run_id)
         return self
+
+
+class SqlSource(Contract):
+    """One PostgreSQL database, read through operator-registered scalar queries only.
+
+    The connection string comes from the environment (`dsn_env`), never from configuration.
+    Every query runs in a read-only transaction with a statement timeout; use a read-only role
+    as well, because the transaction mode is a guard, not a permission boundary.
+    """
+
+    enabled: StrictBool = False
+    dsn_env: EnvironmentName | None = None
+    statement_timeout_ms: int = Field(default=5000, ge=100, le=60000)
+    connect_timeout_seconds: int = Field(default=5, ge=1, le=30)
+    max_requests: int = Field(default=32, ge=1, le=100)
+
+    @model_validator(mode="after")
+    def validate_dsn(self) -> Self:
+        if self.enabled and self.dsn_env is None:
+            raise ValueError("enabled SQL source requires dsn_env")
+        return self
+
+
+SQL_WINDOW_PARAMETERS = frozenset({"started_at", "ended_at"})
+
+
+class SqlQuery(Contract):
+    """One SELECT returning one row with one column; `%(started_at)s` and `%(ended_at)s` bind
+    the incident window. Not a SQL parser: the read-only transaction is the enforcement."""
+
+    sql: Text
+
+    @model_validator(mode="after")
+    def validate_statement(self) -> Self:
+        statement = self.sql.strip()
+        if not re.match(r"(?is)^(select|with)\b", statement):
+            raise ValueError("SQL query must be a single SELECT or WITH statement")
+        if ";" in statement.rstrip(";") or statement.count(";") > 1:
+            raise ValueError("SQL query must be a single statement")
+        named = set(re.findall(r"%\((\w+)\)s", statement))
+        if not named <= SQL_WINDOW_PARAMETERS:
+            raise ValueError("SQL parameters are limited to %(started_at)s and %(ended_at)s")
+        if re.search(r"%(?!\(\w+\)s|%)", statement):
+            raise ValueError("use %% for a literal percent sign in SQL")
+        return self
+
+
+def change_path(path: str) -> str:
+    """A repository-relative file or directory, passed to Git as a literal pathspec."""
+    parts = path.removesuffix("/").split("/")  # a trailing slash marks a directory
+    if (
+        not path
+        or path.startswith(("/", "-", ":"))
+        or "\\" in path
+        or any(part in {"", ".", "..", ".git"} for part in parts)
+    ):
+        raise ValueError("change paths must be explicit relative repository paths")
+    return path
+
+
+class GitChangeSource(Contract):
+    """One repository whose commits are changes to the entities its paths configure."""
+
+    id: Identifier
+    root: Text
+    # Repository-relative file or directory -> entity IDs it configures (e.g. a GitOps manifest).
+    paths: dict[Identifier, tuple[Identifier, ...]] = Field(min_length=1, max_length=200)
+    # Optional conventional-commit scopes -> entities, e.g. "feature-service" for
+    # "deploy(feature-service): 1.6.0 -> 1.7.0". A recognised scope narrows a commit to a shared
+    # file (one kustomization.yaml or values file for many services) to the entities it names.
+    scopes: dict[Identifier, tuple[Identifier, ...]] = Field(default_factory=dict, max_length=200)
+
+    @model_validator(mode="after")
+    def validate_paths(self) -> Self:
+        for path, entity_ids in self.paths.items():
+            change_path(path)
+            if not entity_ids:
+                raise ValueError("each change path must map to at least one entity")
+        if any(not entity_ids for entity_ids in self.scopes.values()):
+            raise ValueError("each change scope must map to at least one entity")
+        return self
+
+
+class ChangeSource(Contract):
+    """Typed, time-bounded change records: commits to mapped paths and Kubernetes rollouts."""
+
+    enabled: StrictBool = False
+    git: tuple[GitChangeSource, ...] = Field(default=(), max_length=10)
+    kubernetes_rollouts: StrictBool = False
+    lookback_seconds: int = Field(default=3600, ge=60, le=604800)
+    max_records: int = Field(default=50, ge=1, le=200)
+
+    @model_validator(mode="after")
+    def validate_backends(self) -> Self:
+        if self.enabled and not (self.git or self.kubernetes_rollouts):
+            raise ValueError(
+                "enabled change source requires git repositories or kubernetes_rollouts"
+            )
+        if len({source.id for source in self.git}) != len(self.git):
+            raise ValueError("duplicate change repository IDs")
+        return self
+
+
+class ChangeQuery(Contract):
+    """A fact about recent changes to the query's entity, counted back from the incident end.
+
+    Query parameters are strings in YAML/JSON (`lookback_seconds: "1800"`)."""
+
+    output: Literal["count", "seconds_since_latest"] = "count"
+    lookback_seconds: int | None = Field(default=None, ge=60, le=604800)
+    kind: Literal["any", "commit", "rollout"] = "any"

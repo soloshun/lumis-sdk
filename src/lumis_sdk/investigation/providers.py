@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 @asynccontextmanager
 async def configured_investigator(
-    settings: ModelSettings, *, timeout: float
+    settings: ModelSettings, *, timeout: float, retries: int = 2
 ) -> AsyncIterator["Investigator"]:
     import httpx2
 
@@ -22,11 +22,17 @@ async def configured_investigator(
     key = os.environ.get(settings.credential_env)
     if not key:
         raise ValueError("configured investigator credential is absent")
+    from pydantic_ai.settings import ModelSettings as AgentModelSettings
+
+    # `thinking` is pydantic-ai's unified setting; OpenRouter maps it to its `reasoning` field.
+    thinking = AgentModelSettings()
+    if settings.reasoning is not None:
+        thinking["thinking"] = settings.reasoning
     async with httpx2.AsyncClient(timeout=timeout, trust_env=False, follow_redirects=False) as http:
         if settings.provider in {"openrouter", "openai"}:
             from openai import AsyncOpenAI
             from pydantic_ai.models.openai import OpenAIResponsesModel, OpenAIResponsesModelSettings
-            from pydantic_ai.models.openrouter import OpenRouterModel
+            from pydantic_ai.models.openrouter import OpenRouterModel, OpenRouterModelSettings
             from pydantic_ai.providers.openai import OpenAIProvider
             from pydantic_ai.providers.openrouter import OpenRouterProvider
 
@@ -39,22 +45,28 @@ async def configured_investigator(
                 else "https://api.openai.com/v1",
             ) as client:
                 if settings.provider == "openrouter":
+                    routing = OpenRouterModelSettings(
+                        openrouter_provider={"allow_fallbacks": False, "require_parameters": True}
+                    )
+                    if settings.reasoning is not None:
+                        routing["thinking"] = settings.reasoning
                     yield PydanticInvestigator(
                         OpenRouterModel(
                             settings.model, provider=OpenRouterProvider(openai_client=client)
                         ),
-                        model_settings={
-                            "extra_body": {
-                                "provider": {"allow_fallbacks": False, "require_parameters": True}
-                            }
-                        },
+                        model_settings=routing,
+                        retries=retries,
                     )
                 else:
+                    responses = OpenAIResponsesModelSettings(openai_store=False)
+                    if settings.reasoning is not None:
+                        responses["thinking"] = settings.reasoning
                     yield PydanticInvestigator(
                         OpenAIResponsesModel(
                             settings.model, provider=OpenAIProvider(openai_client=client)
                         ),
-                        model_settings=OpenAIResponsesModelSettings(openai_store=False),
+                        model_settings=responses,
+                        retries=retries,
                     )
         elif settings.provider == "anthropic":
             from anthropic import AsyncAnthropic
@@ -65,7 +77,9 @@ async def configured_investigator(
                 yield PydanticInvestigator(
                     AnthropicModel(
                         settings.model, provider=AnthropicProvider(anthropic_client=anthropic)
-                    )
+                    ),
+                    model_settings=thinking,
+                    retries=retries,
                 )
         else:
             from google.genai.types import HttpRetryOptions
@@ -76,7 +90,11 @@ async def configured_investigator(
                 api_key=key, http_client=http, retry_options=HttpRetryOptions(attempts=1)
             )
             try:
-                yield PydanticInvestigator(GoogleModel(settings.model, provider=provider))
+                yield PydanticInvestigator(
+                    GoogleModel(settings.model, provider=provider),
+                    model_settings=thinking,
+                    retries=retries,
+                )
             finally:
                 await provider.client.aio.aclose()
                 provider.client.close()

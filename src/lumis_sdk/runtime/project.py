@@ -6,10 +6,14 @@ from typing import Annotated, Literal, Self
 from pydantic import Field, StrictBool, StringConstraints, model_validator
 
 from lumis_sdk.connectors.settings import (
+    ChangeQuery,
+    ChangeSource,
     LokiQuery,
     LokiSource,
     PrefectQuery,
     PrefectSource,
+    SqlQuery,
+    SqlSource,
     TempoQuery,
     TempoSource,
 )
@@ -131,6 +135,18 @@ class Sources(Contract):
     loki: LokiSource = Field(default_factory=LokiSource)
     tempo: TempoSource = Field(default_factory=TempoSource)
     prefect: PrefectSource = Field(default_factory=PrefectSource)
+    sql: SqlSource = Field(default_factory=SqlSource)
+    changes: ChangeSource = Field(default_factory=ChangeSource)
+
+    @model_validator(mode="after")
+    def validate_change_backends(self) -> Self:
+        if (
+            self.changes.enabled
+            and self.changes.kubernetes_rollouts
+            and not self.kubernetes.enabled
+        ):
+            raise ValueError("Kubernetes rollout changes require the enabled Kubernetes source")
+        return self
 
     @property
     def requires_http(self) -> bool:
@@ -143,6 +159,8 @@ class ModelSettings(Contract):
     provider: Literal["openrouter", "openai", "anthropic", "gemini"] = "openrouter"
     model: Identifier
     api_key_env: Annotated[str, StringConstraints(pattern=r"^[A-Z][A-Z0-9_]*$")] | None = None
+    # Provider reasoning effort for the reference agent; None leaves the provider default.
+    reasoning: Literal["minimal", "low", "medium", "high"] | None = None
 
     @property
     def credential_env(self) -> str:
@@ -198,12 +216,16 @@ class OperationalProject(Contract):
                 "loki",
                 "tempo",
                 "prefect",
+                "sql",
+                "changes",
             }:
                 raise ValueError("unsupported CLI evidence provider")
             remote: dict[str, type[Contract]] = {
                 "loki": LokiQuery,
                 "tempo": TempoQuery,
                 "prefect": PrefectQuery,
+                "sql": SqlQuery,
+                "changes": ChangeQuery,
             }
             if query.provider in remote:
                 if not getattr(self.sources, query.provider).enabled:

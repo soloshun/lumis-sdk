@@ -96,7 +96,9 @@ class CodeSnapshot:
             command += [
                 "log",
                 "--max-count=20",
-                "--format=%H %cI",
+                "--format=%H %cI %s"
+                if self.repository.include_commit_subjects
+                else "--format=%H %cI",
                 f"--since={since}",
                 f"--until={until}",
             ]
@@ -126,16 +128,22 @@ class CodeSnapshot:
             raise ValueError("Git inspection unavailable")
         text = result.stdout.decode("utf-8")
         if operation == "git.log":
-            # This fixed format has structural commit IDs/timestamps only. Applying free-text
-            # card redaction could corrupt a SHA and make a subsequent approved diff unusable.
+            # Structural commit IDs/timestamps are validated, not redacted: free-text card
+            # redaction could corrupt a SHA and make a subsequent approved diff unusable. Optional
+            # subjects (one line each, operator opt-in) are untrusted text: redacted and truncated.
             import re
 
-            if any(
-                not re.fullmatch(
-                    r"[a-f0-9]{40} \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})", line
+            structural = r"[a-f0-9]{40} \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})"
+            lines = []
+            for line in text.splitlines():
+                match = re.fullmatch(f"({structural})(?: (.*))?", line)
+                if match is None or (
+                    match.group(2) is not None and not self.repository.include_commit_subjects
+                ):
+                    raise ValueError("unexpected Git metadata format")
+                prefix, subject = match.groups()
+                lines.append(
+                    prefix if subject is None else f"{prefix} {redact_text(subject)[:200]}"
                 )
-                for line in text.splitlines()
-            ):
-                raise ValueError("unexpected Git metadata format")
-            return text
+            return "\n".join(lines) + ("\n" if text.endswith("\n") else "")
         return redact_text(text)

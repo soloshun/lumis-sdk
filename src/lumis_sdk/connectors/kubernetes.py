@@ -17,6 +17,8 @@ def topology_from_kubernetes(payload: dict[str, Any], *, namespace: str) -> Grap
 
     Service edges are declared routing matches, not proof that a runtime call happened.
     Kubernetes resource IDs are deliberately distinct from logical service identities.
+    Pods that ran to completion (`Succeeded`, e.g. finished Job pods) are not current topology
+    and are skipped; failed pods are kept because they may be part of the incident.
     """
     entities: dict[str, Entity] = {}
     items: dict[str, dict[str, Any]] = {}
@@ -25,6 +27,8 @@ def topology_from_kubernetes(payload: dict[str, Any], *, namespace: str) -> Grap
         metadata = item.get("metadata", {})
         kind, name = item.get("kind"), metadata.get("name")
         if kind not in kinds or not name or metadata.get("namespace", namespace) != namespace:
+            continue
+        if kind == "Pod" and item.get("status", {}).get("phase") == "Succeeded":
             continue
         identity = f"k8s:{namespace}:{kind.lower()}:{name}"
         attrs = {"namespace": namespace}

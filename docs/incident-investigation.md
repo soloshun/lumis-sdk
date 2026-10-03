@@ -50,20 +50,43 @@ Only these operations are supported:
 | evidence | Operator-registered query ID; never model-authored PromQL |
 | code.read, code.search | Read/literal-search an explicit text-file allowlist |
 | git.log, git.diff | Fixed local read-only commands; full SHA diff, approved paths only |
+| changes | Recent commits/rollouts touching scoped entities (`sources.changes`), newest first |
 | hypothesis.register | Validate and bind a falsifiable candidate before probing |
 | probe | Generated Python experiment in an explicitly enabled, resource-limited container |
 
 Files are snapshotted once per repository per investigation, redacted and hashed. Absolute
 file paths, traversal, symlinks, special files, binary/oversized files, secret/dot directories
 and unapproved extensions are refused. Repository roots are explicitly operator-controlled.
-Consumer modules are never imported. Git log returns commit IDs/timestamps, not messages;
-diffs disable external diff/textconv and hooks. This is basic inspection, **not** the future
-typed time-bounded change-record / recent_changes_affecting API.
+Consumer modules are never imported. Git log returns commit IDs/timestamps; with the
+repository's `include_commit_subjects: true` it also returns each commit's subject line, redacted
+and truncated to 200 characters (untrusted text, like every tool result). Diffs disable external
+diff/textconv and hooks. For "what changed, where and when" use typed change records instead:
+`inspect(changes)` lists recent commits and rollouts already attributed to graph entities, and a
+registered `provider: changes` query turns them into checkable facts (see
+[recent changes](telemetry-connectors.md#recent-changes)). A change is evidence about an entity,
+never a causal-path node: write the path in graph IDs and predict the change, for example
+`release_changes_30m gt 0` on the service.
 
 The model returns AgentOutput: candidates, tentative suggestions/patch text and unresolved
 questions. It cannot author evidence, assessment state, confidence-as-authority or confirmed
-causes. References are validated locally; invalid suggestions are discarded. Generated patches
-are text only: never applied to the repository or an operational system.
+causes. Generated patches are text only: never applied to the repository or an operational system.
+
+Acceptance is per candidate. Before the run ends, the reference agent checks its final answer
+against the same rules the handler applies (graph IDs, registered query IDs, a new ID for a revised
+hypothesis, known evidence/receipt references) and returns any problem to the model to repair, up
+to `validation_retries` times; malformed tool arguments are retried the same way, and every attempt
+still counts toward the budgets. The handler then validates again: an invalid candidate, and any
+suggestion that depends on it or cites unknown evidence/receipts, is dropped and the reason is
+listed in `unresolved_questions`; valid candidates and suggestions are kept.
+
+Stop reasons distinguish `agent_completed`, `agent_budget_exhausted` (request/tool/token limits
+reached), `agent_output_invalid` (retries exhausted), `deadline_exceeded` and
+`investigator_rejected_or_unavailable` (provider or other failure). Without a final answer there
+are no suggestions, but candidates registered during the run and all collected evidence remain
+and are assessed. The reference agent sends no `parallel_tool_calls` setting (tools run
+sequentially), so OpenRouter's `require_parameters` routing also matches endpoints that do not
+advertise it. `PydanticInvestigator.messages` holds the last run's provider messages in memory
+for audit/evaluation by the caller; it is never written to the report.
 
 ## Python API
 
@@ -123,11 +146,13 @@ The existing project, topology, source, query and incident contracts remain. Add
         output_tokens_limit: 12000
         max_tool_characters: 8000
         max_total_tool_characters: 32000
+        validation_retries: 2
       repositories:
         - id: application
           root: ./approved-source
           entity_ids: [service:demo]
           files: [src/handler.py, pyproject.toml]
+          include_commit_subjects: false
       sandbox:
         enabled: false
 
@@ -149,7 +174,7 @@ broker budget. Each run has independent state.
 IncidentReport contains context, triage findings, mechanically evaluated candidates, redacted
 tool receipts, tentative suggestions, unresolved questions, route, stop reason and
 request/token/tool/query/probe counts. It does not store raw chain-of-thought or the full provider
-conversation. No global tracing is enabled by Lumis. OpenAI response storage is explicitly
+conversation (callers that need it for evaluation read `PydanticInvestigator.messages`). No global tracing is enabled by Lumis. OpenAI response storage is explicitly
 disabled; this does not override provider retention policies.
 
 supported_diagnosis means checks support a candidate, not confirmed causality. Missing usable

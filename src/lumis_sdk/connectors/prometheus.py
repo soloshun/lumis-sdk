@@ -45,7 +45,9 @@ class PrometheusConnector:
                 entity_id=query.entity_id,
                 key=query.key,
                 value=float(value),
-                observed_at=datetime.fromtimestamp(float(timestamp), UTC),
+                # Prometheus echoes the evaluation time rounded to milliseconds, which can land
+                # after a microsecond-precision `ended_at` and fall outside the incident window.
+                observed_at=min(datetime.fromtimestamp(float(timestamp), UTC), incident.ended_at),
                 source="prometheus",
                 retrieval_method="GET /api/v1/query",
             ),

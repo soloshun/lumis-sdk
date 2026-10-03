@@ -180,7 +180,91 @@ See [verification](verification.md) and [consumer qualification](integrations.md
 OpenTelemetry's `4317` is an OTLP ingestion port, not a log/trace retrieval API. Keep your
 collector sending telemetry to the backends; configure `sources.tempo.endpoint` for querying
 and `sources.opentelemetry.export_file` for offline exports. No live SDK receiver is implemented.
-SQL evidence, OpenLineage ingestion and typed recent-change queries remain unimplemented.
+OpenLineage ingestion remains unimplemented.
+
+## Recent changes
+
+Typed change records answer "what changed, where in the graph, and when". A change is a
+time-bounded fact about an entity, not a graph node (why: [design note](design-notes/gridcast-integration-lessons.md#change-records)).
+
+```yaml
+sources:
+  kubernetes: {enabled: true, context: my-context, namespace: estate}
+  changes:
+    enabled: true
+    lookback_seconds: 3600          # default window back from the incident end
+    max_records: 50                 # more matches -> a count fact is `degraded`
+    kubernetes_rollouts: true       # ReplicaSet history + ScalingReplicaSet events
+    git:
+      - id: gitops
+        root: ../gitops             # relative to lumis.yaml
+        paths:                      # repository path (file or dir/) -> entities it configures
+          kustomization.yaml: ['service:estate:api', 'service:estate:worker']
+          apps/api/: ['service:estate:api']
+        scopes:                     # optional: conventional-commit scope -> entities
+          api: ['service:estate:api']
+queries:
+  - id: api-release-changes
+    provider: changes
+    entity_id: 'service:estate:api'
+    key: release_changes_30m
+    description: Commits and rollouts touching the api in the 30 minutes before incident end
+    parameters: {output: count, lookback_seconds: "1800", kind: any}   # kind: any|commit|rollout
+```
+
+* `output: count` is the number of changes to the query's entity in the lookback. Git history
+  and ReplicaSets are authoritative, so **zero is an observation**: a hypothesis "a release
+  caused this" can be contradicted by `release_changes_30m eq 0`.
+* `output: seconds_since_latest` is the age of the newest change; no change yields no fact.
+* The agent's `inspect(changes)` (optionally with a target entity) lists records newest first:
+  `id`, `kind` (`commit` | `rollout`), `source`, `at`, `entity_ids`, a redacted `summary`
+  (commit subject and files, or rollout revision and images) and a `reference` (SHA or
+  ReplicaSet). Only records touching the incident scope are shown.
+
+Attribution and limits:
+
+* **Git** commits are attributed through `paths`; a shared file (one `kustomization.yaml` or
+  values file for many services) maps to all of them, so add `scopes`: a recognised
+  conventional-commit scope (`deploy(api): 1.6.0 -> 1.7.0`) narrows the commit to its entities.
+  Git runs read-only (`--literal-pathspecs`, hooks and fsmonitor off, bounded output).
+* **Kubernetes**: a new ReplicaSet's creation is a rollout. Re-activating an existing ReplicaSet
+  (rollback, or a GitOps revert-and-reapply) keeps its old creation time; only a
+  `ScalingReplicaSet` event ("Scaled up replica set X from 0 to N") records it, and events expire
+  (one hour by default). Scaling a Deployment is not a rollout. Treat the Git source as the
+  durable record and Kubernetes as the confirmation that the change reached the cluster.
+* Any unreadable backend makes the change history unavailable (no fact), never silently partial.
+
+## Read-only SQL (PostgreSQL)
+
+Install the `sql` extra (`lumis-sdk[sql]`, psycopg 3). The connection string is read from the
+environment variable named by `dsn_env`, never from configuration:
+
+```yaml
+sources:
+  sql:
+    enabled: true
+    dsn_env: ESTATE_READONLY_DSN      # e.g. postgresql://reader@db:5432/estate
+    statement_timeout_ms: 5000
+    connect_timeout_seconds: 5
+queries:
+  - id: model-alias-moves
+    provider: sql
+    entity_id: service:estate:forecast-service
+    key: production_alias_changes_30m
+    description: Production alias moves in the 30 minutes before incident end
+    parameters:
+      sql: >-
+        SELECT count(*) FROM ml.model_events WHERE event = 'alias_set'
+        AND at > %(ended_at)s - interval '30 minutes' AND at <= %(ended_at)s
+```
+
+Each query is one `SELECT`/`WITH` statement returning exactly one row with one column (number,
+boolean or text; text is redacted). `%(started_at)s` and `%(ended_at)s` bind the incident window;
+no other parameters are accepted and a literal `%` is written `%%`. Every query runs in its own
+read-only transaction (`default_transaction_read_only`, `SET TRANSACTION READ ONLY`) with the
+statement timeout and is rolled back. The transaction mode is a guard, not a permission boundary:
+connect as a role that can only `SELECT` the tables you register. `NULL` yields no observation;
+the observation time is the incident end. Errors are reported only as unavailable evidence.
 
 API references: [Loki query API](https://grafana.com/docs/loki/latest/reference/loki-http-api/),
 [Tempo query API](https://grafana.com/docs/tempo/latest/api_docs/),
