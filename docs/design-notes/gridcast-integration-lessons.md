@@ -122,8 +122,16 @@ structural graph at query or render time, not merged into `GraphSnapshot`.
 * **One identity convention everywhere.** Kubernetes `app.kubernetes.io/name` = OTel
   `service.name` = alert `entity` label = Lumis ID `service:<namespace>:<name>`. Use aliases
   only for explicit exceptions (Tempo named the database after `db.name`).
-* **One fact per query.** Use `or vector(0)` in PromQL so "nothing happened" is a 0 rather than
-  an error.
+* **One fact per query, and never turn "not observed" into zero.** `or vector(0)` is safe only
+  when the series is guaranteed to exist whenever its subject exists (application counters
+  pre-initialised at start-up). It is unsafe for infrastructure metrics of short-lived subjects.
+  In scenario D, cAdvisor never scraped the crash-looping container, so
+  `container_oom_events_total ... or vector(0)` reported 0 OOM kills. That false zero contradicted
+  the correct OOM signature and made the agent's "not OOM" mechanism look supported. The proof
+  is only as good as the telemetry.
+* **Decide important mechanisms from two independent sources.** For OOM, use the container's
+  termination reason (kube-state-metrics `kube_pod_container_status_last_terminated_reason` or
+  pod status) plus working set vs. limit, so one blind source cannot falsify a signature alone.
 * **Loki counts can support but never falsify.** Zero matches produce no fact. Pair every
   log-based prediction with a Prometheus or change falsifier, or a healthy estate leaves the
   signature `unknown`.
