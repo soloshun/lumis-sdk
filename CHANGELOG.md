@@ -2,6 +2,15 @@
 
 ## Unreleased — standalone operational-intelligence reset
 
+- Align operational graph with the design's Pydantic + NetworkX multigraph; expose bounded
+  neighborhoods, independent NetworkX exports and dependency-free DOT inspection.
+- Share YAML-driven discovery/preparation/investigation across Python, notebooks and CLI;
+  enabled source failures produce sanitized incomplete reports and block investigation.
+- Add external normalized topology files, explicit identity aliases, Kubernetes resource/service
+  links and optional Prometheus service-graph discovery with separate aggregate bounds.
+- Add `lumis graph`, `discover --report`, discovered-reference binding, optional YAML replay file,
+  runnable offline notebook, graph/API documentation and checkable milestone/readiness roadmap.
+
 - Replace the additive transition with one active architecture: core, graph, connectors,
   reasoning, models, runtime, security and CLI.
 - Remove superseded framework APIs, plugin packages, embedded cookbooks, old schemas,

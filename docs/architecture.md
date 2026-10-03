@@ -11,7 +11,7 @@ a confirmed root cause, or permission to execute a change.
 
 ## Current flow
 
-Incident + declared/discovered topology → bounded context → rules / retrieved candidates /
+YAML project → bounded discovery + identity binding → incident + prepared graph → bounded context → rules / retrieved candidates /
 optional model → validation and deduplication → registered evidence queries → deterministic
 assessment → supported candidates or abstention → optional persisted investigation.
 
@@ -28,17 +28,19 @@ facts cannot silently turn into support. Contradiction takes precedence.
 | Package | Responsibility |
 | --- | --- |
 | `core` | Pydantic contracts and invariants |
-| `graph` | Directed indexed adjacency and bounded neighborhood traversal |
+| `graph` | NetworkX directed multigraph, identity links and bounded neighborhood traversal |
 | `connectors` | Read-only external topology and observation adapters |
 | `reasoning` | Interchangeable candidate sources and mechanical assessment |
 | `models` | Optional model adapter, no decision or action authority |
-| `runtime` | Investigation loop, project parsing, scaffold and SQLite records |
+| `runtime` | Shared YAML preparation/discovery, investigation loop, scaffold and SQLite records |
 | `security` | Conservative model/report context redaction |
 | `cli` | Explicit composition of the public contracts |
 
-Indexed standard-library adjacency keeps the core dependency footprint small. Traversal is
-cycle-safe and refuses entity-budget overflow. No graph database is required for this milestone.
+The graph uses Pydantic contracts plus NetworkX `MultiDiGraph`, as proposed in the design.
+Parallel relationship kinds survive normalization. Traversal is cycle-safe and refuses
+entity-budget overflow; NetworkX exports are independent deep copies. No graph database is required.
 Relationship directions represent observed/declared operational relations, not proven causality.
+See [graph API and lineage](graph.md). Visualization is optional; the graph primarily scopes reasoning.
 
 ## Safety and bounded work
 
@@ -47,9 +49,15 @@ model output tokens, per-source/per-query time and total investigation time.
 Initial collection shares the query budget. Failed queries are audited and not retried silently.
 Source failures are isolated; zero candidates and insufficient evidence are normal abstention.
 
+Preparation has a separate discovery deadline and estate entity/relationship/response limits.
+An enabled topology source failure aborts preparation with a sanitized per-source report; a
+partial graph is diagnostic only. In contrast, an evidence-query failure is audited in the
+investigation and may lead to abstention. YAML references are bound strictly after discovery.
+
 Query parameters remain local to the connector. Models receive catalog descriptions and IDs,
-not arbitrary command authority. Local replay makes no network calls. Kubernetes discovery
-is explicit, namespace/context scoped and excludes secret/environment payloads. HTTP support
+not arbitrary command authority. Local-only replay makes no network calls. Enabled YAML discovery
+runs during `prepare`, `graph` and `investigate`, not just the separate discover command.
+Kubernetes discovery is namespace/context scoped and excludes secret/environment payloads. HTTP support
 is optional and refuses redirects, credential-bearing endpoints and oversized responses.
 
 Redaction is heuristic, not a guarantee that arbitrary data is safe to export.

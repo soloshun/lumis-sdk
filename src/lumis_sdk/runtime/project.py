@@ -3,10 +3,16 @@
 from pathlib import Path
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, StringConstraints, model_validator
+from pydantic import Field, StrictBool, StringConstraints, model_validator
 
 from lumis_sdk.core import EvidenceQuery, GraphSnapshot, Hypothesis, InvestigationBudget
-from lumis_sdk.core.contracts import Contract, Identifier, validate_hypothesis_catalog
+from lumis_sdk.core.contracts import (
+    Contract,
+    Identifier,
+    Text,
+    validate_hypothesis_catalog,
+    validate_hypothesis_queries,
+)
 from lumis_sdk.runtime.documents import load_mapping, read_document
 
 __all__ = ["OperationalProject", "load_project", "read_document"]
@@ -18,7 +24,7 @@ class ProjectIdentity(Contract):
 
 
 class KubernetesSource(Contract):
-    enabled: bool = False
+    enabled: StrictBool = False
     context: Identifier | None = None
     namespace: Identifier | None = None
 
@@ -30,13 +36,22 @@ class KubernetesSource(Contract):
 
 
 class PrometheusSource(Contract):
-    enabled: bool = False
+    enabled: StrictBool = False
     endpoint: str | None = None
+    discover_service_graph: StrictBool = False
+    service_namespace: Identifier | None = None
+    service_graph_query: Text = (
+        "sum by (client, server) (rate(traces_service_graph_request_total[5m]))"
+    )
 
     @model_validator(mode="after")
     def require_endpoint(self) -> Self:
         if self.enabled and not self.endpoint:
             raise ValueError("enabled Prometheus source requires endpoint")
+        if self.discover_service_graph and (not self.enabled or not self.service_namespace):
+            raise ValueError(
+                "service graph requires enabled Prometheus and explicit service namespace"
+            )
         if self.endpoint:
             # Endpoint validation has no dependency on the optional HTTP implementation.
             from urllib.parse import urlsplit
@@ -57,7 +72,7 @@ class PrometheusSource(Contract):
 class OpenTelemetrySource(Contract):
     """Normalize an OTLP JSON export; this is not a live OTLP receiver."""
 
-    enabled: bool = False
+    enabled: StrictBool = False
     export_file: str | None = None
 
     @model_validator(mode="after")
@@ -67,10 +82,42 @@ class OpenTelemetrySource(Contract):
         return self
 
 
+class TopologySource(Contract):
+    """An external normalized graph snapshot, never executable adapter code."""
+
+    enabled: StrictBool = False
+    file_path: Text | None = None
+
+    @model_validator(mode="after")
+    def require_file(self) -> Self:
+        if self.enabled and not self.file_path:
+            raise ValueError("enabled topology source requires file_path")
+        return self
+
+
+class IdentitySettings(Contract):
+    aliases: dict[Identifier, Identifier] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def reject_chains(self) -> Self:
+        if set(self.aliases.values()) & self.aliases.keys():
+            raise ValueError("identity alias chains, self aliases and cycles are not supported")
+        return self
+
+
+class DiscoveryBudget(Contract):
+    timeout_seconds: float = Field(default=30, gt=0, le=120)
+    max_entities: int = Field(default=5000, ge=1, le=50000)
+    max_relationships: int = Field(default=10000, ge=1, le=100000)
+    max_service_graph_series: int = Field(default=1000, ge=1, le=10000)
+    max_response_bytes: int = Field(default=2000000, ge=1, le=10000000)
+
+
 class Sources(Contract):
     kubernetes: KubernetesSource = Field(default_factory=KubernetesSource)
     prometheus: PrometheusSource = Field(default_factory=PrometheusSource)
     opentelemetry: OpenTelemetrySource = Field(default_factory=OpenTelemetrySource)
+    topology: TopologySource = Field(default_factory=TopologySource)
 
 
 class ModelSettings(Contract):
@@ -102,6 +149,9 @@ class OperationalProject(Contract):
     api_version: Literal["lumis.dev/operational-v1alpha1"] = "lumis.dev/operational-v1alpha1"
     project: ProjectIdentity
     sources: Sources = Field(default_factory=Sources)
+    identity: IdentitySettings = Field(default_factory=IdentitySettings)
+    discovery: DiscoveryBudget = Field(default_factory=DiscoveryBudget)
+    observations_file: Text | None = None
     models: ModelSettings | None = None
     policies: Policies = Field(default_factory=Policies)
     graph: GraphSnapshot = Field(default_factory=GraphSnapshot)
@@ -119,10 +169,7 @@ class OperationalProject(Contract):
             raise ValueError("duplicate initial query IDs")
         if not set(self.initial_query_ids) <= query_ids:
             raise ValueError("initial query is not registered")
-        ids = {entity.id for entity in self.graph.entities}
         for query in self.queries:
-            if query.entity_id not in ids:
-                raise ValueError("query entity absent from declared graph")
             if query.provider not in {"snapshot", "prometheus"}:
                 raise ValueError("unsupported CLI evidence provider")
             if query.provider == "prometheus":
@@ -131,8 +178,27 @@ class OperationalProject(Contract):
         if len({item.id for item in self.rule_hypotheses}) != len(self.rule_hypotheses):
             raise ValueError("duplicate hypothesis IDs")
         for hypothesis in self.rule_hypotheses:
-            validate_hypothesis_catalog(hypothesis, self.graph, self.queries)
+            validate_hypothesis_queries(hypothesis, self.queries)
+        if not self.requires_discovery:
+            self.validate_references(self.graph)
         return self
+
+    @property
+    def requires_discovery(self) -> bool:
+        return bool(
+            self.sources.kubernetes.enabled
+            or self.sources.opentelemetry.enabled
+            or self.sources.topology.enabled
+            or self.sources.prometheus.discover_service_graph
+        )
+
+    def validate_references(self, graph: GraphSnapshot) -> None:
+        """Bind IDs only after enabled discovery; unresolved references fail closed."""
+        ids = {entity.id for entity in graph.entities}
+        if any(query.entity_id not in ids for query in self.queries):
+            raise ValueError("query entity absent from prepared graph")
+        for hypothesis in self.rule_hypotheses:
+            validate_hypothesis_catalog(hypothesis, graph, self.queries)
 
 
 def load_project(path: Path) -> OperationalProject:

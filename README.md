@@ -33,12 +33,16 @@ These commands require no consuming project, Kubernetes cluster, HTTP extra or A
 - Bounded graph scoping, source validation/deduplication, deterministic evidence checks,
   query/time budgets, normal abstention and SQLite investigation persistence.
 - Declared topology, scoped read-only Kubernetes discovery and OTLP JSON export normalization.
+- NetworkX directed multigraph, resource/service identity links, bounded graph API and DOT export.
+- YAML-led `YamlProject.prepare()` / `investigate()`; per-source discovery reports and automatic
+  binding of discovered entity IDs. Optional Prometheus service-graph topology from existing metrics.
 - Optional Prometheus observations and opt-in model candidates: OpenRouter (default),
   native OpenAI, Anthropic and Gemini. See [model configuration](docs/models.md).
 
 No remediation executor, automatic learned-rule promotion, live OTLP receiver, hosted service,
 or complete autonomous operational lifecycle is shipped.
 See [architecture](docs/architecture.md), [Python API](docs/python-api.md) and [roadmap](ROADMAP.md).
+For hands-on local testing, use the [offline notebook](docs/notebooks/operational-graph.ipynb).
 
 ## Independent framework, external applications
 

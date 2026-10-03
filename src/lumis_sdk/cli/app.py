@@ -5,7 +5,7 @@ from typing import Annotated
 import typer
 
 from lumis_sdk import __version__
-from lumis_sdk.cli.operational import discover, doctor, init, investigate
+from lumis_sdk.cli.operational import discover, doctor, graph, init, investigate
 
 app = typer.Typer(no_args_is_help=True, help="Experimental read-only operational intelligence.")
 
@@ -28,6 +28,7 @@ def callback(
 app.command()(init)
 app.command()(doctor)
 app.command()(discover)
+app.command()(graph)
 app.command()(investigate)
 
 

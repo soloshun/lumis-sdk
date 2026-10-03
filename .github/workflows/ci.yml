@@ -43,6 +43,10 @@ jobs:
           .venv-smoke/bin/lumis init --directory /tmp/lumis-smoke
           .venv-smoke/bin/lumis doctor --project /tmp/lumis-smoke/lumis.yaml
           .venv-smoke/bin/lumis discover --project /tmp/lumis-smoke/lumis.yaml
+          .venv-smoke/bin/lumis discover --project /tmp/lumis-smoke/lumis.yaml --report > /tmp/discovery.json
+          jq -e '.complete == true' /tmp/discovery.json
+          .venv-smoke/bin/lumis graph --project /tmp/lumis-smoke/lumis.yaml --entity service:demo --format dot
+          .venv-smoke/bin/python -c 'from lumis_sdk.runtime import YamlProject; from lumis_sdk.graph import OperationalGraph; import networkx'
           .venv-smoke/bin/lumis investigate \
             --project /tmp/lumis-smoke/lumis.yaml \
             --incident /tmp/lumis-smoke/incident.json \

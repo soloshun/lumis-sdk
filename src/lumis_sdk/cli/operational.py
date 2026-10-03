@@ -2,23 +2,19 @@
 
 import asyncio
 import importlib.util
-import json
 import os
 import shutil
 from pathlib import Path
 
 import typer
-from pydantic import SecretStr, TypeAdapter
+from pydantic import TypeAdapter
 
-from lumis_sdk.connectors import SnapshotConnector, merge_topology
-from lumis_sdk.connectors.kubernetes import KubernetesDiscovery
-from lumis_sdk.connectors.otel import topology_from_otlp
-from lumis_sdk.core import Evidence, GraphSnapshot, Incident, Investigation
+from lumis_sdk.core import Evidence, GraphSnapshot, Incident
 from lumis_sdk.graph import OperationalGraph
-from lumis_sdk.reasoning import HypothesisSource, ModelHypothesisSource, RuleSource
-from lumis_sdk.runtime import EvidenceConnector, InvestigationRuntime, InvestigationStore
+from lumis_sdk.runtime import DiscoveryError, InvestigationStore, YamlProject
+from lumis_sdk.runtime.discovery import discover_project
 from lumis_sdk.runtime.documents import json_document
-from lumis_sdk.runtime.project import OperationalProject, load_project, read_document
+from lumis_sdk.runtime.project import load_project, read_document
 
 
 def init(
@@ -75,6 +71,11 @@ def doctor(
         export = Path(config.sources.opentelemetry.export_file)
         if not (export if export.is_absolute() else project.parent / export).is_file():
             warnings.append("Configured OTLP JSON export is absent.")
+    if config.sources.topology.enabled:
+        assert config.sources.topology.file_path is not None
+        snapshot = Path(config.sources.topology.file_path)
+        if not (snapshot if snapshot.is_absolute() else project.parent / snapshot).is_file():
+            warnings.append("Configured topology JSON snapshot is absent.")
     typer.echo(
         json_document(
             {
@@ -91,33 +92,59 @@ def doctor(
 
 def discover(
     project: Path = typer.Option(Path("lumis.yaml"), "--project", exists=True, readable=True),
+    report: bool = typer.Option(False, "--report", help="Include per-source readiness statuses."),
 ) -> None:
-    """Merge declared topology with enabled read-only Kubernetes and local OTLP sources."""
+    """Merge declared topology with all enabled, bounded read-only sources."""
     try:
         config = load_project(project)
-        graph = asyncio.run(_discover(config, project.parent))
+        result = asyncio.run(discover_project(config, project.parent))
+    except DiscoveryError as error:
+        if report:
+            typer.echo(json_document(error.report.model_dump(mode="json")).rstrip())
+            raise typer.Exit(1) from error
+        raise typer.BadParameter(
+            "Discovery incomplete; use --report to inspect statuses."
+        ) from error
     except Exception as error:
         raise typer.BadParameter(
             "Discovery failed; check configuration, scope, RBAC and bounds."
         ) from error
-    typer.echo(graph.model_dump_json(indent=2))
+    typer.echo(
+        json_document(result.model_dump(mode="json")).rstrip()
+        if report
+        else result.graph.model_dump_json(indent=2)
+    )
 
 
-async def _discover(config: OperationalProject, base: Path) -> GraphSnapshot:
-    snapshots = [config.graph]
-    kube = config.sources.kubernetes
-    if kube.enabled:
-        assert kube.context is not None and kube.namespace is not None
-        snapshots.append(
-            await KubernetesDiscovery(context=kube.context, namespace=kube.namespace).discover()
-        )
-    otel = config.sources.opentelemetry
-    if otel.enabled:
-        assert otel.export_file is not None
-        path = Path(otel.export_file)
-        payload = json.loads(read_document(path if path.is_absolute() else base / path))
-        snapshots.append(topology_from_otlp(payload))
-    return merge_topology(*snapshots)
+def graph(
+    project: Path = typer.Option(Path("lumis.yaml"), "--project", exists=True, readable=True),
+    entity: str | None = typer.Option(
+        None, "--entity", help="Scope around one canonical entity ID."
+    ),
+    hops: int = typer.Option(3, "--hops", min=0, max=10),
+    format: str = typer.Option(
+        "json", "--format", help="json or dot; DOT needs no plotting extras."
+    ),
+) -> None:
+    """Discover and inspect the operational graph, optionally bounded around an entity."""
+    if format not in {"json", "dot"}:
+        raise typer.BadParameter("format must be json or dot")
+    try:
+        prepared = asyncio.run(YamlProject.from_file(project).prepare())
+        selected = prepared.graph
+        if entity is not None:
+            selected = OperationalGraph(
+                selected.dependencies_within(
+                    entity, hops=hops, max_entities=prepared.config.budget.max_entities
+                )
+            )
+    except Exception as error:
+        raise typer.BadParameter(
+            "Graph not ready; check discovery and canonical references."
+        ) from error
+    typer.echo(
+        selected.to_dot() if format == "dot" else selected.snapshot().model_dump_json(indent=2)
+    )
 
 
 def investigate(
@@ -133,19 +160,23 @@ def investigate(
 ) -> None:
     """Emit an investigation; unresolved/abstained is valid output, not a CLI failure."""
     try:
-        config = load_project(project)
-        if topology:
-            graph = GraphSnapshot.model_validate_json(read_document(topology))
-            config = OperationalProject.model_validate(
-                config.model_dump() | {"graph": merge_topology(config.graph, graph).model_dump()}
-            )
+        configured = YamlProject.from_file(project)
+        supplied = GraphSnapshot.model_validate_json(read_document(topology)) if topology else None
         event = Incident.model_validate_json(read_document(incident))
         facts = (
             TypeAdapter(tuple[Evidence, ...]).validate_json(read_document(observations))
             if observations
-            else ()
+            else None
         )
-        result = asyncio.run(_run(config, event, facts, use_model, generation_only))
+        result = asyncio.run(
+            configured.investigate(
+                event,
+                observations=facts,
+                topology=supplied,
+                use_model=use_model,
+                generation_only=generation_only,
+            )
+        )
         if store is not None:
             InvestigationStore(store).save(result)
     except Exception as error:
@@ -153,66 +184,3 @@ def investigate(
             "Investigation failed; check documents, scope, dependencies and provider settings."
         ) from error
     typer.echo(json_document(result.model_dump(mode="json")).rstrip())
-
-
-async def _run(
-    project: OperationalProject,
-    incident: Incident,
-    facts: tuple[Evidence, ...],
-    use_model: bool,
-    generation_only: bool,
-) -> Investigation:
-    sources: list[HypothesisSource] = [RuleSource(project.rule_hypotheses)]
-    connectors: dict[str, EvidenceConnector] = {"snapshot": SnapshotConnector(facts)}
-    if project.sources.prometheus.enabled or use_model:
-        import httpx
-
-        from lumis_sdk.connectors.prometheus import PrometheusConnector
-        from lumis_sdk.models.factory import create_hypothesis_model
-
-        async with httpx.AsyncClient(
-            timeout=max(
-                project.budget.query_timeout_seconds, project.budget.source_timeout_seconds
-            ),
-            trust_env=False,
-        ) as client:
-            if project.sources.prometheus.enabled:
-                assert project.sources.prometheus.endpoint is not None
-                connectors["prometheus"] = PrometheusConnector(
-                    project.sources.prometheus.endpoint, client
-                )
-            if use_model:
-                if project.models is None:
-                    raise ValueError("explicit model configuration required")
-                sources.append(
-                    ModelHypothesisSource(
-                        create_hypothesis_model(
-                            provider=project.models.provider,
-                            model=project.models.model,
-                            api_key=SecretStr(os.environ.get(project.models.credential_env, "")),
-                            client=client,
-                            max_input_characters=project.budget.max_context_characters,
-                            max_output_tokens=project.budget.max_model_output_tokens,
-                        )
-                    )
-                )
-            return await _investigate(project, incident, sources, connectors, generation_only)
-    return await _investigate(project, incident, sources, connectors, generation_only)
-
-
-async def _investigate(
-    project: OperationalProject,
-    incident: Incident,
-    sources: list[HypothesisSource],
-    connectors: dict[str, EvidenceConnector],
-    generation_only: bool,
-) -> Investigation:
-    return await InvestigationRuntime(
-        graph=OperationalGraph(project.graph),
-        queries=project.queries,
-        sources=sources,
-        connectors=connectors,
-        budget=project.budget,
-    ).investigate(
-        incident, initial_query_ids=project.initial_query_ids, generation_only=generation_only
-    )
