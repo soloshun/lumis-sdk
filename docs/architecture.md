@@ -79,11 +79,14 @@ Operators remain responsible for approved telemetry access and model-provider da
 ## Deliberately absent
 
 No executor, auto-remediation, policy-controlled deployment, live telemetry receiver,
-automatic incident ingestion, verified automatic rule learning, retrieval service,
-typed recent-change connector or production-readiness guarantee is implied.
+automatic incident ingestion, verified automatic rule learning, retrieval service
+or production-readiness guarantee is implied.
 These are incremental roadmap work, not placeholders that appear enabled in configuration.
 Basic local Git log/diff inspection is available. Advanced orchestration, learning and governance
 are not implemented yet; they are deferred until after PoC evaluation.
 
 Loki/Tempo/Prefect read-only observation and scoped Tempo/Prefect topology adapters are
-implemented; see [their query/configuration boundaries](telemetry-connectors.md).
+implemented; see [their query/configuration boundaries](telemetry-connectors.md). Typed
+recent-change records (Git commits on mapped paths, Kubernetes rollouts) are evidence about
+entities, not graph nodes; see [recent changes](telemetry-connectors.md#recent-changes) and
+[why](design-notes/gridcast-integration-lessons.md#change-records).

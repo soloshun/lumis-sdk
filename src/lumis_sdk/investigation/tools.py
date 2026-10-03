@@ -124,6 +124,34 @@ class InvestigationTools:
             **(self.model_usage | usage),
         )
 
+    async def _changes(self, target: str | None) -> ToolReceipt:
+        """Recent changes (commits, rollouts) touching scoped entities, newest first."""
+        from lumis_sdk.connectors.changes import ChangeConnector
+
+        connector = self.connectors.get("changes")
+        if not isinstance(connector, ChangeConnector):
+            raise ValueError("change records are not enabled")
+        ids = {entity.id for entity in self.context.graph.entities}
+        if target is not None and target not in ids:
+            raise ValueError("change target is outside incident scope")
+        records, truncated = await connector.records(
+            until=self.context.incident.ended_at,
+            entity_ids=(target,) if target else tuple(sorted(ids)),
+        )
+        payload = {
+            "until": self.context.incident.ended_at.isoformat(),
+            "lookback_seconds": connector.source.lookback_seconds,
+            "truncated": truncated,
+            "changes": [
+                record.model_dump(mode="json")
+                | {"entity_ids": [entity for entity in record.entity_ids if entity in ids]}
+                for record in records
+            ],
+        }
+        return self._receipt(
+            "changes", "Recent changes affecting scoped entities", json.dumps(payload)
+        )
+
     def _snapshot(self, repository_id: str | None) -> CodeSnapshot:
         repository = next(
             (repo for repo in self.settings.repositories if repo.id == repository_id), None
@@ -287,6 +315,8 @@ class InvestigationTools:
             }
             if catalog["repositories"]:
                 catalog["operations"] += ["code.read", "code.search", "git.log", "git.diff"]
+            if "changes" in self.connectors:
+                catalog["operations"].append("changes")
             return self._receipt("catalog", "Available bounded tools", json.dumps(catalog))
         if request.operation == "evidence" and request.query_id:
             return await self.collect(request.query_id)
@@ -297,6 +327,8 @@ class InvestigationTools:
                 "Register a falsifiable candidate",
                 request.hypothesis.model_dump_json(),
             )
+        if request.operation == "changes":
+            return await self._changes(request.target)
         if request.operation == "graph" and request.target:
             graph = OperationalGraph(self.context.graph).dependencies_within(
                 request.target, hops=1, max_entities=self.budget.max_entities

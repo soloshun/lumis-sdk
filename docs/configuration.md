@@ -254,8 +254,8 @@ CLI `--observations` or Python `observations=` overrides it; `observations=()` f
 
 Checked editor schemas are in [schemas](../schemas). Regenerate with
 `uv run python scripts/generate_config_schema.py`.
-Loki, Tempo, Prefect and read-only SQL are supported optional sources; follow their
-[setup guide](telemetry-connectors.md).
+Loki, Tempo, Prefect, read-only SQL and recent-change records (`sources.changes`) are supported
+optional sources; follow their [setup guide](telemetry-connectors.md).
 Basic Git/code inspection uses explicit investigator repository/file allowlists, not an unrestricted
 `sources.git.repository` shortcut. Approval-required execution and automatic rule promotion are not
 accepted working configuration; no executor is shipped.

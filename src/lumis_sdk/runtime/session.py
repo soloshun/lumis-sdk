@@ -34,14 +34,26 @@ if TYPE_CHECKING:
 
 
 def local_connectors(
-    project: OperationalProject, observations: tuple[Evidence, ...] | None
+    project: OperationalProject, base: Path, observations: tuple[Evidence, ...] | None
 ) -> dict[str, EvidenceConnector]:
-    """Connectors that need no HTTP client: supplied observations and the optional SQL source."""
+    """Connectors that need no HTTP client: supplied observations, SQL and change history."""
     connectors: dict[str, EvidenceConnector] = {"snapshot": SnapshotConnector(observations or ())}
     if project.sources.sql.enabled:
         from lumis_sdk.connectors.sql import SqlConnector
 
         connectors["sql"] = SqlConnector(project.sources.sql)
+    if project.sources.changes.enabled:
+        from lumis_sdk.connectors.changes import ChangeConnector
+
+        kube = project.sources.kubernetes
+        connectors["changes"] = ChangeConnector(
+            project.sources.changes,
+            base=base,
+            kubernetes=(kube.context, kube.namespace)
+            if kube.enabled and kube.context and kube.namespace
+            else None,
+            aliases=project.identity.aliases,
+        )
     return connectors
 
 
@@ -73,7 +85,7 @@ class PreparedProject:
             observations = TypeAdapter(tuple[Evidence, ...]).validate_json(
                 read_document(relative_path(self.base, project.observations_file))
             )
-        connectors = local_connectors(project, observations)
+        connectors = local_connectors(project, self.base, observations)
         if runner is None and project.investigator.sandbox.enabled:
             from lumis_sdk.sandbox.runner import DockerProbeRunner
 
@@ -116,7 +128,7 @@ class PreparedProject:
                 read_document(relative_path(self.base, project.observations_file))
             )
         sources: list[HypothesisSource] = [RuleSource(project.rule_hypotheses)]
-        connectors = local_connectors(project, observations)
+        connectors = local_connectors(project, self.base, observations)
         async with http_client(
             client,
             required=project.sources.requires_http or use_model,

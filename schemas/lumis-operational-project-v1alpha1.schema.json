@@ -56,6 +56,47 @@
       "title": "AgentBudget",
       "type": "object"
     },
+    "ChangeSource": {
+      "additionalProperties": false,
+      "description": "Typed, time-bounded change records: commits to mapped paths and Kubernetes rollouts.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "git": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GitChangeSource"
+          },
+          "maxItems": 10,
+          "title": "Git",
+          "type": "array"
+        },
+        "kubernetes_rollouts": {
+          "default": false,
+          "title": "Kubernetes Rollouts",
+          "type": "boolean"
+        },
+        "lookback_seconds": {
+          "default": 3600,
+          "maximum": 604800,
+          "minimum": 60,
+          "title": "Lookback Seconds",
+          "type": "integer"
+        },
+        "max_records": {
+          "default": 50,
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Max Records",
+          "type": "integer"
+        }
+      },
+      "title": "ChangeSource",
+      "type": "object"
+    },
     "Check": {
       "additionalProperties": false,
       "description": "A testable prediction or falsifier evaluated only against tool observations.",
@@ -338,6 +379,66 @@
         "description"
       ],
       "title": "EvidenceQuery",
+      "type": "object"
+    },
+    "GitChangeSource": {
+      "additionalProperties": false,
+      "description": "One repository whose commits are changes to the entities its paths configure.",
+      "properties": {
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "paths": {
+          "additionalProperties": {
+            "items": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "propertyNames": {
+            "maxLength": 256,
+            "minLength": 1
+          },
+          "title": "Paths",
+          "type": "object"
+        },
+        "root": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Root",
+          "type": "string"
+        },
+        "scopes": {
+          "additionalProperties": {
+            "items": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxProperties": 200,
+          "propertyNames": {
+            "maxLength": 256,
+            "minLength": 1
+          },
+          "title": "Scopes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "root",
+        "paths"
+      ],
+      "title": "GitChangeSource",
       "type": "object"
     },
     "GraphSnapshot": {
@@ -1019,6 +1120,9 @@
     "Sources": {
       "additionalProperties": false,
       "properties": {
+        "changes": {
+          "$ref": "#/$defs/ChangeSource"
+        },
         "kubernetes": {
           "$ref": "#/$defs/KubernetesSource"
         },

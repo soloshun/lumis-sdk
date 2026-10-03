@@ -54,6 +54,7 @@ class InspectRequest(Contract):
         "code.search",
         "git.log",
         "git.diff",
+        "changes",
         "hypothesis.register",
     ]
     target: Identifier | None = None

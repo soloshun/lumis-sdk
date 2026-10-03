@@ -6,6 +6,8 @@ from typing import Annotated, Literal, Self
 from pydantic import Field, StrictBool, StringConstraints, model_validator
 
 from lumis_sdk.connectors.settings import (
+    ChangeQuery,
+    ChangeSource,
     LokiQuery,
     LokiSource,
     PrefectQuery,
@@ -134,6 +136,17 @@ class Sources(Contract):
     tempo: TempoSource = Field(default_factory=TempoSource)
     prefect: PrefectSource = Field(default_factory=PrefectSource)
     sql: SqlSource = Field(default_factory=SqlSource)
+    changes: ChangeSource = Field(default_factory=ChangeSource)
+
+    @model_validator(mode="after")
+    def validate_change_backends(self) -> Self:
+        if (
+            self.changes.enabled
+            and self.changes.kubernetes_rollouts
+            and not self.kubernetes.enabled
+        ):
+            raise ValueError("Kubernetes rollout changes require the enabled Kubernetes source")
+        return self
 
     @property
     def requires_http(self) -> bool:
@@ -204,6 +217,7 @@ class OperationalProject(Contract):
                 "tempo",
                 "prefect",
                 "sql",
+                "changes",
             }:
                 raise ValueError("unsupported CLI evidence provider")
             remote: dict[str, type[Contract]] = {
@@ -211,6 +225,7 @@ class OperationalProject(Contract):
                 "tempo": TempoQuery,
                 "prefect": PrefectQuery,
                 "sql": SqlQuery,
+                "changes": ChangeQuery,
             }
             if query.provider in remote:
                 if not getattr(self.sources, query.provider).enabled:

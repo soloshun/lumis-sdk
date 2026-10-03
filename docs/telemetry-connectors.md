@@ -180,7 +180,59 @@ See [verification](verification.md) and [consumer qualification](integrations.md
 OpenTelemetry's `4317` is an OTLP ingestion port, not a log/trace retrieval API. Keep your
 collector sending telemetry to the backends; configure `sources.tempo.endpoint` for querying
 and `sources.opentelemetry.export_file` for offline exports. No live SDK receiver is implemented.
-OpenLineage ingestion and typed recent-change queries remain unimplemented.
+OpenLineage ingestion remains unimplemented.
+
+## Recent changes
+
+Typed change records answer "what changed, where in the graph, and when". A change is a
+time-bounded fact about an entity, not a graph node (why: [design note](design-notes/gridcast-integration-lessons.md#change-records)).
+
+```yaml
+sources:
+  kubernetes: {enabled: true, context: my-context, namespace: estate}
+  changes:
+    enabled: true
+    lookback_seconds: 3600          # default window back from the incident end
+    max_records: 50                 # more matches -> a count fact is `degraded`
+    kubernetes_rollouts: true       # ReplicaSet history + ScalingReplicaSet events
+    git:
+      - id: gitops
+        root: ../gitops             # relative to lumis.yaml
+        paths:                      # repository path (file or dir/) -> entities it configures
+          kustomization.yaml: ['service:estate:api', 'service:estate:worker']
+          apps/api/: ['service:estate:api']
+        scopes:                     # optional: conventional-commit scope -> entities
+          api: ['service:estate:api']
+queries:
+  - id: api-release-changes
+    provider: changes
+    entity_id: 'service:estate:api'
+    key: release_changes_30m
+    description: Commits and rollouts touching the api in the 30 minutes before incident end
+    parameters: {output: count, lookback_seconds: "1800", kind: any}   # kind: any|commit|rollout
+```
+
+* `output: count` is the number of changes to the query's entity in the lookback. Git history
+  and ReplicaSets are authoritative, so **zero is an observation**: a hypothesis "a release
+  caused this" can be contradicted by `release_changes_30m eq 0`.
+* `output: seconds_since_latest` is the age of the newest change; no change yields no fact.
+* The agent's `inspect(changes)` (optionally with a target entity) lists records newest first:
+  `id`, `kind` (`commit` | `rollout`), `source`, `at`, `entity_ids`, a redacted `summary`
+  (commit subject and files, or rollout revision and images) and a `reference` (SHA or
+  ReplicaSet). Only records touching the incident scope are shown.
+
+Attribution and limits:
+
+* **Git** commits are attributed through `paths`; a shared file (one `kustomization.yaml` or
+  values file for many services) maps to all of them, so add `scopes`: a recognised
+  conventional-commit scope (`deploy(api): 1.6.0 -> 1.7.0`) narrows the commit to its entities.
+  Git runs read-only (`--literal-pathspecs`, hooks and fsmonitor off, bounded output).
+* **Kubernetes**: a new ReplicaSet's creation is a rollout. Re-activating an existing ReplicaSet
+  (rollback, or a GitOps revert-and-reapply) keeps its old creation time; only a
+  `ScalingReplicaSet` event ("Scaled up replica set X from 0 to N") records it, and events expire
+  (one hour by default). Scaling a Deployment is not a rollout. Treat the Git source as the
+  durable record and Kubernetes as the confirmation that the change reached the cluster.
+* Any unreadable backend makes the change history unavailable (no fact), never silently partial.
 
 ## Read-only SQL (PostgreSQL)
 

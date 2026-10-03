@@ -131,6 +131,7 @@ def test_sql_against_postgres_is_read_only(monkeypatch):
 
 def test_project_registers_sql_queries_only_for_an_enabled_source():
     import json
+    from pathlib import Path
 
     from lumis_sdk.runtime.project import OperationalProject
     from lumis_sdk.runtime.scaffold import starter_documents
@@ -143,7 +144,7 @@ def test_project_registers_sql_queries_only_for_an_enabled_source():
         OperationalProject.model_validate(config)
     config["sources"] = {"sql": {"enabled": True, "dsn_env": "ESTATE_READONLY_DSN"}}
     project = OperationalProject.model_validate(config)
-    assert set(local_connectors(project, None)) == {"snapshot", "sql"}
+    assert set(local_connectors(project, Path(), None)) == {"snapshot", "sql"}
     config["queries"][-1]["parameters"] = {"sql": "UPDATE t SET x = 1"}
     with pytest.raises(ValueError, match="SELECT"):
         OperationalProject.model_validate(config)

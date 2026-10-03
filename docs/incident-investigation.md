@@ -50,6 +50,7 @@ Only these operations are supported:
 | evidence | Operator-registered query ID; never model-authored PromQL |
 | code.read, code.search | Read/literal-search an explicit text-file allowlist |
 | git.log, git.diff | Fixed local read-only commands; full SHA diff, approved paths only |
+| changes | Recent commits/rollouts touching scoped entities (`sources.changes`), newest first |
 | hypothesis.register | Validate and bind a falsifiable candidate before probing |
 | probe | Generated Python experiment in an explicitly enabled, resource-limited container |
 
@@ -59,8 +60,12 @@ and unapproved extensions are refused. Repository roots are explicitly operator-
 Consumer modules are never imported. Git log returns commit IDs/timestamps; with the
 repository's `include_commit_subjects: true` it also returns each commit's subject line, redacted
 and truncated to 200 characters (untrusted text, like every tool result). Diffs disable external
-diff/textconv and hooks. This is basic inspection, **not** the future
-typed time-bounded change-record / recent_changes_affecting API.
+diff/textconv and hooks. For "what changed, where and when" use typed change records instead:
+`inspect(changes)` lists recent commits and rollouts already attributed to graph entities, and a
+registered `provider: changes` query turns them into checkable facts (see
+[recent changes](telemetry-connectors.md#recent-changes)). A change is evidence about an entity,
+never a causal-path node: write the path in graph IDs and predict the change, for example
+`release_changes_30m gt 0` on the service.
 
 The model returns AgentOutput: candidates, tentative suggestions/patch text and unresolved
 questions. It cannot author evidence, assessment state, confidence-as-authority or confirmed
