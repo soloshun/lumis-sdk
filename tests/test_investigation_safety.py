@@ -109,6 +109,27 @@ def test_git_reads_only_approved_paths_without_external_diff(tmp_path):
         )
     )
     assert after in log and before in log
+    assert "change" not in log  # subjects are opt-in
+    (tmp_path / "allowed.py").write_text("value = 3\n")
+    git("add", ".")
+    git("-c", "commit.gpgsign=false", "commit", "-m", "Raise pool size password=hunter2secret")
+    with_subjects = CodeSnapshot(
+        CodeRepository(
+            id="r",
+            root=str(tmp_path),
+            entity_ids=("service",),
+            files=("allowed.py",),
+            include_commit_subjects=True,
+        ),
+        tmp_path,
+    )
+    log = asyncio.run(
+        with_subjects.git(
+            "git.log", since="2000-01-01T00:00:00+00:00", until="2030-01-01T00:00:00+00:00"
+        )
+    )
+    assert f"{after} " in log and " change" in log and "Raise pool size" in log
+    assert "hunter2secret" not in log
     with pytest.raises(ValueError, match="full commit"):
         asyncio.run(
             snapshot.git("git.diff", since="", until="", base_commit="HEAD", head_commit=after)

@@ -92,7 +92,7 @@ class InvestigationTools:
         code_hash: str | None = None,
         snapshot_hash: str | None = None,
     ) -> ToolReceipt:
-        # git.log is validated fixed-format structural SHAs/timestamps, not commit messages.
+        # git.log: structural SHAs/timestamps are validated; opt-in subjects are redacted upstream.
         safe = output if operation == "git.log" else redact_text(output)
         digest = hashlib.sha256(safe.encode()).hexdigest()
         remaining = max(0, self.settings.budget.max_total_tool_characters - self.output_characters)
