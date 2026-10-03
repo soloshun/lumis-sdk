@@ -1,0 +1,51 @@
+# Independent SDK contract example. Replace endpoints, identities and selectors for your estate.
+api_version: lumis.dev/operational-v1alpha1
+project: {name: demo-estate, environment: local}
+sources:
+  loki:
+    enabled: true
+    endpoint: http://localhost:3100
+    max_results: 20
+  tempo:
+    enabled: true
+    endpoint: http://localhost:3200
+    max_results: 20
+    # Optional observed topology discovery (requires service.namespace on spans):
+    # service_namespace: demo-estate
+    # discovery_query: '{ resource.service.namespace = "demo-estate" }'
+  prefect:
+    enabled: true
+    endpoint: http://localhost:4200/api
+    flow_names: [daily-forecast]
+    max_results: 20
+    # Optional workflow/run/task topology:
+    # discover_topology: true
+    # namespace: demo-estate
+graph:
+  entities:
+    - {id: 'service:demo-estate:forecast', kind: service, name: forecast}
+queries:
+  - id: forecast-errors
+    provider: loki
+    entity_id: service:demo-estate:forecast
+    key: error_log
+    description: Forecast error log records within the incident window
+    parameters:
+      logql: '{service_name="forecast", namespace="demo-estate"} |= "error"'
+      output: entries
+  - id: forecast-traces
+    provider: tempo
+    entity_id: service:demo-estate:forecast
+    key: trace_duration_ms
+    description: Durations of matching forecast traces (not a population percentile)
+    parameters:
+      traceql: '{ resource.service.name = "forecast" && resource.service.namespace = "demo-estate" }'
+      output: duration_ms
+  - id: forecast-flow-runs
+    provider: prefect
+    entity_id: service:demo-estate:forecast
+    key: flow_run
+    description: Current Prefect flow states transitioned within the incident window
+    parameters: {flow_name: daily-forecast, operation: flow_runs, output: entries}
+initial_query_ids: [forecast-errors, forecast-traces, forecast-flow-runs]
+policies: {default_action_mode: read_only}

@@ -19,6 +19,8 @@ ordered documentation/code entry points, expected local outputs and the first Gr
    to inspect NetworkX topology and test YAML-led investigation.
 5. [Model providers](models.md): OpenRouter default, native OpenAI/Anthropic/Gemini wrappers.
 6. [Integration boundaries](integrations.md): connect any application through external data.
+   Follow [Loki/Tempo/Prefect setup](telemetry-connectors.md) for real read-only endpoints and
+   registered observation queries; begin from the [complete example](examples/telemetry-project.yaml).
 7. [Migration](migration.md): breaking reset and how to retrieve the previous implementation.
 8. [Verification](verification.md): local checks, offline contracts and release evidence.
 9. [Release runbook](releasing.md): maintainers' dev → main → release procedure.

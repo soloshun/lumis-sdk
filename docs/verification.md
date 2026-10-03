@@ -23,6 +23,12 @@ deduplication, missing/conflicting/degraded/stale evidence, source/query timeout
 audited terminal states, record roundtrips, redaction, scoped topology, bounded HTTP serialization,
 mocked Prometheus/OpenRouter/OpenAI/Anthropic/Gemini contracts and standalone CLI/YAML behavior.
 
+The [telemetry connector suite](../tests/test_telemetry_connectors.py) additionally exercises
+Loki/Tempo/Prefect wire serialization, incident windows, scoped read-only filters, redacted log/run/
+span observations, malformed/empty/capped responses, optional topology and public runtime/agent
+wiring. See [connector setup](telemetry-connectors.md); no live backend/consumer qualification is
+implied by deterministic HTTP transports.
+
 Tests for the retired architecture are removed with their code, not counted as current coverage.
 
 The agent suite uses the real Pydantic AI loop with a scripted FunctionModel: dynamic tools,
@@ -40,6 +46,21 @@ cancellation, incomplete CLI reports and caller-owned HTTP client lifetime. Two 
 service/data-lineage inputs demonstrate the portable boundary; neither imports cookbook code.
 
 ## Independent distribution smoke
+
+### Limited live transport smoke (2026-10-03)
+
+Read-only requests against the already-running local GridCast backends verified real Loki log
+queries, Tempo TraceQL search/OTLP span retrieval, and Prefect flow/task filters. The 24-hour
+queries returned records; intentionally bounded results were correctly marked degraded at their
+caps (20 log records, 100 trace matches and 20 flow records). A scoped task filter returned two
+task records; an explicit trace returned a span observation. No fault was injected, workflow
+state changed, remediation performed or paid model invoked. This is transport compatibility,
+not representative incident diagnosis, telemetry completeness or consumer acceptance.
+
+Real Prefect schemas revealed different flow/task sort enums; real Tempo search returned
+unpadded hexadecimal IDs. Both compatibility cases now have regression coverage.
+
+### Clean-wheel boundary
 
 Build, install the wheel without the HTTP extra in an empty environment, then follow CLI
 steps 2–5. CI repeats that workflow on Python 3.11/3.12/3.13 and asserts supported yet unconfirmed

@@ -58,10 +58,14 @@ def doctor(
     warnings: list[str] = []
     if config.sources.kubernetes.enabled and not shutil.which("kubectl"):
         warnings.append("Kubernetes discovery requires kubectl on PATH.")
-    if (config.sources.prometheus.enabled or config.models) and not importlib.util.find_spec(
-        "httpx"
-    ):
+    if (config.sources.requires_http or config.models) and not importlib.util.find_spec("httpx"):
         warnings.append("Optional HTTP features require lumis-sdk[http].")
+    for name in ("loki", "tempo", "prefect"):
+        source = getattr(config.sources, name)
+        if source.enabled and any(
+            not os.environ.get(variable) for variable in source.headers_env.values()
+        ):
+            warnings.append(f"Configured {name} source credential is absent.")
     if config.models and not os.environ.get(config.models.credential_env):
         warnings.append(
             "Configured model credential is absent; offline investigation remains available."

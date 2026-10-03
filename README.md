@@ -54,6 +54,8 @@ Start with the [incident API guide](docs/incident-investigation.md) and
 - JSON/DOT/SVG/terminal graph exports, interactive CLI, SQLite incident audit and manual resolutions.
 - Optional Prometheus observations and opt-in model candidates/agents: OpenRouter (default),
   native OpenAI, Anthropic and Gemini. See [model configuration](docs/models.md).
+- YAML-backed Loki logs, Tempo trace search/spans and Prefect flow/task observations, plus
+  scoped Tempo/Prefect topology. See the [connector setup guide](docs/telemetry-connectors.md).
 
 No remediation executor, automatic learned-rule promotion, live OTLP receiver, hosted service,
 or complete autonomous operational lifecycle is shipped.

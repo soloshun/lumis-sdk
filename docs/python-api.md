@@ -4,6 +4,11 @@ Import the current operational contracts; there is no dependency on GridCast or 
 
 ## Recommended incident API
 
+Configured `loki`, `tempo` and `prefect` sources are composed automatically alongside
+Prometheus and snapshot observations. Queries remain operator-registered; both deterministic
+checks and agent `inspect(evidence)` use the same connectors. Optional Prefect/Tempo topology
+is merged during `prepare()`. See the [endpoint/query guide](telemetry-connectors.md).
+
 Use `YamlProject.handle_incident(...)` for evidence-backed triage, optional agent tools,
 mechanical reports and human review. Read the [incident API/config/storage walkthrough](incident-investigation.md)
 and executable [agent notebook](notebooks/incident-agent.ipynb).
@@ -127,6 +132,7 @@ Assessment states: `supported`, `contradicted`, `unresolved`.
 Outcomes: `supported`, `abstained`, `hypotheses_ready`.
 See generated JSON schemas and [architecture](architecture.md) for invariants.
 
-Optional HTTP adapters include `connectors.prometheus` and the four model wrappers documented in
+Optional HTTP adapters include `connectors.prometheus`, `connectors.loki`, `connectors.tempo`,
+`connectors.prefect` and the four model wrappers documented in
 [model providers](models.md). Core imports and local replay do not import HTTP dependencies.
 There is intentionally no stable pre-reset API re-export or obsolete compatibility package.

@@ -95,6 +95,10 @@ async def discover_project(
         "kubernetes": config.sources.kubernetes.enabled,
         "opentelemetry": config.sources.opentelemetry.enabled,
         "prometheus.service_graph": config.sources.prometheus.discover_service_graph,
+        "prefect": config.sources.prefect.discover_topology,
+        "tempo": bool(
+            config.sources.tempo.discover_trace_ids or config.sources.tempo.discovery_query
+        ),
     }
     statuses = {
         name: SourceDiscovery(name=name, status="not_checked" if active else "disabled")
@@ -173,6 +177,51 @@ async def discover_project(
                             max_bytes=config.discovery.max_response_bytes,
                         ),
                     )
+            if enabled["prefect"] or enabled["tempo"]:
+                async with http_client(
+                    client, required=True, timeout=config.discovery.timeout_seconds
+                ) as connection:
+                    assert connection is not None
+                    if enabled["prefect"]:
+                        current = "prefect"
+                        from lumis_sdk.connectors.prefect import PrefectConnector
+
+                        prefect_source = config.sources.prefect.model_copy(
+                            update={
+                                "max_response_bytes": min(
+                                    config.sources.prefect.max_response_bytes,
+                                    config.discovery.max_response_bytes,
+                                )
+                            }
+                        )
+                        accept(
+                            current,
+                            await PrefectConnector(prefect_source, connection).discover(
+                                at=at,
+                                max_entities=config.discovery.max_entities,
+                                max_relationships=config.discovery.max_relationships,
+                            ),
+                        )
+                    if enabled["tempo"]:
+                        current = "tempo"
+                        from lumis_sdk.connectors.tempo import TempoConnector
+
+                        tempo_source = config.sources.tempo.model_copy(
+                            update={
+                                "max_response_bytes": min(
+                                    config.sources.tempo.max_response_bytes,
+                                    config.discovery.max_response_bytes,
+                                )
+                            }
+                        )
+                        accept(
+                            current,
+                            await TempoConnector(tempo_source, connection).discover(
+                                at=at,
+                                max_entities=config.discovery.max_entities,
+                                max_relationships=config.discovery.max_relationships,
+                            ),
+                        )
     except Exception as error:
         # Do not export provider errors/URLs/bodies/credentials in readiness output.
         statuses[current] = SourceDiscovery(
