@@ -48,9 +48,27 @@ Goal: improve reusable external observations and bounded investigation, not add 
   limits, no hidden ground-truth access, and comparable measured baselines.
 
 OI-2a provides the first fixtures; the adapter kit, change evidence and measured baselines remain.
-The next logical sprint is **OI-2b**, not automatic remediation or a consumer-specific rewrite.
+The continuation adds an explicit public artifact slice before broader evidence/learning work:
+
+- [x] **OI-A1: evidence-backed deterministic sandwich.** Three-state findings, nonterminal
+  signatures, multi-observable terminal sufficiency, ambiguity/scope checks and caller guard.
+- [x] **OI-A2: basic single investigator.** Pydantic AI native providers, dynamic inspect/probe
+  tool families, approved graph/query/code/Git scope, budgets, typed output and mechanical assessment.
+- [x] **OI-A3: diagnostic experiments and audit.** Opt-in resource-limited Docker, copied
+  source only, degraded probe evidence, receipts/digests, immutable SQLite reports/manual resolutions.
+- [x] **OI-A4: usable public package surface.** CLI incident/menu/SVG, API/YAML/sandbox
+  documentation, schemas and executable offline agent notebook.
+- [ ] **OI-A5: artifact evaluation.** Versioned independent/live scenarios, provider qualification,
+  diagnosis/abstention/cost measurements and external cookbook evidence.
+
+OI-A1–A4 implement a basic public proof of concept, not private advanced strategies or production
+governance. OI-2b remains open: basic Git inspect tools do not finish typed change records.
+Next is evidence/evaluation qualification or OI-2b, never automatic recovery.
 
 ## Phase C — reusable memory and controlled learning
+
+Deferred beyond the current public proof of concept. These are design/research candidates,
+not a promise to expose private strategy or enterprise intellectual property.
 
 Goal: reuse prior incidents without mistaking repetition for truth.
 
@@ -63,6 +81,9 @@ Goal: reuse prior incidents without mistaking repetition for truth.
   cost measurements; no automatic operational authority.
 
 ## Phase D — independently governed proposals and verification
+
+Deferred design boundary. Only tentative diagnostic suggestions and separate human attestations
+are implemented now; enterprise policy, real execution and recovery are excluded.
 
 Goal: introduce safe proposal boundaries only after diagnosis has measurable quality.
 
@@ -79,13 +100,14 @@ These are planned capabilities, not an executor commitment.
 ## Cookbook integration readiness
 
 Goal: a cookbook declares approved source/query/candidate YAML, supplies an incident, and calls
-`YamlProject.from_file(...).investigate(...)` without application-specific runtime assembly.
+`YamlProject.from_file(...).handle_incident(...)` without application-specific runtime assembly.
 
 - [x] Shared YAML composition; no GridCast imports or hidden ground-truth access.
 - [x] Offline replay without network/model credentials or an external repository.
 - [x] Bounded, inspectable operational graph and declared dataset/job lineage.
 - [x] Mocked read-only Kubernetes/OTLP and Prometheus topology/evidence contracts.
 - [x] API/YAML/CLI documentation and runnable notebook match the shipped interfaces.
+- [x] Conservative triage, basic tool-agent contract, isolated probes and human-review audit.
 - [ ] Qualify real cookbook endpoints, telemetry coverage, identities, namespaces and RBAC.
 - [ ] Validate live model schema support, privacy, cost, candidate quality and missing-data behavior.
 - [ ] Add/qualify remaining adapters before claiming all GridCast fault/scenario families work.

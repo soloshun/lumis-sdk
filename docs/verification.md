@@ -25,6 +25,14 @@ mocked Prometheus/OpenRouter/OpenAI/Anthropic/Gemini contracts and standalone CL
 
 Tests for the retired architecture are removed with their code, not counted as current coverage.
 
+The agent suite uses the real Pydantic AI loop with a scripted FunctionModel: dynamic tools,
+structured output, budget exhaustion, malformed claims, triage escalation, source failure,
+scoped code/Git, immutable candidate/probe bindings and separate manual resolution persistence.
+Both notebooks execute offline. Scripted responses test protocol, not model quality.
+Opt-in real Docker tests cover no network/credential forwarding, unprivileged execution,
+read-only root, copied source, invalid/non-finite/oversized output and timeout/cancellation cleanup.
+See [sandbox qualification](sandbox.md). CI runs these against a preloaded pinned image.
+
 The suite also executes every code cell of the trusted offline notebook under an async event loop,
 checks NetworkX parallel edges/cycles/export isolation, YAML discovery/binding, explicit aliases,
 resource/service bridges, service-graph vector contracts, aggregate limits, source deadline,

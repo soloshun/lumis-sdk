@@ -2,7 +2,16 @@
 
 Import the current operational contracts; there is no dependency on GridCast or its modules.
 
-## YAML-led API (recommended)
+## Recommended incident API
+
+Use `YamlProject.handle_incident(...)` for evidence-backed triage, optional agent tools,
+mechanical reports and human review. Read the [incident API/config/storage walkthrough](incident-investigation.md)
+and executable [agent notebook](notebooks/incident-agent.ipynb).
+
+The candidate-only investigate API below remains a comparison baseline; use_model is not a
+tool-using agent loop.
+
+## YAML-led candidate API
 
 After `lumis init --directory /tmp/my-lumis-project`, optionally set
 `observations_file: observations.json` in its YAML. The same project drives CLI and Python:

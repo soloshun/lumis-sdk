@@ -11,6 +11,15 @@ a confirmed root cause, or permission to execute a change.
 
 ## Current flow
 
+The recommended path is [incident investigation](incident-investigation.md): prepared context →
+evidence-backed triage → sufficient signature or one bounded Pydantic AI investigator →
+mechanical assessment → human review. inspect reads scoped evidence, graph and approved code/Git.
+probe tests registered candidates only in an explicitly enabled resource-limited Docker container.
+Its results are synthetic/degraded, not independent production proof. No fix is applied.
+Human resolutions may be recorded separately.
+
+The following lower-level investigate path remains as a candidate/evaluation baseline:
+
 YAML project → bounded discovery + identity binding → incident + prepared graph → bounded context → rules / retrieved candidates /
 optional model → validation and deduplication → registered evidence queries → deterministic
 assessment → supported candidates or abstention → optional persisted investigation.
@@ -32,6 +41,9 @@ facts cannot silently turn into support. Contradiction takes precedence.
 | `connectors` | Read-only external topology and observation adapters |
 | `reasoning` | Interchangeable candidate sources and mechanical assessment |
 | `models` | Optional model adapter, no decision or action authority |
+| `checks` | Conservative triage and caller-owned sufficiency guard |
+| `investigation` | Typed reports, bounded tools and optional single Pydantic AI investigator |
+| `sandbox` | Resource-limited copied-source experiments; no host fallback |
 | `runtime` | Shared YAML preparation/discovery, investigation loop, scaffold and SQLite records |
 | `security` | Conservative model/report context redaction |
 | `cli` | Explicit composition of the public contracts |
@@ -68,5 +80,7 @@ Operators remain responsible for approved telemetry access and model-provider da
 
 No executor, auto-remediation, policy-controlled deployment, live telemetry receiver,
 automatic incident ingestion, verified automatic rule learning, retrieval service,
-Git/Prefect/Loki/Tempo connector or production-readiness guarantee is implied.
+typed recent-change/Prefect/Loki/Tempo connector or production-readiness guarantee is implied.
 These are incremental roadmap work, not placeholders that appear enabled in configuration.
+Basic local Git log/diff inspection is available; private advanced strategies, learning and
+enterprise governance are not part of the public proof of concept.

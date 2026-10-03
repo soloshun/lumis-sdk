@@ -13,6 +13,8 @@ from lumis_sdk.core.contracts import (
     validate_hypothesis_catalog,
     validate_hypothesis_queries,
 )
+from lumis_sdk.investigation.config import InvestigatorSettings
+from lumis_sdk.investigation.contracts import DiagnosticRule
 from lumis_sdk.runtime.documents import load_mapping, read_document
 
 __all__ = ["OperationalProject", "load_project", "read_document"]
@@ -153,6 +155,8 @@ class OperationalProject(Contract):
     discovery: DiscoveryBudget = Field(default_factory=DiscoveryBudget)
     observations_file: Text | None = None
     models: ModelSettings | None = None
+    checks: tuple[DiagnosticRule, ...] = ()
+    investigator: InvestigatorSettings = Field(default_factory=InvestigatorSettings)
     policies: Policies = Field(default_factory=Policies)
     graph: GraphSnapshot = Field(default_factory=GraphSnapshot)
     queries: tuple[EvidenceQuery, ...] = ()
@@ -170,11 +174,28 @@ class OperationalProject(Contract):
         if not set(self.initial_query_ids) <= query_ids:
             raise ValueError("initial query is not registered")
         for query in self.queries:
-            if query.provider not in {"snapshot", "prometheus"}:
+            if query.provider not in {"snapshot", "prometheus", "probe"}:
                 raise ValueError("unsupported CLI evidence provider")
             if query.provider == "prometheus":
                 if not self.sources.prometheus.enabled or not query.parameters.get("promql"):
                     raise ValueError("Prometheus query requires enabled source and promql")
+            if query.provider == "probe" and not self.investigator.sandbox.enabled:
+                raise ValueError("probe query requires explicitly enabled sandbox")
+        if len({rule.id for rule in self.checks}) != len(self.checks):
+            raise ValueError("duplicate diagnostic rule IDs")
+        if len(self.checks) > 50:
+            raise ValueError("diagnostic check count exceeds bound")
+        for rule in self.checks:
+            validate_hypothesis_queries(rule.hypothesis, self.queries)
+            if rule.terminal and not rule.explains_entities:
+                raise ValueError("terminal check requires explicit explanation scope")
+            if not set(rule.explains_entities) <= set(rule.hypothesis.causal_path):
+                raise ValueError("explanation scope must belong to candidate path")
+            if any(
+                query.provider == "probe" and query.id in rule.hypothesis.evidence_needed
+                for query in self.queries
+            ):
+                raise ValueError("deterministic checks cannot use agent-authored probes")
         if len({item.id for item in self.rule_hypotheses}) != len(self.rule_hypotheses):
             raise ValueError("duplicate hypothesis IDs")
         for hypothesis in self.rule_hypotheses:
@@ -199,6 +220,10 @@ class OperationalProject(Contract):
             raise ValueError("query entity absent from prepared graph")
         for hypothesis in self.rule_hypotheses:
             validate_hypothesis_catalog(hypothesis, graph, self.queries)
+        for rule in self.checks:
+            validate_hypothesis_catalog(rule.hypothesis, graph, self.queries)
+        if any(not set(repo.entity_ids) <= ids for repo in self.investigator.repositories):
+            raise ValueError("repository mapping references absent entity")
 
 
 def load_project(path: Path) -> OperationalProject:

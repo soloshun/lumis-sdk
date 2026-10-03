@@ -1,12 +1,14 @@
 """A tiny synthetic conformance input, not an application-specific cookbook."""
 
+from typing import Any
+
 from lumis_sdk.runtime.documents import json_document
 from lumis_sdk.runtime.project import OperationalProject
 
 
 def starter_documents() -> dict[str, str]:
     """Return validated starter files with no network sources, secrets or ground-truth label."""
-    config = {
+    config: dict[str, Any] = {
         "api_version": "lumis.dev/operational-v1alpha1",
         "project": {"name": "my-estate", "environment": "local"},
         "policies": {"default_action_mode": "read_only"},
@@ -41,6 +43,9 @@ def starter_documents() -> dict[str, str]:
         ],
         "budget": {"max_queries": 2},
     }
+    config["checks"] = [
+        {"id": "service-health", "terminal": False, "hypothesis": config["rule_hypotheses"][0]}
+    ]
     OperationalProject.model_validate(config)
     incident = {
         "id": "demo-001",

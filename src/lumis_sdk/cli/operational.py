@@ -66,6 +66,10 @@ def doctor(
         warnings.append(
             "Configured model credential is absent; offline investigation remains available."
         )
+    if config.models and not importlib.util.find_spec("pydantic_ai"):
+        warnings.append("Tool-using incident investigation requires lumis-sdk[agent].")
+    if config.investigator.sandbox.enabled and not shutil.which("docker"):
+        warnings.append("Enabled diagnostic sandbox requires an approved Docker daemon and image.")
     if config.sources.opentelemetry.enabled:
         assert config.sources.opentelemetry.export_file is not None
         export = Path(config.sources.opentelemetry.export_file)
@@ -122,13 +126,14 @@ def graph(
         None, "--entity", help="Scope around one canonical entity ID."
     ),
     hops: int = typer.Option(3, "--hops", min=0, max=10),
-    format: str = typer.Option(
-        "json", "--format", help="json or dot; DOT needs no plotting extras."
+    format: str = typer.Option("json", "--format", help="json, dot, svg or terminal."),
+    output: Path | None = typer.Option(
+        None, "--output", help="Write a new export file; refuse overwrite."
     ),
 ) -> None:
     """Discover and inspect the operational graph, optionally bounded around an entity."""
-    if format not in {"json", "dot"}:
-        raise typer.BadParameter("format must be json or dot")
+    if format not in {"json", "dot", "svg", "terminal"}:
+        raise typer.BadParameter("format must be json, dot, svg or terminal")
     try:
         prepared = asyncio.run(YamlProject.from_file(project).prepare())
         selected = prepared.graph
@@ -142,9 +147,27 @@ def graph(
         raise typer.BadParameter(
             "Graph not ready; check discovery and canonical references."
         ) from error
-    typer.echo(
-        selected.to_dot() if format == "dot" else selected.snapshot().model_dump_json(indent=2)
-    )
+    from lumis_sdk.graph.render import svg, terminal
+
+    try:
+        content = (
+            selected.to_dot()
+            if format == "dot"
+            else svg(selected.snapshot())
+            if format == "svg"
+            else terminal(selected.snapshot())
+            if format == "terminal"
+            else selected.snapshot().model_dump_json(indent=2)
+        )
+        if output is not None:
+            with output.open("x", encoding="utf-8") as stream:
+                stream.write(content + "\n")
+        else:
+            typer.echo(content)
+    except Exception as error:
+        raise typer.BadParameter(
+            "Export failed; check graph bounds and choose a new writable output file."
+        ) from error
 
 
 def investigate(

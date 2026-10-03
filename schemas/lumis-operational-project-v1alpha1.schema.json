@@ -1,5 +1,54 @@
 {
   "$defs": {
+    "AgentBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_probes": {
+          "default": 2,
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Probes",
+          "type": "integer"
+        },
+        "max_tool_characters": {
+          "default": 8000,
+          "maximum": 64000,
+          "minimum": 100,
+          "title": "Max Tool Characters",
+          "type": "integer"
+        },
+        "max_total_tool_characters": {
+          "default": 32000,
+          "maximum": 256000,
+          "minimum": 100,
+          "title": "Max Total Tool Characters",
+          "type": "integer"
+        },
+        "output_tokens_limit": {
+          "default": 12000,
+          "maximum": 100000,
+          "minimum": 100,
+          "title": "Output Tokens Limit",
+          "type": "integer"
+        },
+        "request_limit": {
+          "default": 8,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Request Limit",
+          "type": "integer"
+        },
+        "tool_calls_limit": {
+          "default": 10,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Tool Calls Limit",
+          "type": "integer"
+        }
+      },
+      "title": "AgentBudget",
+      "type": "object"
+    },
     "Check": {
       "additionalProperties": false,
       "description": "A testable prediction or falsifier evaluated only against tool observations.",
@@ -53,6 +102,88 @@
         "value"
       ],
       "title": "Check",
+      "type": "object"
+    },
+    "CodeRepository": {
+      "additionalProperties": false,
+      "properties": {
+        "entity_ids": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Entity Ids",
+          "type": "array"
+        },
+        "files": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Files",
+          "type": "array"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "root": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "root",
+        "entity_ids",
+        "files"
+      ],
+      "title": "CodeRepository",
+      "type": "object"
+    },
+    "DiagnosticRule": {
+      "additionalProperties": false,
+      "properties": {
+        "explains_entities": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Explains Entities",
+          "type": "array"
+        },
+        "hypothesis": {
+          "$ref": "#/$defs/Hypothesis"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "terminal": {
+          "default": false,
+          "title": "Terminal",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "hypothesis"
+      ],
+      "title": "DiagnosticRule",
       "type": "object"
     },
     "DiscoveryBudget": {
@@ -380,6 +511,28 @@
       "title": "InvestigationBudget",
       "type": "object"
     },
+    "InvestigatorSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "budget": {
+          "$ref": "#/$defs/AgentBudget"
+        },
+        "repositories": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CodeRepository"
+          },
+          "maxItems": 10,
+          "title": "Repositories",
+          "type": "array"
+        },
+        "sandbox": {
+          "$ref": "#/$defs/SandboxPolicy"
+        }
+      },
+      "title": "InvestigatorSettings",
+      "type": "object"
+    },
     "KubernetesSource": {
       "additionalProperties": false,
       "properties": {
@@ -613,6 +766,66 @@
       "title": "Relationship",
       "type": "object"
     },
+    "SandboxPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "cpus": {
+          "default": 0.5,
+          "exclusiveMinimum": 0,
+          "maximum": 2,
+          "title": "Cpus",
+          "type": "number"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9./:_-]*@sha256:[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image"
+        },
+        "max_output_bytes": {
+          "default": 8000,
+          "maximum": 64000,
+          "minimum": 100,
+          "title": "Max Output Bytes",
+          "type": "integer"
+        },
+        "memory_mb": {
+          "default": 128,
+          "maximum": 512,
+          "minimum": 64,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "pids": {
+          "default": 32,
+          "maximum": 64,
+          "minimum": 8,
+          "title": "Pids",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "title": "SandboxPolicy",
+      "type": "object"
+    },
     "Sources": {
       "additionalProperties": false,
       "properties": {
@@ -671,6 +884,14 @@
     "budget": {
       "$ref": "#/$defs/InvestigationBudget"
     },
+    "checks": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DiagnosticRule"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
     "discovery": {
       "$ref": "#/$defs/DiscoveryBudget"
     },
@@ -689,6 +910,9 @@
       },
       "title": "Initial Query Ids",
       "type": "array"
+    },
+    "investigator": {
+      "$ref": "#/$defs/InvestigatorSettings"
     },
     "models": {
       "anyOf": [
