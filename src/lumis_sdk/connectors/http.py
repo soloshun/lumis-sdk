@@ -30,6 +30,20 @@ async def read_json(
     max_bytes: int = 1_000_000,
     **kwargs: Any,
 ) -> dict[str, Any]:
+    result = await read_payload(client, method, url, max_bytes=max_bytes, **kwargs)
+    if not isinstance(result, dict):
+        raise ValueError("HTTP JSON response must be an object")
+    return result
+
+
+async def read_payload(
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    *,
+    max_bytes: int = 1_000_000,
+    **kwargs: Any,
+) -> Any:
     """Bound decoded response bytes, including chunked or compressed responses."""
     async with client.stream(method, url, follow_redirects=False, **kwargs) as response:
         response.raise_for_status()
@@ -41,6 +55,4 @@ async def read_json(
                 raise ValueError("HTTP response exceeds byte budget")
             chunks.extend(chunk)
     result = json.loads(chunks)
-    if not isinstance(result, dict):
-        raise ValueError("HTTP JSON response must be an object")
     return result

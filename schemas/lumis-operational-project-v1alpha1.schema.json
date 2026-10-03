@@ -573,6 +573,68 @@
       "title": "KubernetesSource",
       "type": "object"
     },
+    "LokiSource": {
+      "additionalProperties": false,
+      "description": "Read-only log queries; no ingestion, tailing or deletion.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "headers_env": {
+          "additionalProperties": {
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "Authorization",
+              "X-Scope-OrgID"
+            ]
+          },
+          "title": "Headers Env",
+          "type": "object"
+        },
+        "max_requests": {
+          "default": 32,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "max_response_bytes": {
+          "default": 1000000,
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Max Response Bytes",
+          "type": "integer"
+        },
+        "max_results": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        }
+      },
+      "title": "LokiSource",
+      "type": "object"
+    },
     "ModelSettings": {
       "additionalProperties": false,
       "properties": {
@@ -650,6 +712,104 @@
         }
       },
       "title": "Policies",
+      "type": "object"
+    },
+    "PrefectSource": {
+      "additionalProperties": false,
+      "properties": {
+        "discover_topology": {
+          "default": false,
+          "title": "Discover Topology",
+          "type": "boolean"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "flow_names": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "title": "Flow Names",
+          "type": "array"
+        },
+        "headers_env": {
+          "additionalProperties": {
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "Authorization",
+              "X-Scope-OrgID"
+            ]
+          },
+          "title": "Headers Env",
+          "type": "object"
+        },
+        "lookback_seconds": {
+          "default": 3600,
+          "maximum": 86400,
+          "minimum": 1,
+          "title": "Lookback Seconds",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 32,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "max_response_bytes": {
+          "default": 1000000,
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Max Response Bytes",
+          "type": "integer"
+        },
+        "max_results": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        },
+        "namespace": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Namespace"
+        }
+      },
+      "title": "PrefectSource",
       "type": "object"
     },
     "ProjectIdentity": {
@@ -832,17 +992,138 @@
         "kubernetes": {
           "$ref": "#/$defs/KubernetesSource"
         },
+        "loki": {
+          "$ref": "#/$defs/LokiSource"
+        },
         "opentelemetry": {
           "$ref": "#/$defs/OpenTelemetrySource"
         },
+        "prefect": {
+          "$ref": "#/$defs/PrefectSource"
+        },
         "prometheus": {
           "$ref": "#/$defs/PrometheusSource"
+        },
+        "tempo": {
+          "$ref": "#/$defs/TempoSource"
         },
         "topology": {
           "$ref": "#/$defs/TopologySource"
         }
       },
       "title": "Sources",
+      "type": "object"
+    },
+    "TempoSource": {
+      "additionalProperties": false,
+      "properties": {
+        "discover_trace_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "Discover Trace Ids",
+          "type": "array"
+        },
+        "discovery_query": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Discovery Query"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "headers_env": {
+          "additionalProperties": {
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "Authorization",
+              "X-Scope-OrgID"
+            ]
+          },
+          "title": "Headers Env",
+          "type": "object"
+        },
+        "lookback_seconds": {
+          "default": 3600,
+          "maximum": 86400,
+          "minimum": 1,
+          "title": "Lookback Seconds",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 32,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "max_response_bytes": {
+          "default": 1000000,
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Max Response Bytes",
+          "type": "integer"
+        },
+        "max_results": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        },
+        "max_spans": {
+          "default": 1000,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Max Spans",
+          "type": "integer"
+        },
+        "service_namespace": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Service Namespace"
+        }
+      },
+      "title": "TempoSource",
       "type": "object"
     },
     "TopologySource": {

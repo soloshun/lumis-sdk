@@ -2,6 +2,12 @@
 
 ## Unreleased — standalone operational-intelligence reset
 
+- Implement YAML-backed optional Loki/Tempo/Prefect read-only queries and scoped workflow/trace
+  topology, environment-backed authentication, bounded HTTP reads and shared Python/CLI/agent
+  composition. Empty/partial telemetry stays unknown/degraded; no receiver or workflow mutation.
+- Add independent connector wire-contract tests, complete YAML example, query API documentation
+  and updated schemas. Live consumer qualification and publication remain separate.
+
 - Add evidence-backed deterministic triage with terminal/nonterminal signatures, three-state
   findings, ambiguity/scope sufficiency checks and an optional caller-owned guard.
 - Add one opt-in Pydantic AI investigator with native OpenRouter/OpenAI/Anthropic/Gemini,

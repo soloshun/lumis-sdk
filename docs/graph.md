@@ -64,8 +64,10 @@ graph:
 ```
 
 Here `upstream_of("dataset:features")` finds the preparation job and raw inputs. This is usable
-declared lineage, **not automatic OpenLineage ingestion**. OpenLineage/Prefect/Git/recent-change
-adapters remain unchecked roadmap work. There is no shipped `recent_changes_affecting` method,
+declared lineage, **not automatic OpenLineage ingestion**. Prefect workflow/task and Tempo trace
+topology are now available through [scoped discovery](telemetry-connectors.md).
+OpenLineage and typed Git/recent-change adapters remain roadmap work. There is no shipped
+`recent_changes_affecting` method,
 temporal graph history or promise that all GridCast scenarios are already supported.
 
 Try both service investigation and lineage traversal in the [notebook](notebooks/operational-graph.ipynb).

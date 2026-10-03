@@ -5,6 +5,14 @@ from typing import Annotated, Literal, Self
 
 from pydantic import Field, StrictBool, StringConstraints, model_validator
 
+from lumis_sdk.connectors.settings import (
+    LokiQuery,
+    LokiSource,
+    PrefectQuery,
+    PrefectSource,
+    TempoQuery,
+    TempoSource,
+)
 from lumis_sdk.core import EvidenceQuery, GraphSnapshot, Hypothesis, InvestigationBudget
 from lumis_sdk.core.contracts import (
     Contract,
@@ -120,6 +128,15 @@ class Sources(Contract):
     prometheus: PrometheusSource = Field(default_factory=PrometheusSource)
     opentelemetry: OpenTelemetrySource = Field(default_factory=OpenTelemetrySource)
     topology: TopologySource = Field(default_factory=TopologySource)
+    loki: LokiSource = Field(default_factory=LokiSource)
+    tempo: TempoSource = Field(default_factory=TempoSource)
+    prefect: PrefectSource = Field(default_factory=PrefectSource)
+
+    @property
+    def requires_http(self) -> bool:
+        return any(
+            source.enabled for source in (self.prometheus, self.loki, self.tempo, self.prefect)
+        )
 
 
 class ModelSettings(Contract):
@@ -174,8 +191,27 @@ class OperationalProject(Contract):
         if not set(self.initial_query_ids) <= query_ids:
             raise ValueError("initial query is not registered")
         for query in self.queries:
-            if query.provider not in {"snapshot", "prometheus", "probe"}:
+            if query.provider not in {
+                "snapshot",
+                "prometheus",
+                "probe",
+                "loki",
+                "tempo",
+                "prefect",
+            }:
                 raise ValueError("unsupported CLI evidence provider")
+            remote: dict[str, type[Contract]] = {
+                "loki": LokiQuery,
+                "tempo": TempoQuery,
+                "prefect": PrefectQuery,
+            }
+            if query.provider in remote:
+                if not getattr(self.sources, query.provider).enabled:
+                    raise ValueError("query requires enabled source")
+                parameters = remote[query.provider].model_validate(query.parameters)
+                if isinstance(parameters, PrefectQuery):
+                    if parameters.flow_name not in self.sources.prefect.flow_names:
+                        raise ValueError("Prefect query flow is outside configured allowlist")
             if query.provider == "prometheus":
                 if not self.sources.prometheus.enabled or not query.parameters.get("promql"):
                     raise ValueError("Prometheus query requires enabled source and promql")
@@ -211,6 +247,9 @@ class OperationalProject(Contract):
             or self.sources.opentelemetry.enabled
             or self.sources.topology.enabled
             or self.sources.prometheus.discover_service_graph
+            or self.sources.prefect.discover_topology
+            or self.sources.tempo.discover_trace_ids
+            or self.sources.tempo.discovery_query
         )
 
     def validate_references(self, graph: GraphSnapshot) -> None:

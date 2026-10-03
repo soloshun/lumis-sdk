@@ -137,6 +137,11 @@ Payload attributes/baggage are not exported as graph context.
 
 ## Prometheus evidence
 
+For endpoint-backed logs, traces and workflows, see the
+[Loki/Tempo/Prefect source and query reference](telemetry-connectors.md) and
+[complete YAML example](examples/telemetry-project.yaml). The same providers are available
+through the incident API, CLI and investigator evidence tool.
+
 ```yaml
 sources:
   prometheus:
@@ -246,5 +251,7 @@ CLI `--observations` or Python `observations=` overrides it; `observations=()` f
 
 Checked editor schemas are in [schemas](../schemas). Regenerate with
 `uv run python scripts/generate_config_schema.py`.
-Design-pattern ideas such as Git, Prefect, Loki, Tempo, approval-required actions and automatic
-rule promotion are not accepted as working configuration until their adapters/contracts ship.
+Loki, Tempo and Prefect are supported optional sources; follow their [setup guide](telemetry-connectors.md).
+Basic Git/code inspection uses explicit investigator repository/file allowlists, not an unrestricted
+`sources.git.repository` shortcut. Approval-required execution and automatic rule promotion are not
+accepted working configuration; no executor is shipped.

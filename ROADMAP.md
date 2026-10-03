@@ -37,10 +37,11 @@ Goal: improve reusable external observations and bounded investigation, not add 
   - [ ] **OI-2b: Git/recent-change evidence.** Typed time-bounded change records, repository/commit
     identity, safe read-only access and implemented `recent_changes_affecting` semantics.
   - [ ] Reusable adapter conformance kit: capabilities, query provenance, limits and failure cases.
-  - [ ] **OI-2c: data/orchestration observations.** Pick one justified external adapter (e.g.
-    OpenLineage or Prefect) with independent fixtures, least privilege and documented limitations.
-  - [ ] Prioritize Loki/Tempo evidence adapters from concrete scenario needs; neither is implied
-    by reading an existing service-graph metric from Prometheus.
+  - [x] **OI-2c: data/orchestration observations.** Scoped Prefect flow/task filters and observed
+    workflow/task dependency topology, independent fixtures, least privilege and documented limits.
+  - [x] Loki/Tempo read-only evidence adapters with endpoint-backed registered queries and bounded
+    Tempo trace discovery; authenticated YAML/runtime/agent integration and failure-case tests.
+  - [ ] Live Loki/Tempo/Prefect access and evidence-quality qualification in external consumers.
 - [ ] **OI-3: stronger seek loop and evaluation.** Query-selection baselines, explicit uncertainty,
   multi-source contradictions, budget/performance measurements and withheld-evidence scenarios.
   Evaluate proposed hypotheses against synthetic/public incident corpora.

@@ -15,8 +15,8 @@ a required repository checkout, or a reason to pause framework development.
    triage, optional tool-agent investigation and mechanical reporting are composed for you.
    Retain the uncertainty/audit record. Enable paid agents explicitly with use_agent=True.
 
-Kubernetes resource discovery, OTLP JSON topology, Prometheus instant queries and normalized
-snapshots plus existing Prometheus service-graph metrics are the implemented boundaries.
+Kubernetes discovery, OTLP exports, Prometheus queries/service-graph metrics, normalized snapshots,
+Loki logs, Tempo traces and Prefect run observations/topology are implemented boundaries.
 Future vendor adapters must reuse the same contracts.
 No workflow requires importing a consumer's simulation, hidden injected fault or ground-truth label.
 
@@ -59,13 +59,18 @@ blindly copying this generic query. Do not use an injected fault manifest as an 
 | OpenTelemetry | Bounded local OTLP JSON topology normalization | Approved export and service identities; not a live receiver |
 | Dataset/job lineage | Declared or normalized external graph snapshots | Real external lineage export; no OpenLineage ingestion yet |
 | Git inspection | Approved local file snapshot and bounded log/full-SHA diff | Real repository/file/entity mapping; typed recent-change queries not implemented yet |
-| Prefect / Loki / Tempo / SQL evidence queries | Not shipped | Adapter milestones or reviewed external normalized observations before dependent scenarios |
+| Loki | Registered bounded incident-window log queries | Actual labels/coverage, read credentials and log privacy |
+| Tempo | TraceQL search, explicit trace spans and bounded trace-to-graph discovery | Resource identity/namespace, actual trace encoding and available backend history |
+| Prefect | Scoped flow/task state/runtime queries and workflow/task topology | API base, approved flow names, run/state timestamps and permissions |
+| SQL evidence queries | Not shipped | Reviewed external normalized observations or future adapter work |
 | Models | OpenRouter default; native OpenAI/Anthropic/Gemini | Live schema/quality/cost/privacy evaluation |
 
-The cookbook's integration draft can describe future sources. A field in that draft is **not**
-automatically supported SDK YAML: unknown fields fail validation. In particular Loki/Tempo/SQL/
-Prefect providers, namespace arrays, arbitrary allowed actions and default-model shortcuts are not
-accepted by the current schema. No cookbook code or deployment is changed by this SDK milestone.
+Use the [Loki/Tempo/Prefect setup guide](telemetry-connectors.md) and complete YAML example for
+these endpoint-backed providers. A field in an older cookbook/design draft is not automatically
+valid SDK YAML: unknown fields still fail validation. SQL providers, namespace arrays, arbitrary
+allowed actions and default-model shortcuts are not accepted. An OTLP ingestion endpoint is not
+a retrieval source; use Tempo's query endpoint or a local OTLP export. No cookbook code or
+deployment is changed by this SDK milestone.
 
 ### Acceptance checklist for each cookbook
 

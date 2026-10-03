@@ -94,7 +94,7 @@ First-test checklist:
 - [ ] Choose one controlled scenario with discriminating evidence available through supported
   observations; inspect coverage before claiming a diagnosis is possible.
 - [ ] Map actual canonical graph IDs, source scope, service labels and incident time window.
-- [ ] Register approved Prometheus queries or externally supplied normalized observations.
+- [ ] Register approved Prometheus/Loki/Tempo/Prefect queries or external normalized observations.
 - [ ] Configure evidence-backed checks and exact code/Git file allowlists.
 - [ ] Qualify the dedicated sandbox and an explicit tool-capable model before enabling either.
 - [ ] Run healthy, known-signature, uncertain, missing-data and conflicting-evidence cases.
@@ -102,11 +102,12 @@ First-test checklist:
 - [ ] Keep hidden fault labels outside Lumis; score against them only after the report.
 - [ ] Apply any fix manually, verify it externally and separately record the human resolution.
 
-No live GridCast run or paid-provider quality evaluation was performed by the SDK implementation.
-Prometheus/service-graph observations and basic code/Git tools are supported. Loki/Tempo/SQL/
-Prefect evidence adapters, OpenLineage ingestion and typed recent-change queries are not
-implemented yet. Scenarios requiring those need reviewed external normalization or incremental
-adapter work; a model cannot compensate for absent evidence.
+No controlled GridCast fault-scenario or paid-provider quality evaluation was performed.
+Limited live read-only connector transport checks are recorded in [verification](verification.md).
+Prometheus, Loki, Tempo and Prefect observations and basic code/Git tools are supported.
+Use the [connector setup guide](telemetry-connectors.md) before live testing. SQL evidence,
+OpenLineage ingestion and typed recent-change queries are not implemented yet. Scenarios requiring
+those need reviewed external normalization or adapter work; a model cannot replace absent evidence.
 
 ## What remains
 

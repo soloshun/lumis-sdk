@@ -70,16 +70,14 @@ class PreparedProject:
             runner = DockerProbeRunner(project.investigator.sandbox)
         async with http_client(
             client,
-            required=project.sources.prometheus.enabled,
+            required=project.sources.requires_http,
             timeout=project.budget.query_timeout_seconds,
         ) as connection:
-            if project.sources.prometheus.enabled:
-                from lumis_sdk.connectors.prometheus import PrometheusConnector
+            if project.sources.requires_http:
+                from lumis_sdk.connectors.factory import evidence_connectors
 
-                assert connection is not None and project.sources.prometheus.endpoint is not None
-                connectors["prometheus"] = PrometheusConnector(
-                    project.sources.prometheus.endpoint, connection
-                )
+                assert connection is not None
+                connectors.update(evidence_connectors(project.sources, connection))
             return await handle_incident(
                 project,
                 self.graph,
@@ -113,18 +111,16 @@ class PreparedProject:
         }
         async with http_client(
             client,
-            required=project.sources.prometheus.enabled or use_model,
+            required=project.sources.requires_http or use_model,
             timeout=max(
                 project.budget.query_timeout_seconds, project.budget.source_timeout_seconds
             ),
         ) as connection:
-            if project.sources.prometheus.enabled:
-                from lumis_sdk.connectors.prometheus import PrometheusConnector
+            if project.sources.requires_http:
+                from lumis_sdk.connectors.factory import evidence_connectors
 
-                assert connection is not None and project.sources.prometheus.endpoint is not None
-                connectors["prometheus"] = PrometheusConnector(
-                    project.sources.prometheus.endpoint, connection
-                )
+                assert connection is not None
+                connectors.update(evidence_connectors(project.sources, connection))
             if use_model:
                 if project.models is None:
                     raise ValueError("explicit model configuration required")
