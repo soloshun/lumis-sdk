@@ -33,6 +33,18 @@ if TYPE_CHECKING:
     from lumis_sdk.sandbox.runner import ProbeRunner
 
 
+def local_connectors(
+    project: OperationalProject, observations: tuple[Evidence, ...] | None
+) -> dict[str, EvidenceConnector]:
+    """Connectors that need no HTTP client: supplied observations and the optional SQL source."""
+    connectors: dict[str, EvidenceConnector] = {"snapshot": SnapshotConnector(observations or ())}
+    if project.sources.sql.enabled:
+        from lumis_sdk.connectors.sql import SqlConnector
+
+        connectors["sql"] = SqlConnector(project.sources.sql)
+    return connectors
+
+
 @dataclass(frozen=True)
 class PreparedProject:
     """A discovered, reference-bound estate; reuse it explicitly or prepare a fresh snapshot."""
@@ -61,9 +73,7 @@ class PreparedProject:
             observations = TypeAdapter(tuple[Evidence, ...]).validate_json(
                 read_document(relative_path(self.base, project.observations_file))
             )
-        connectors: dict[str, EvidenceConnector] = {
-            "snapshot": SnapshotConnector(observations or ())
-        }
+        connectors = local_connectors(project, observations)
         if runner is None and project.investigator.sandbox.enabled:
             from lumis_sdk.sandbox.runner import DockerProbeRunner
 
@@ -106,9 +116,7 @@ class PreparedProject:
                 read_document(relative_path(self.base, project.observations_file))
             )
         sources: list[HypothesisSource] = [RuleSource(project.rule_hypotheses)]
-        connectors: dict[str, EvidenceConnector] = {
-            "snapshot": SnapshotConnector(observations or ())
-        }
+        connectors = local_connectors(project, observations)
         async with http_client(
             client,
             required=project.sources.requires_http or use_model,

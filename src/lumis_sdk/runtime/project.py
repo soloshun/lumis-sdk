@@ -10,6 +10,8 @@ from lumis_sdk.connectors.settings import (
     LokiSource,
     PrefectQuery,
     PrefectSource,
+    SqlQuery,
+    SqlSource,
     TempoQuery,
     TempoSource,
 )
@@ -131,6 +133,7 @@ class Sources(Contract):
     loki: LokiSource = Field(default_factory=LokiSource)
     tempo: TempoSource = Field(default_factory=TempoSource)
     prefect: PrefectSource = Field(default_factory=PrefectSource)
+    sql: SqlSource = Field(default_factory=SqlSource)
 
     @property
     def requires_http(self) -> bool:
@@ -200,12 +203,14 @@ class OperationalProject(Contract):
                 "loki",
                 "tempo",
                 "prefect",
+                "sql",
             }:
                 raise ValueError("unsupported CLI evidence provider")
             remote: dict[str, type[Contract]] = {
                 "loki": LokiQuery,
                 "tempo": TempoQuery,
                 "prefect": PrefectQuery,
+                "sql": SqlQuery,
             }
             if query.provider in remote:
                 if not getattr(self.sources, query.provider).enabled:

@@ -1,4 +1,4 @@
-"""HTTP source and registered-query contracts; importable without HTTP extras."""
+"""Source and registered-query contracts; importable without HTTP or SQL extras."""
 
 import re
 from typing import Annotated, Literal, Self
@@ -139,4 +139,49 @@ class PrefectQuery(Contract):
             from uuid import UUID
 
             UUID(self.flow_run_id)
+        return self
+
+
+class SqlSource(Contract):
+    """One PostgreSQL database, read through operator-registered scalar queries only.
+
+    The connection string comes from the environment (`dsn_env`), never from configuration.
+    Every query runs in a read-only transaction with a statement timeout; use a read-only role
+    as well, because the transaction mode is a guard, not a permission boundary.
+    """
+
+    enabled: StrictBool = False
+    dsn_env: EnvironmentName | None = None
+    statement_timeout_ms: int = Field(default=5000, ge=100, le=60000)
+    connect_timeout_seconds: int = Field(default=5, ge=1, le=30)
+    max_requests: int = Field(default=32, ge=1, le=100)
+
+    @model_validator(mode="after")
+    def validate_dsn(self) -> Self:
+        if self.enabled and self.dsn_env is None:
+            raise ValueError("enabled SQL source requires dsn_env")
+        return self
+
+
+SQL_WINDOW_PARAMETERS = frozenset({"started_at", "ended_at"})
+
+
+class SqlQuery(Contract):
+    """One SELECT returning one row with one column; `%(started_at)s` and `%(ended_at)s` bind
+    the incident window. Not a SQL parser: the read-only transaction is the enforcement."""
+
+    sql: Text
+
+    @model_validator(mode="after")
+    def validate_statement(self) -> Self:
+        statement = self.sql.strip()
+        if not re.match(r"(?is)^(select|with)\b", statement):
+            raise ValueError("SQL query must be a single SELECT or WITH statement")
+        if ";" in statement.rstrip(";") or statement.count(";") > 1:
+            raise ValueError("SQL query must be a single statement")
+        named = set(re.findall(r"%\((\w+)\)s", statement))
+        if not named <= SQL_WINDOW_PARAMETERS:
+            raise ValueError("SQL parameters are limited to %(started_at)s and %(ended_at)s")
+        if re.search(r"%(?!\(\w+\)s|%)", statement):
+            raise ValueError("use %% for a literal percent sign in SQL")
         return self

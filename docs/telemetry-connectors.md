@@ -180,7 +180,39 @@ See [verification](verification.md) and [consumer qualification](integrations.md
 OpenTelemetry's `4317` is an OTLP ingestion port, not a log/trace retrieval API. Keep your
 collector sending telemetry to the backends; configure `sources.tempo.endpoint` for querying
 and `sources.opentelemetry.export_file` for offline exports. No live SDK receiver is implemented.
-SQL evidence, OpenLineage ingestion and typed recent-change queries remain unimplemented.
+OpenLineage ingestion and typed recent-change queries remain unimplemented.
+
+## Read-only SQL (PostgreSQL)
+
+Install the `sql` extra (`lumis-sdk[sql]`, psycopg 3). The connection string is read from the
+environment variable named by `dsn_env`, never from configuration:
+
+```yaml
+sources:
+  sql:
+    enabled: true
+    dsn_env: ESTATE_READONLY_DSN      # e.g. postgresql://reader@db:5432/estate
+    statement_timeout_ms: 5000
+    connect_timeout_seconds: 5
+queries:
+  - id: model-alias-moves
+    provider: sql
+    entity_id: service:estate:forecast-service
+    key: production_alias_changes_30m
+    description: Production alias moves in the 30 minutes before incident end
+    parameters:
+      sql: >-
+        SELECT count(*) FROM ml.model_events WHERE event = 'alias_set'
+        AND at > %(ended_at)s - interval '30 minutes' AND at <= %(ended_at)s
+```
+
+Each query is one `SELECT`/`WITH` statement returning exactly one row with one column (number,
+boolean or text; text is redacted). `%(started_at)s` and `%(ended_at)s` bind the incident window;
+no other parameters are accepted and a literal `%` is written `%%`. Every query runs in its own
+read-only transaction (`default_transaction_read_only`, `SET TRANSACTION READ ONLY`) with the
+statement timeout and is rolled back. The transaction mode is a guard, not a permission boundary:
+connect as a role that can only `SELECT` the tables you register. `NULL` yields no observation;
+the observation time is the incident end. Errors are reported only as unavailable evidence.
 
 API references: [Loki query API](https://grafana.com/docs/loki/latest/reference/loki-http-api/),
 [Tempo query API](https://grafana.com/docs/tempo/latest/api_docs/),
