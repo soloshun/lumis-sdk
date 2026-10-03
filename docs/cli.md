@@ -12,8 +12,8 @@ uv run lumis --help
 uv run lumis investigate --help
 ```
 
-Expect the current checkout version and exactly four commands: `init`, `doctor`,
-`discover`, `investigate`. Old diagnose/resolve/plugins/config-migrate commands are removed.
+Expect the current checkout version and five commands: `init`, `doctor`,
+`discover`, `graph`, `investigate`. Old diagnose/resolve/plugins/config-migrate commands are removed.
 Do not assume the package currently on PyPI contains this unreleased reset.
 
 ## 2. Initialize a fresh workspace
@@ -37,7 +37,8 @@ Expect JSON with `valid: true`, `mode: "read_only"`, `network_checked: false` an
 `warnings: []` for the default starter.
 Doctor validates local configuration and reports missing optional tools/credentials/export files.
 It does not connect to services, confirm RBAC, or spend model tokens.
-Warnings do not invalidate an otherwise valid offline project.
+Warnings do not invalidate an otherwise valid offline project. When discovery is configured,
+doctor defers graph membership until preparation: `valid` is not proof that external IDs exist.
 Invalid configuration exits nonzero with a sanitized error.
 
 Read [YAML configuration](configuration.md) before enabling an external source.
@@ -52,7 +53,22 @@ Expect a graph JSON object with `entities` and `relationships`.
 With the starter this is a local declared graph, with no external discovery.
 If Kubernetes is enabled, this command reads only its configured context and namespace.
 If OTLP export normalization is enabled, it reads that bounded local JSON file.
-Discovery is explicit; investigate never discovers the whole estate automatically.
+Enabled sources are reused automatically by investigation; there is no need to pass a saved
+topology file just to run against the YAML sources. The incident context remains bounded separately.
+Prometheus service-graph discovery and normalized topology files are also supported.
+
+Inspect per-source status and the graph directly:
+
+```bash
+uv run lumis discover --project /tmp/my-lumis-project/lumis.yaml --report
+uv run lumis graph --project /tmp/my-lumis-project/lumis.yaml --entity service:demo --hops 1
+uv run lumis graph --project /tmp/my-lumis-project/lumis.yaml --format dot
+```
+
+Report output includes `complete`, `graph` and `sources` (`ok`, `disabled`, `error`, `not_checked`).
+An enabled source failure exits nonzero; `--report` still emits sanitized diagnostics. Partial
+discovery is never treated as ready. DOT export needs no Graphviz/Matplotlib installation;
+rendering it is optional. See [graph API](graph.md).
 
 To retain the output, redirect it to a new file:
 
@@ -79,6 +95,10 @@ not that a real incident has been repaired or a root cause proven.
 Run the same command without `--observations`: expect a valid `abstained` investigation.
 Missing evidence is a normal result; the exit status remains zero.
 Structural/input/provider setup errors exit nonzero.
+`--topology` is optional additive enrichment, not a replacement for enabled YAML sources.
+To make the two-input command shorter, set `observations_file: observations.json` in YAML, then
+use only `--project` and `--incident`. That explicitly opts into file replay; the unchanged starter
+still abstains when observations are omitted.
 
 ## 6. Persist a local audit record
 
@@ -114,6 +134,8 @@ Do not confuse mocked transport tests with a completed live-provider evaluation.
 | `init --directory PATH` | Create three offline starter files |
 | `doctor --project FILE` | Local validation and readiness warnings only |
 | `discover --project FILE` | Merge declared graph with explicitly enabled topology sources |
+| `discover --project FILE --report` | Per-source acquisition status; nonzero for incomplete discovery |
+| `graph --project FILE [--entity ID --hops N] [--format json or dot]` | Inspect discovered graph or bounded neighborhood |
 | `investigate --project FILE --incident FILE` | Structured read-only investigation |
 | `--observations FILE` | Replay normalized evidence JSON array |
 | `--topology FILE` | Merge an external graph JSON snapshot |

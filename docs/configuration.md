@@ -75,6 +75,9 @@ Validate any edited file with `lumis doctor --project FILE`.
 | `project.name` | Required non-secret project identity |
 | `project.environment` | Local/dev/staging-style identity, default local |
 | `sources` | Optional explicitly enabled connectors; all disabled by default |
+| `identity.aliases` | Explicit raw ID → canonical ID mapping; no chains/cycles or guessed name joins |
+| `discovery` | Separate estate discovery time/entity/edge/series/response bounds |
+| `observations_file` | Optional normalized evidence JSON array, relative to YAML directory |
 | `models` | Optional provider/model/key-variable configuration; OpenRouter default, also OpenAI/Anthropic/Gemini |
 | `policies.default_action_mode` | Only `read_only` is supported; no action execution exists |
 | `graph.entities` | Unique operational id/kind/name, string metadata attributes, provenance IDs |
@@ -88,8 +91,10 @@ A causal path is a candidate's graph-referenced explanation, not verified causal
 Query/check references must exist; duplicate query or hypothesis IDs are rejected.
 Supported checks are `eq`, `ne`, `gt`, `ge`, `lt`, `le`.
 Ordered comparisons require numeric, non-boolean values.
-Register queries on declared entities before investigating; merge discovered topology with declared
-business entities explicitly. Metadata can enrich ownership/context, not authorize actions.
+Queries may reference declared **or discoverable** canonical entity IDs. When topology sources are
+enabled, local validation defers graph membership to preparation; unresolved IDs still fail before
+investigation. Doctor is not a completed discovery/binding check. Without discovery sources, local
+validation immediately checks membership. Metadata enriches context, not action authority.
 
 ## Kubernetes discovery
 
@@ -103,7 +108,10 @@ sources:
 
 Both scope fields are required. `kubectl` and read access to services, deployments, pods and
 ReplicaSets are required. No kubeconfig edits, all-namespace scan, env/secret extraction or workload
-mutation occurs. Discovery is triggered only by `lumis discover`.
+mutation occurs. `discover`, `graph`, `investigate` and Python `prepare()` use the same discovery.
+Approved `app.kubernetes.io/name` labels and namespace add logical `service:<namespace>:<name>`
+entities; resource IDs stay distinct and connect to the logical entity through `hosts` edges.
+Missing app labels do not cause guessed identities or service-call edges.
 
 ## OpenTelemetry export normalization
 
@@ -144,6 +152,64 @@ HTTP(S) endpoints may not include credentials, query parameters or fragments.
 The current adapter does not expose a provider-authentication configuration; keep access scoped
 through your operator-managed network boundary. HTTP is an optional extra.
 
+## Prometheus service-graph discovery
+
+```yaml
+sources:
+  prometheus:
+    enabled: true
+    endpoint: http://localhost:9090
+    discover_service_graph: true
+    service_namespace: my-estate
+    service_graph_query: 'sum by (client, server) (rate(traces_service_graph_request_total[5m]))'
+```
+
+This consumes an existing service-graph metric (for example exported by a Tempo metrics-generator);
+it does not query Tempo, install its generator or infer call topology from arbitrary `up` metrics.
+The operator-owned expression must return a vector with nonempty `client` and `server` labels and
+finite positive values. Zero values add no relationship; absence is not proof of no dependency.
+Server → client `serves` edges use `service:<service_namespace>:<label>` IDs. An explicit namespace
+is mandatory: the query must be scoped to one estate. Do not aggregate same-name services across
+tenants/namespaces and relabel them as one estate. Warnings/partial results fail discovery.
+`YamlProject.investigate()` queries at the incident end time. `prepare(at=...)` allows an explicit
+time; standalone discovery/graph without a time uses the backend's current instant.
+
+## External topology, aliases and discovery limits
+
+```yaml
+sources:
+  topology:
+    enabled: true
+    file_path: ./estate.json
+identity:
+  aliases:
+    'service:old-estate:frontend': 'service:canonical-frontend'
+discovery:
+  timeout_seconds: 30
+  max_entities: 5000
+  max_relationships: 10000
+  max_service_graph_series: 1000
+  max_response_bytes: 2000000
+observations_file: ./observations.json
+```
+
+`estate.json` is a validated `GraphSnapshot`, not executable adapter code. Each local document is
+also capped at 1 MiB. Aliases apply to discovered entity IDs and edge endpoints, not query/check
+strings: queries, candidates, observations and incidents must use the canonical IDs already.
+Do not collapse Kubernetes resources into services. Kind/metadata conflicts, alias chains and
+cycles are rejected. A declared canonical target can supply the display name; many-to-one aliases
+require compatible kinds/names/attributes. Conflicting namespace metadata is rejected, not erased.
+
+The discovery budget covers preparation separately from the incident's `budget`. Aggregate
+overflow is rejected, never silently truncated. A failed source leaves remaining sources
+`not_checked`; the report is incomplete and investigation does not start. Local file reads are
+synchronous but size bounded; the deadline primarily bounds asynchronous source waits. Cancellation
+propagates. A prepared snapshot is reused only when you explicitly retain `PreparedProject`.
+
+Live Kubernetes discovery reports **current** resources; requesting historical Prometheus time does
+not reconstruct historical Kubernetes state. For reproducible replay, archive normalized topology
+and observations externally and use file sources. There is no automatic snapshot history service.
+
 ## Optional model
 
 ```yaml
@@ -153,7 +219,8 @@ models:
   api_key_env: OPENROUTER_API_KEY
 ```
 
-No default model, auto-fallback or hidden call is used. Only `--use-model` invokes this source.
+No default model, auto-fallback or hidden call is used. Only `--use-model` or Python
+`use_model=True` invokes this source.
 Provider-specific key defaults and native configuration are in [model providers](models.md).
 The environment variable name must use uppercase letters/digits/underscores and start with a letter.
 Structured model output must contain 3–5 valid candidates. Availability, cost, privacy,
@@ -166,6 +233,8 @@ schema support and quality remain operator responsibilities.
 `key`, scalar `value`, `observed_at`, `source`, `retrieval_method`, optional `quality`
 (`observed` or `degraded`). Values and check types must agree.
 Observation time must fall within the incident window; source provenance is caller-owned.
+If `observations_file` is configured, it is read automatically during investigation. An explicit
+CLI `--observations` or Python `observations=` overrides it; `observations=()` forces missing evidence.
 
 Checked editor schemas are in [schemas](../schemas). Regenerate with
 `uv run python scripts/generate_config_schema.py`.

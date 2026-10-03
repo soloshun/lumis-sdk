@@ -2,6 +2,62 @@
 
 Import the current operational contracts; there is no dependency on GridCast or its modules.
 
+## YAML-led API (recommended)
+
+After `lumis init --directory /tmp/my-lumis-project`, optionally set
+`observations_file: observations.json` in its YAML. The same project drives CLI and Python:
+
+```python
+from lumis_sdk.core import Incident
+from lumis_sdk.runtime import YamlProject
+from lumis_sdk.runtime.documents import read_document
+from pathlib import Path
+
+workspace = Path("/tmp/my-lumis-project")
+incident = Incident.model_validate_json(read_document(workspace / "incident.json"))
+project = YamlProject.from_file(workspace / "lumis.yaml")
+result = await project.investigate(incident)
+print(result.outcome, result.truth_state)
+```
+
+Use top-level `await` in Jupyter. In a regular Python script wrap the awaited code in `async def
+main()` and call `asyncio.run(main())`; do not use `asyncio.run` inside an active notebook event loop.
+The runnable [offline notebook](notebooks/operational-graph.ipynb) checks a service incident and
+a separate data-lineage graph without any HTTP extra, cluster, credentials or consumer checkout.
+
+`from_file` validates local configuration only. `investigate` discovers all enabled YAML sources
+at the incident end time, strictly binds query/candidate entity IDs, then scopes the graph and
+investigates. Sources/queries/hypotheses are declared once in YAML. No model call occurs unless
+`use_model=True`; OpenRouter is the default configured provider, not a hidden default model.
+
+For inspection or repeated incidents against an explicit shared snapshot:
+
+```python
+prepared = await project.prepare(at=incident.ended_at)
+print(prepared.discovery.complete)
+print([(source.name, source.status) for source in prepared.discovery.sources])
+print(prepared.graph.upstream_of(incident.affected_entities[0]))
+neighborhood = prepared.graph.dependencies_within(incident.affected_entities[0], hops=2)
+networkx_graph = prepared.graph.to_networkx()  # independent deep copy
+print(prepared.graph.to_dot())
+result = await prepared.investigate(incident)
+```
+
+Reusing `PreparedProject` does not refresh topology; call `prepare` again for fresh discovery.
+`client=` injects an `httpx.AsyncClient` for approved authenticated access or deterministic
+transport tests; the caller retains ownership and must close it. Offline paths never import HTTP.
+`topology=` adds a validated graph snapshot; `observations=` overrides configured replay facts.
+`generation_only=True` returns candidates (initial observation queries may still run).
+
+Preparation can raise `DiscoveryError`; inspect `error.report` (including incomplete source
+statuses), not raw provider exception text. Missing discovered references raise `ValueError` before
+investigation. Discovery and investigation have separate budgets; no automatic partial success,
+global graph cache, live historical Kubernetes replay or automatic incident ingestion is implied.
+
+## Lower-level extension API
+
+Use this when adding custom source/connector implementations instead of the shipped YAML providers.
+
 ```python
 import asyncio
 from pathlib import Path

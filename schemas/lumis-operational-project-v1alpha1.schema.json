@@ -55,6 +55,48 @@
       "title": "Check",
       "type": "object"
     },
+    "DiscoveryBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_entities": {
+          "default": 5000,
+          "maximum": 50000,
+          "minimum": 1,
+          "title": "Max Entities",
+          "type": "integer"
+        },
+        "max_relationships": {
+          "default": 10000,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Max Relationships",
+          "type": "integer"
+        },
+        "max_response_bytes": {
+          "default": 2000000,
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Max Response Bytes",
+          "type": "integer"
+        },
+        "max_service_graph_series": {
+          "default": 1000,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Max Service Graph Series",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "maximum": 120,
+          "title": "Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "title": "DiscoveryBudget",
+      "type": "object"
+    },
     "Entity": {
       "additionalProperties": false,
       "description": "Operational identity; attributes should contain normalized non-secret metadata only.",
@@ -245,6 +287,26 @@
         "falsifiers"
       ],
       "title": "Hypothesis",
+      "type": "object"
+    },
+    "IdentitySettings": {
+      "additionalProperties": false,
+      "properties": {
+        "aliases": {
+          "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "propertyNames": {
+            "maxLength": 256,
+            "minLength": 1
+          },
+          "title": "Aliases",
+          "type": "object"
+        }
+      },
+      "title": "IdentitySettings",
       "type": "object"
     },
     "InvestigationBudget": {
@@ -463,6 +525,11 @@
     "PrometheusSource": {
       "additionalProperties": false,
       "properties": {
+        "discover_service_graph": {
+          "default": false,
+          "title": "Discover Service Graph",
+          "type": "boolean"
+        },
         "enabled": {
           "default": false,
           "title": "Enabled",
@@ -479,6 +546,27 @@
           ],
           "default": null,
           "title": "Endpoint"
+        },
+        "service_graph_query": {
+          "default": "sum by (client, server) (rate(traces_service_graph_request_total[5m]))",
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Service Graph Query",
+          "type": "string"
+        },
+        "service_namespace": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Service Namespace"
         }
       },
       "title": "PrometheusSource",
@@ -536,9 +624,39 @@
         },
         "prometheus": {
           "$ref": "#/$defs/PrometheusSource"
+        },
+        "topology": {
+          "$ref": "#/$defs/TopologySource"
         }
       },
       "title": "Sources",
+      "type": "object"
+    },
+    "TopologySource": {
+      "additionalProperties": false,
+      "description": "An external normalized graph snapshot, never executable adapter code.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "file_path": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Path"
+        }
+      },
+      "title": "TopologySource",
       "type": "object"
     }
   },
@@ -553,8 +671,14 @@
     "budget": {
       "$ref": "#/$defs/InvestigationBudget"
     },
+    "discovery": {
+      "$ref": "#/$defs/DiscoveryBudget"
+    },
     "graph": {
       "$ref": "#/$defs/GraphSnapshot"
+    },
+    "identity": {
+      "$ref": "#/$defs/IdentitySettings"
     },
     "initial_query_ids": {
       "default": [],
@@ -576,6 +700,20 @@
         }
       ],
       "default": null
+    },
+    "observations_file": {
+      "anyOf": [
+        {
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Observations File"
     },
     "policies": {
       "$ref": "#/$defs/Policies"

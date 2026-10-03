@@ -9,6 +9,8 @@ lives on the legacy branches, not alongside the current API.
 2. [CLI walkthrough](cli.md): install from source, initialize, inspect, discover and investigate.
 3. [YAML reference](configuration.md): every supported project field and a complete configuration.
 4. [Python API](python-api.md): compose the same runtime independently of the CLI.
+   Start with the [offline notebook](notebooks/operational-graph.ipynb) and [graph/lineage guide](graph.md)
+   to inspect NetworkX topology and test YAML-led investigation.
 5. [Model providers](models.md): OpenRouter default, native OpenAI/Anthropic/Gemini wrappers.
 6. [Integration boundaries](integrations.md): connect any application through external data.
 7. [Migration](migration.md): breaking reset and how to retrieve the previous implementation.

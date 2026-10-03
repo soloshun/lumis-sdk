@@ -25,6 +25,12 @@ mocked Prometheus/OpenRouter/OpenAI/Anthropic/Gemini contracts and standalone CL
 
 Tests for the retired architecture are removed with their code, not counted as current coverage.
 
+The suite also executes every code cell of the trusted offline notebook under an async event loop,
+checks NetworkX parallel edges/cycles/export isolation, YAML discovery/binding, explicit aliases,
+resource/service bridges, service-graph vector contracts, aggregate limits, source deadline,
+cancellation, incomplete CLI reports and caller-owned HTTP client lifetime. Two independent
+service/data-lineage inputs demonstrate the portable boundary; neither imports cookbook code.
+
 ## Independent distribution smoke
 
 Build, install the wheel without the HTTP extra in an empty environment, then follow CLI

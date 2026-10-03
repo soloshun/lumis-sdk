@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from lumis_sdk.core import GraphSnapshot, Hypothesis, Incident, Investigation
+from lumis_sdk.runtime.discovery import DiscoveryReport
 from lumis_sdk.runtime.project import OperationalProject
 
 SCHEMA_DIR = Path(__file__).parents[1] / "schemas"
@@ -14,6 +15,7 @@ SCHEMAS = {
     "lumis-graph-v1alpha1.schema.json": GraphSnapshot,
     "lumis-hypothesis-v1alpha1.schema.json": Hypothesis,
     "lumis-incident-v1alpha1.schema.json": Incident,
+    "lumis-discovery-v1alpha1.schema.json": DiscoveryReport,
 }
 
 

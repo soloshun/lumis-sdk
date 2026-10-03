@@ -251,6 +251,11 @@ def validate_hypothesis_catalog(
     targets = {check.entity_id for check in (*hypothesis.predictions, *hypothesis.falsifiers)}
     if not (set(hypothesis.causal_path) | targets) <= ids:
         raise ValueError("hypothesis references entity outside incident graph")
+    validate_hypothesis_queries(hypothesis, catalog)
+
+
+def validate_hypothesis_queries(hypothesis: Hypothesis, catalog: tuple[EvidenceQuery, ...]) -> None:
+    """Validate query coverage before topology discovery or source registration."""
     queries = {query.id: query for query in catalog}
     if not set(hypothesis.evidence_needed) <= queries.keys():
         raise ValueError("hypothesis requests unregistered evidence")
