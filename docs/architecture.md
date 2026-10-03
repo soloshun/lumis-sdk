@@ -82,5 +82,5 @@ No executor, auto-remediation, policy-controlled deployment, live telemetry rece
 automatic incident ingestion, verified automatic rule learning, retrieval service,
 typed recent-change/Prefect/Loki/Tempo connector or production-readiness guarantee is implied.
 These are incremental roadmap work, not placeholders that appear enabled in configuration.
-Basic local Git log/diff inspection is available; private advanced strategies, learning and
-enterprise governance are not part of the public proof of concept.
+Basic local Git log/diff inspection is available. Advanced orchestration, learning and governance
+are not implemented yet; they are deferred until after PoC evaluation.

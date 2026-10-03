@@ -13,6 +13,8 @@ supported does not mean causally proven or confirmed.
 
 Read the [documentation entry point](docs/README.md), then follow the
 [CLI walkthrough](docs/cli.md) and [YAML reference](docs/configuration.md).
+For a complete review order and integration-readiness checklist, start with the
+[PoC review guide](docs/review-guide.md).
 
 For this unreleased development architecture, install from the checkout:
 

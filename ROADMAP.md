@@ -61,14 +61,14 @@ The continuation adds an explicit public artifact slice before broader evidence/
 - [ ] **OI-A5: artifact evaluation.** Versioned independent/live scenarios, provider qualification,
   diagnosis/abstention/cost measurements and external cookbook evidence.
 
-OI-A1–A4 implement a basic public proof of concept, not private advanced strategies or production
-governance. OI-2b remains open: basic Git inspect tools do not finish typed change records.
+OI-A1–A4 implement the basic investigation proof of concept. Advanced governance and orchestration
+are not implemented yet and are deferred until after PoC evaluation.
+OI-2b remains open: basic Git inspect tools do not finish typed change records.
 Next is evidence/evaluation qualification or OI-2b, never automatic recovery.
 
 ## Phase C — reusable memory and controlled learning
 
-Deferred beyond the current public proof of concept. These are design/research candidates,
-not a promise to expose private strategy or enterprise intellectual property.
+Not implemented yet. Deferred until after the current PoC has been evaluated.
 
 Goal: reuse prior incidents without mistaking repetition for truth.
 
@@ -82,8 +82,9 @@ Goal: reuse prior incidents without mistaking repetition for truth.
 
 ## Phase D — independently governed proposals and verification
 
-Deferred design boundary. Only tentative diagnostic suggestions and separate human attestations
-are implemented now; enterprise policy, real execution and recovery are excluded.
+Not implemented yet. Deferred until after PoC evaluation. Only tentative diagnostic suggestions
+and separate human attestations are implemented now; policy-controlled execution and recovery
+are not available.
 
 Goal: introduce safe proposal boundaries only after diagnosis has measurable quality.
 

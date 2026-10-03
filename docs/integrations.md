@@ -11,8 +11,9 @@ a required repository checkout, or a reason to pause framework development.
 3. Declare external sources and optional identity aliases; enrich metadata without importing application code.
 4. Register operator-owned observation queries and produce a bounded incident.
 5. Supply normalized observations or register supported read-only observation queries in YAML.
-6. Await `YamlProject.from_file("lumis.yaml").investigate(incident)`: discovery, binding,
-   bounded context and testing are composed for you. Retain the uncertainty/audit record.
+6. Await `YamlProject.from_file("lumis.yaml").handle_incident(incident)`: discovery, binding,
+   triage, optional tool-agent investigation and mechanical reporting are composed for you.
+   Retain the uncertainty/audit record. Enable paid agents explicitly with use_agent=True.
 
 Kubernetes resource discovery, OTLP JSON topology, Prometheus instant queries and normalized
 snapshots plus existing Prometheus service-graph metrics are the implemented boundaries.
@@ -44,9 +45,9 @@ queries:
 initial_query_ids: [frontend-availability]
 ```
 
-This intentionally omits business hypotheses; without rules or an explicitly invoked model it
-collects the initial observation then normally abstains with no candidates. Add falsifiable
-rules or approved model settings following the [YAML reference](configuration.md).
+This intentionally omits diagnostic signatures; without checks or an explicitly enabled agent
+it collects the initial observation then reports requires_human_expert. Add falsifiable checks
+or approved model settings following the [incident guide](incident-investigation.md).
 Sources must really expose the configured logical IDs; no placeholder node is fabricated.
 For GridCast, choose its real namespace/context/service names and registered metrics, rather than
 blindly copying this generic query. Do not use an injected fault manifest as an observation.
@@ -57,7 +58,8 @@ blindly copying this generic query. Do not use an injected fault manifest as an 
 | Prometheus | Instant scalar evidence + service-graph vector discovery | Available metrics, correct estate scope/aggregation |
 | OpenTelemetry | Bounded local OTLP JSON topology normalization | Approved export and service identities; not a live receiver |
 | Dataset/job lineage | Declared or normalized external graph snapshots | Real external lineage export; no OpenLineage ingestion yet |
-| Git / Prefect / Loki / Tempo queries | Not shipped | Future adapter milestones before dependent scenarios |
+| Git inspection | Approved local file snapshot and bounded log/full-SHA diff | Real repository/file/entity mapping; typed recent-change queries not implemented yet |
+| Prefect / Loki / Tempo / SQL evidence queries | Not shipped | Adapter milestones or reviewed external normalized observations before dependent scenarios |
 | Models | OpenRouter default; native OpenAI/Anthropic/Gemini | Live schema/quality/cost/privacy evaluation |
 
 The cookbook's integration draft can describe future sources. A field in that draft is **not**
@@ -72,8 +74,9 @@ accepted by the current schema. No cookbook code or deployment is changed by thi
 - [ ] `lumis discover --report` completes against approved real sources.
 - [ ] `lumis graph --entity CANONICAL_ID` includes expected dependency/resource identities.
 - [ ] Register queries with correct aggregation and timezone-aware incident windows.
-- [ ] Investigate without models first; retain queries, timestamps, provenance and abstention.
-- [ ] Separately qualify optional live model candidates with withheld/conflicting evidence.
+- [ ] Run handle_incident without an agent first; retain findings, evidence and uncertainty.
+- [ ] Separately qualify the optional live tool-agent with withheld/conflicting evidence.
+- [ ] Approve repository file scope and a dedicated sandbox before testing generated probes.
 - [ ] Record versions, topology inputs, metrics, access limits and measured outcomes externally.
 
 ## Separate cookbook project
@@ -86,6 +89,12 @@ SDK CI does not build or import it. This repository includes only synthetic cont
 the small offline CLI scaffold; there is no embedded cookbook directory.
 
 ## Two distinct kinds of readiness
+
+The current GridCast integration draft describes the earlier candidate-only API and some
+future source fields. It must be mapped to the incident API/current schema before execution.
+Begin with one scenario whose discriminating evidence is available through supported
+Prometheus observations, topology and approved code/Git inspection. Do not assume all nine
+scenario families are covered. See the [review and first-test checklist](review-guide.md).
 
 **SDK milestone readiness:** contracts, isolated/mock adapter checks, budgets, failure behavior,
 CLI/YAML docs and clean-wheel independent smoke pass.

@@ -5,6 +5,9 @@ lives on the legacy branches, not alongside the current API.
 
 ## Reading order
 
+For a maintainer review, begin with [PoC review guide](review-guide.md): current status,
+ordered documentation/code entry points, expected local outputs and the first GridCast test gate.
+
 1. [Architecture](architecture.md): what the SDK does, package boundaries and safety model.
    Then [incident investigation](incident-investigation.md) for the recommended deterministic →
    agent → human-review flow and [sandbox threat model](sandbox.md) before enabling experiments.

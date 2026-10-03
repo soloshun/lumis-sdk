@@ -13,8 +13,9 @@
   resolution records. No recovery, patch application or automatic learned-rule promotion.
 - Add incident/record-resolution/interactive-console CLI, SVG/terminal graph rendering, incident
   API/sandbox documentation, schemas, an executable offline agent notebook and real Docker CI.
-- Bound the public artifact to basic investigation; defer advanced private strategies/enterprise
-  governance. Typed recent-change evidence and live provider/consumer evaluation remain open.
+- Complete the basic investigation PoC; defer multi-agent orchestration, advanced governance
+  and automated recovery until after PoC evaluation. Typed recent-change evidence and live
+  provider/consumer evaluation remain open.
 
 - Align operational graph with the design's Pydantic + NetworkX multigraph; expose bounded
   neighborhoods, independent NetworkX exports and dependency-free DOT inspection.
