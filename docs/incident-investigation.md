@@ -171,10 +171,11 @@ Protect the DB with filesystem/access/retention policies; this is not a multi-te
 
 ## Research artifact boundary
 
-Public: contracts, graph/telemetry integration, conservative signatures, tool broker, one basic
-investigator, isolated experiments, reports and manual audit records.
-Private/future strategy, multi-agent orchestration, ranking/calibration, learning/promotion,
-enterprise policy, deployment and automatic remediation are **not** included.
+Implemented: contracts, graph/telemetry integration, conservative signatures, tool broker,
+one basic investigator, isolated experiments, reports and manual audit records.
+Multi-agent orchestration, calibrated ranking, automatic learning/rule promotion, advanced
+policy-controlled execution and automatic remediation are **not implemented yet**.
+They are deferred until after PoC evaluation.
 
 For a conference artifact, record SDK commit, Python/dependency versions, image digest,
 incident window, input hashes, independent telemetry provenance, checks/candidates, receipts,
