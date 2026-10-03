@@ -8,11 +8,10 @@ resolution-time, availability, or production-recovery SLA is provided by the ope
 - Do not report vulnerabilities or exposed credentials in public issues; follow `SECURITY.md`.
 - Include Lumis SDK version, Python version, operating system, minimal synthetic reproduction, and relevant command output.
 
-Core support covers the latest development line and the most recent public release. Official
-optional plugins follow their own declared compatibility range. Community plugins, consuming
-applications, vendor services, production operations, bespoke integrations, and private data are
-the responsibility of their publishers or operators. A maintainer may reproduce a community
-plugin issue against the public contract suite, but that does not transfer ownership to Lumis SDK.
+Active support targets the operational development line. Superseded APIs and independently
+published legacy plugin packages are preserved historically, not promised current compatibility.
+Community integrations, consuming applications, vendor services, production operations,
+bespoke integrations and private data remain the responsibility of their publishers/operators.
 
 Security reports follow `SECURITY.md`, not normal support channels. Governance and release
 ownership are defined in `GOVERNANCE.md`.

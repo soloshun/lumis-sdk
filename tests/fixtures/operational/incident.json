@@ -1,0 +1,7 @@
+{
+  "id": "synthetic-query-amplification-001",
+  "affected_entities": ["batch-pipeline"],
+  "symptoms": ["Batch latency increased while database reads rose sharply."],
+  "started_at": "2026-10-02T12:00:00Z",
+  "ended_at": "2026-10-02T12:30:00Z"
+}

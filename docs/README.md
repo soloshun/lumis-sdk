@@ -1,57 +1,22 @@
-# Lumis SDK documentation
+# Documentation: start here
 
-## Active direction: operational intelligence
+This is the active standalone operational-intelligence SDK documentation. Historical documentation
+lives on the legacy branches, not alongside the current API.
 
-Start with the [operational-intelligence documentation](operational-intelligence/README.md),
-[GridCast runbook](operational-intelligence/gridcast-integration.md),
-[new Python API](operational-intelligence/python-api.md), and [current roadmap](../ROADMAP.md).
-The legacy references below remain for compatibility and historical research reproduction.
-They are not the active sprint plan or the release qualification for the repurposed SDK.
+## Reading order
 
-Lumis SDK is a vendor-agnostic Python framework for deterministic, evidence-grounded incident
-diagnosis and carefully governed recovery workflows. Start with a core-only path; add models,
-plugins, shared memory, or hosted systems only where the adopter explicitly needs them.
+1. [Architecture](architecture.md): what the SDK does, package boundaries and safety model.
+2. [CLI walkthrough](cli.md): install from source, initialize, inspect, discover and investigate.
+3. [YAML reference](configuration.md): every supported project field and a complete configuration.
+4. [Python API](python-api.md): compose the same runtime independently of the CLI.
+5. [Model providers](models.md): OpenRouter default, native OpenAI/Anthropic/Gemini wrappers.
+6. [Integration boundaries](integrations.md): connect any application through external data.
+7. [Migration](migration.md): breaking reset and how to retrieve the previous implementation.
+8. [Verification](verification.md): local checks, offline contracts and release evidence.
+9. [Release runbook](releasing.md): maintainers' dev → main → release procedure.
 
-> [!IMPORTANT]
-> Lumis SDK is an experimental, work-in-progress companion to
-> [the published reference-architecture paper](https://arxiv.org/abs/2608.01955), not a
-> production-ready autonomous remediation system.
+The [roadmap](../ROADMAP.md) separates implemented SDK work from future capability and external
+consumer validation. Contributors should also read [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-## Start here
-
-| Goal | Guide |
-| --- | --- |
-| Understand the framework | [Core concepts](concepts/core-concepts.md) and [architecture overview](architecture/overview.md) |
-| Relate the SDK to the paper | [Research alignment and experimental status](architecture/research-alignment.md) |
-| Install and run an example | [Cookbook guide](../cookbook/README.md) and [standalone adoption evidence](adoption/phase-1-standalone-paths.md) |
-| Configure a project | [Configuration reference](configuration.md) |
-| Migrate alpha documents | [v1 migration guide](migrations/config-v1.md) |
-| Use the Python API | [Core API reference](LUMIS_SDK_REFERENCE.md) |
-| Author a plugin | [Plugin API](python-api/plugins.md) and [compatibility policy](plugins/compatibility.md) |
-| Review security boundaries | [Threat model](safety/threat-model.md) and [security review](safety/security-review.md) |
-| Understand stability | [Public API inventory](stability/public-api.md) and [compatibility policy](stability/compatibility.md) |
-| Reproduce performance checks | [Phase 1 bounded performance baseline](performance/phase-1-baseline.md) |
-| Contribute or release | [Open-source project guide](architecture/open-source-project-guide.md) and [maintainer runbook](contributing/maintainer-runbook.md) |
-| Complete the Phase 1 release | [`0.1.0rc1` to `0.1.0` release guide](releases/0.1.0-phase-1-release-guide.md) |
-| See future direction | [Roadmap](../ROADMAP.md) and [candidate mapping](roadmap/candidate-capability-mapping.md) |
-
-## Python API guides
-
-- [Structured diagnosis rules](python-api/structured-rules.md)
-- [Evidence and JSON reports](python-api/evidence-and-json-reports.md)
-- [Memory stores](python-api/memory.md)
-- [Connectors and webhooks](python-api/connectors.md)
-- [Plugins](python-api/plugins.md)
-- [Policy, verification, and learning](python-api/policy-verification-learning.md)
-
-## Relatable walkthroughs
-
-- [Prometheus/Alertmanager incident diagnosis](../cookbook/prometheus-alertmanager/README.md)
-- [Custom PostgreSQL operational-memory schema](../cookbook/postgres-memory/README.md)
-- [Data-pipeline investigation](../cookbook/data-pipeline-investigation/README.md)
-- [ML regression monitoring](../cookbook/ml-regression-monitoring/README.md)
-- [Software-delivery investigation](../cookbook/software-delivery-ci-investigation/README.md)
-- [Phase 1 tutorial/video script](tutorials/phase-1-video-script.md)
-
-Release-specific notes live under `docs/releases/`; accepted design decisions live under
-`docs/rfcs/`. Product-specific Loomis platform behavior is intentionally outside this index.
+Documentation-site authors can use these files directly as source content. Each sprint must
+update API, CLI/configuration, limitations, tests and release notes together.

@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "Check": {
+      "additionalProperties": false,
+      "description": "A testable prediction or falsifier evaluated only against tool observations.",
+      "properties": {
+        "entity_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "eq",
+            "ne",
+            "gt",
+            "ge",
+            "lt",
+            "le"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "entity_id",
+        "key",
+        "operator",
+        "value"
+      ],
+      "title": "Check",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A candidate explanation, never a confirmed root cause or permission to act.",
+  "properties": {
+    "causal_path": {
+      "items": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Causal Path",
+      "type": "array"
+    },
+    "evidence_needed": {
+      "items": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Evidence Needed",
+      "type": "array"
+    },
+    "falsifiers": {
+      "items": {
+        "$ref": "#/$defs/Check"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Falsifiers",
+      "type": "array"
+    },
+    "id": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "predictions": {
+      "items": {
+        "$ref": "#/$defs/Check"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Predictions",
+      "type": "array"
+    },
+    "statement": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Statement",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "statement",
+    "causal_path",
+    "predictions",
+    "evidence_needed",
+    "falsifiers"
+  ],
+  "title": "Hypothesis",
+  "type": "object"
+}
