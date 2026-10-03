@@ -1108,6 +1108,13 @@
           "title": "Max Spans",
           "type": "integer"
         },
+        "max_trace_reads": {
+          "default": 5,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Trace Reads",
+          "type": "integer"
+        },
         "service_namespace": {
           "anyOf": [
             {

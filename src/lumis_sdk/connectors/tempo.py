@@ -169,13 +169,20 @@ class TempoConnector(RemoteConnector):
                 "q": parameters.traceql,
                 "start": int(incident.started_at.timestamp()),
                 "end": int(incident.ended_at.timestamp()) + 1,
-                "limit": self.source.max_results,
+                "limit": (
+                    self.source.max_trace_reads
+                    if parameters.output == "spans"
+                    else self.source.max_results
+                ),
             },
         )
         if not isinstance(payload, dict):
             raise ValueError("invalid Tempo search response")
         rows = payload.get("traces", [])
-        if not isinstance(rows, list) or len(rows) > self.source.max_results:
+        limit = (
+            self.source.max_trace_reads if parameters.output == "spans" else self.source.max_results
+        )
+        if not isinstance(rows, list) or len(rows) > limit:
             raise ValueError("Tempo result bound exceeded")
         if payload.get("warnings"):
             raise ValueError("partial Tempo search")
@@ -190,6 +197,27 @@ class TempoConnector(RemoteConnector):
             duration = numeric(row["durationMs"])
             if at + timedelta(milliseconds=duration) > incident.ended_at:
                 raise ValueError("trace duration extends outside incident window")
+            if not incident.started_at <= at <= incident.ended_at:
+                raise ValueError("trace search record is outside incident window")
+            if parameters.output == "spans":
+                span_facts = await self.collect(
+                    query.model_copy(
+                        update={"parameters": {"trace_id": trace_id, "output": "spans"}}
+                    ),
+                    incident,
+                )
+                for fact in span_facts:
+                    if len(result) >= self.source.max_results:
+                        raise ValueError("Tempo observation budget exceeded")
+                    result.append(
+                        fact.model_copy(
+                            update={
+                                "id": fact.id + ":" + trace_id,
+                                "quality": "degraded" if len(rows) == limit else fact.quality,
+                            }
+                        )
+                    )
+                continue
             value = (
                 duration
                 if parameters.output == "duration_ms"
@@ -211,7 +239,7 @@ class TempoConnector(RemoteConnector):
                     at,
                     len(result),
                     "GET /api/search",
-                    degraded=len(rows) == self.source.max_results,
+                    degraded=len(rows) == limit,
                 )
             )
         return tuple(result)

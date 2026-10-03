@@ -73,6 +73,7 @@ endpoints, increase limits or select arbitrary Prefect flows. Parameters are str
 | `tempo` | `traceql`, `output: entries` (default) | Selected trace ID/root service/name/duration summaries |
 | `tempo` | `traceql`, `output: duration_ms` | One numeric duration per returned trace |
 | `tempo` | `trace_id`, `output: spans` | Bounded OTLP span identity, service, duration and status summaries |
+| `tempo` | `traceql`, `output: spans` | Search then retrieve matching trace spans, without predeclared incident trace IDs |
 | `prefect` | `flow_name`, `operation: flow_runs` (default), `output: entries` (default) | Selected run identity/state/time/duration summaries |
 | `prefect` | Above, `operation: task_runs`, `flow_run_id` | Task observations for an explicit approved flow run |
 | `prefect` | Either operation, `output: failed_count` or `max_duration_ms` | Failed/crashed count or maximum total runtime of the returned runs |
@@ -162,6 +163,8 @@ only after approving its model/settings. A connector alone does not supply diagn
 Each source has `max_results` (1–100, default 50), `max_response_bytes` (default 1 MB) and
 `max_requests` (default 32 per connector instance). The runtime creates fresh connectors per
 investigation. Discovery and per-query/total investigation deadlines are separately enforced.
+Tempo search-to-spans retrieval also has `max_trace_reads` (1–10, default five); all fetched spans
+share the result/byte/request/deadline bounds. Search caps degrade the resulting span facts.
 No redirects, implicit pagination or hidden retries are used. Prefect's POST filter calls are
 read-only; no create, retry, state-change or deployment endpoint is reachable through these tools.
 Exhaustion/errors/malformed or out-of-window observations are unavailable, not false evidence.

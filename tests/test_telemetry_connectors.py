@@ -255,6 +255,34 @@ def test_tempo_normalizes_unpadded_search_ids_to_otlp_identity():
     assert len(facts) == 2
 
 
+def test_approved_traceql_can_fetch_spans_with_no_preconfigured_incident_trace_id():
+    paths = []
+
+    def handle(request):
+        paths.append(request.url.path)
+        if request.url.path == "/api/search":
+            assert request.url.params["limit"] == "5"
+            return httpx.Response(200, json=search())
+        assert request.url.path == "/api/traces/" + TRACE
+        return httpx.Response(200, json=trace(True))
+
+    source = TempoSource(enabled=True, endpoint="http://tempo.test")
+    registered = query("tempo", traceql='{ resource.service.name = "forecast" }', output="spans")
+    facts = collect(TempoConnector, source, registered, None, handle)
+    assert len(paths) == 2 and len(facts) == 2
+    assert len({item.id for item in facts}) == 2
+    facts = collect(
+        TempoConnector,
+        source.model_copy(update={"max_trace_reads": 1}),
+        registered,
+        None,
+        lambda request: httpx.Response(
+            200, json=search() if request.url.path == "/api/search" else trace()
+        ),
+    )
+    assert all(item.quality == "degraded" for item in facts)
+
+
 def test_prefect_read_only_filters_and_seconds_to_milliseconds():
     source = PrefectSource(
         enabled=True, endpoint="http://prefect.test/api", flow_names=("forecast",)

@@ -63,6 +63,7 @@ class TempoSource(RemoteSource):
     lookback_seconds: int = Field(default=3600, ge=1, le=86400)
     service_namespace: Identifier | None = None
     max_spans: int = Field(default=1000, ge=1, le=10000)
+    max_trace_reads: int = Field(default=5, ge=1, le=10)
 
     @model_validator(mode="after")
     def validate_discovery(self) -> Self:
@@ -119,8 +120,6 @@ class TempoQuery(Contract):
             raise ValueError("Tempo search requires an exact resource matcher")
         if self.trace_id and self.output != "spans":
             raise ValueError("trace_id queries require output: spans")
-        if self.traceql and self.output == "spans":
-            raise ValueError("spans queries require an explicit trace_id")
         return self
 
 
