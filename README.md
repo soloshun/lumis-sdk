@@ -4,8 +4,10 @@ Experimental, vendor-neutral **evidence-grounded operational intelligence** for 
 Lumis turns incident context into falsifiable candidate explanations and tests them against
 bounded, auditable observations. It is research software, not a production recovery service.
 
-**The LLM proposes; Lumis tests.** Supported does not mean causally proven or confirmed.
-Rules, retrieved memory and optional model sources share the same candidate contract.
+**Evidence first; bounded investigation; human review.** Deterministic signatures run before
+one optional tool-using agent. It inspects scoped graph, telemetry and approved code, and can
+test hypotheses in an explicitly enabled diagnostic sandbox. Lumis assigns evidence support;
+supported does not mean causally proven or confirmed.
 
 ## Start here
 
@@ -19,13 +21,21 @@ uv sync --all-groups
 uv run lumis init --directory /tmp/my-lumis-project
 uv run lumis doctor --project /tmp/my-lumis-project/lumis.yaml
 uv run lumis discover --project /tmp/my-lumis-project/lumis.yaml
-uv run lumis investigate --project /tmp/my-lumis-project/lumis.yaml \
+uv run lumis incident --project /tmp/my-lumis-project/lumis.yaml \
   --incident /tmp/my-lumis-project/incident.json \
   --observations /tmp/my-lumis-project/observations.json
 ```
 
 The scaffold is a small synthetic contract check, not a production scenario or cookbook.
 These commands require no consuming project, Kubernetes cluster, HTTP extra or API key.
+Expect a nonterminal health finding and human-review report, not an automatic fix.
+Use the interactive menu with `uv run lumis console --project /tmp/my-lumis-project/lumis.yaml`.
+Export an image with `lumis graph --project ... --format svg --output graph.svg`.
+
+Start with the [incident API guide](docs/incident-investigation.md) and
+[agent notebook](docs/notebooks/incident-agent.ipynb). Install optional dependencies with
+`uv sync --extra agent`; configure an explicit tool-capable model/credential and opt in with
+`lumis incident ... --use-agent`. Configuration alone makes no paid call.
 
 ## Implemented boundary
 
@@ -36,13 +46,18 @@ These commands require no consuming project, Kubernetes cluster, HTTP extra or A
 - NetworkX directed multigraph, resource/service identity links, bounded graph API and DOT export.
 - YAML-led `YamlProject.prepare()` / `investigate()`; per-source discovery reports and automatic
   binding of discovered entity IDs. Optional Prometheus service-graph topology from existing metrics.
-- Optional Prometheus observations and opt-in model candidates: OpenRouter (default),
+- Evidence-backed triage, one bounded Pydantic AI investigator, dynamic inspect/probe tools,
+  scoped allowlisted code/Git, redacted receipts and tentative suggestions.
+- Opt-in resource-limited Docker experiments; never host execution or production-fix verification.
+- JSON/DOT/SVG/terminal graph exports, interactive CLI, SQLite incident audit and manual resolutions.
+- Optional Prometheus observations and opt-in model candidates/agents: OpenRouter (default),
   native OpenAI, Anthropic and Gemini. See [model configuration](docs/models.md).
 
 No remediation executor, automatic learned-rule promotion, live OTLP receiver, hosted service,
 or complete autonomous operational lifecycle is shipped.
 See [architecture](docs/architecture.md), [Python API](docs/python-api.md) and [roadmap](ROADMAP.md).
 For hands-on local testing, use the [offline notebook](docs/notebooks/operational-graph.ipynb).
+Review [sandbox limitations](docs/sandbox.md) before enabling generated experiments.
 
 ## Independent framework, external applications
 

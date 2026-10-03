@@ -6,10 +6,13 @@ import inspect
 import json
 from pathlib import Path
 
+import pytest
 
-def test_operational_graph_notebook_runs_all_cells(tmp_path, monkeypatch):
+
+@pytest.mark.parametrize("name", ["operational-graph", "incident-agent"])
+def test_operational_graph_notebook_runs_all_cells(tmp_path, monkeypatch, name):
     monkeypatch.setattr("tempfile.mkdtemp", lambda **kwargs: str(tmp_path))
-    path = Path(__file__).parents[1] / "docs/notebooks/operational-graph.ipynb"
+    path = Path(__file__).parents[1] / f"docs/notebooks/{name}.ipynb"
     document = json.loads(path.read_text())
     assert document["nbformat"] == 4
     assert document["nbformat_minor"] == 5
@@ -28,8 +31,12 @@ def test_operational_graph_notebook_runs_all_cells(tmp_path, monkeypatch):
             result = eval(compiled, namespace)  # noqa: S307
             if inspect.isawaitable(result):
                 await result
-        assert namespace["result"].outcome == "supported"
-        assert namespace["missing"].outcome == "abstained"
-        assert len(namespace["data_estate"].graph.snapshot().entities) == 3
+        if name == "operational-graph":
+            assert namespace["result"].outcome == "supported"
+            assert namespace["missing"].outcome == "abstained"
+            assert len(namespace["data_estate"].graph.snapshot().entities) == 3
+        else:
+            assert namespace["report"].metrics.model_requests == 4
+            assert namespace["triage_only"].route == "human"
 
     asyncio.run(execute())

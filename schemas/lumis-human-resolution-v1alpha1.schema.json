@@ -1,0 +1,78 @@
+{
+  "additionalProperties": false,
+  "description": "Separate append-only human attestation, not an agent's confirmed-cause claim.",
+  "properties": {
+    "applied_change": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Applied Change",
+      "type": "string"
+    },
+    "evidence_references": {
+      "default": [],
+      "items": {
+        "maxLength": 4000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Evidence References",
+      "type": "array"
+    },
+    "id": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "incident_id": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "outcome": {
+      "enum": [
+        "resolved",
+        "not_resolved",
+        "inconclusive"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "recorded_at": {
+      "format": "date-time",
+      "title": "Recorded At",
+      "type": "string"
+    },
+    "reviewer": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Reviewer",
+      "type": "string"
+    },
+    "source": {
+      "const": "human",
+      "default": "human",
+      "title": "Source",
+      "type": "string"
+    },
+    "summary": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "incident_id",
+    "reviewer",
+    "recorded_at",
+    "summary",
+    "applied_change",
+    "outcome"
+  ],
+  "title": "HumanResolution",
+  "type": "object"
+}

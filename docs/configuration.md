@@ -5,7 +5,15 @@ Unknown fields, duplicate mapping keys, YAML aliases, excessive nesting and docu
 than 1 MiB are rejected. Use explicit strings for identifiers and endpoints, native booleans
 for checks and timezone-qualified timestamps in incident/evidence JSON.
 
-## Complete offline example
+## Incident-agent fields
+
+The schema also includes checks and investigator. See the
+[incident guide](incident-investigation.md#yaml-additions) for diagnostic signatures,
+repository allowlists and budgets, and [sandbox settings](sandbox.md) for digest-pinned
+experiments. Query provider probe requires an explicitly enabled sandbox and cannot be used
+by deterministic signatures. Existing baseline fields below remain supported.
+
+## Complete offline baseline example
 
 ```yaml
 api_version: lumis.dev/operational-v1alpha1

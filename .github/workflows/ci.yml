@@ -53,3 +53,24 @@ jobs:
             --observations /tmp/lumis-smoke/observations.json \
             > /tmp/investigation.json
           jq -e '.outcome == "supported" and .truth_state == "unconfirmed_hypothesis"' /tmp/investigation.json
+          .venv-smoke/bin/lumis graph --project /tmp/lumis-smoke/lumis.yaml --format svg --output /tmp/graph.svg
+          .venv-smoke/bin/lumis incident --project /tmp/lumis-smoke/lumis.yaml \
+            --incident /tmp/lumis-smoke/incident.json \
+            --observations /tmp/lumis-smoke/observations.json > /tmp/incident-report.json
+          jq -e '.route == "human" and .requires_human_review == true and .truth_state == "unconfirmed_hypothesis"' /tmp/incident-report.json
+
+  sandbox:
+    name: Diagnostic sandbox conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      LUMIS_TEST_SANDBOX_IMAGE: python@sha256:dddfd7e07f9d15aeeca61529320492139d21cac7f0070c00609243e51e4e0016
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          version: "0.11.17"
+      - run: uv sync --frozen --all-groups --python 3.12
+      - name: Preload operator-approved image (runner never pulls implicitly)
+        run: docker pull "$LUMIS_TEST_SANDBOX_IMAGE"
+      - run: uv run pytest tests/test_investigation_safety.py tests/test_incident_agent.py -q

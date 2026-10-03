@@ -33,6 +33,7 @@ dependencies = [
 
 [project.optional-dependencies]
 http = ["httpx>=0.28,<1"]
+agent = ["httpx>=0.28,<1", "httpx2>=2.13,<3", "pydantic-ai-slim[openrouter,openai,anthropic,google]>=2.54,<3"]
 
 [project.urls]
 Homepage = "https://github.com/soloshun/lumis-sdk"
@@ -52,6 +53,8 @@ dev = [
   "types-pyyaml>=6.0.12,<7",
   "types-networkx>=3.4,<4",
   "httpx>=0.28,<1",
+  "httpx2>=2.13,<3",
+  "pydantic-ai-slim[openrouter,openai,anthropic,google]>=2.54,<3",
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -1,0 +1,870 @@
+{
+  "$defs": {
+    "Check": {
+      "additionalProperties": false,
+      "description": "A testable prediction or falsifier evaluated only against tool observations.",
+      "properties": {
+        "entity_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "eq",
+            "ne",
+            "gt",
+            "ge",
+            "lt",
+            "le"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "entity_id",
+        "key",
+        "operator",
+        "value"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "Entity": {
+      "additionalProperties": false,
+      "description": "Operational identity; attributes should contain normalized non-secret metadata only.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name"
+      ],
+      "title": "Entity",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "description": "One normalized tool observation with provenance and observation time.",
+      "properties": {
+        "entity_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "quality": {
+          "default": "observed",
+          "enum": [
+            "observed",
+            "degraded"
+          ],
+          "title": "Quality",
+          "type": "string"
+        },
+        "query_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Query Id",
+          "type": "string"
+        },
+        "retrieval_method": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Retrieval Method",
+          "type": "string"
+        },
+        "source": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "id",
+        "query_id",
+        "entity_id",
+        "key",
+        "value",
+        "observed_at",
+        "source",
+        "retrieval_method"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "EvidenceQuery": {
+      "additionalProperties": false,
+      "description": "An operator-registered observation. A model may request its ID, never invent its query.",
+      "properties": {
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "entity_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "provider": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "entity_id",
+        "key",
+        "description"
+      ],
+      "title": "EvidenceQuery",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "assessment": {
+          "$ref": "#/$defs/HypothesisAssessment"
+        },
+        "rule_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "match",
+            "no_match",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "terminal": {
+          "title": "Terminal",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rule_id",
+        "status",
+        "terminal",
+        "assessment"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "GraphSnapshot": {
+      "additionalProperties": false,
+      "description": "An inspectable graph value with unique identities and valid edge endpoints.",
+      "properties": {
+        "entities": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Entity"
+          },
+          "title": "Entities",
+          "type": "array"
+        },
+        "relationships": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Relationship"
+          },
+          "title": "Relationships",
+          "type": "array"
+        }
+      },
+      "title": "GraphSnapshot",
+      "type": "object"
+    },
+    "Hypothesis": {
+      "additionalProperties": false,
+      "description": "A candidate explanation, never a confirmed root cause or permission to act.",
+      "properties": {
+        "causal_path": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Causal Path",
+          "type": "array"
+        },
+        "evidence_needed": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Evidence Needed",
+          "type": "array"
+        },
+        "falsifiers": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Falsifiers",
+          "type": "array"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "predictions": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Predictions",
+          "type": "array"
+        },
+        "statement": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "statement",
+        "causal_path",
+        "predictions",
+        "evidence_needed",
+        "falsifiers"
+      ],
+      "title": "Hypothesis",
+      "type": "object"
+    },
+    "HypothesisAssessment": {
+      "additionalProperties": false,
+      "description": "Mechanical check results; support is not calibrated probability or confirmed truth.",
+      "properties": {
+        "contradicting_evidence_ids": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Contradicting Evidence Ids",
+          "type": "array"
+        },
+        "hypothesis": {
+          "$ref": "#/$defs/Hypothesis"
+        },
+        "missing_checks": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "title": "Missing Checks",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "state": {
+          "enum": [
+            "supported",
+            "contradicted",
+            "unresolved"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "supporting_evidence_ids": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Supporting Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "hypothesis",
+        "sources",
+        "state"
+      ],
+      "title": "HypothesisAssessment",
+      "type": "object"
+    },
+    "Incident": {
+      "additionalProperties": false,
+      "description": "An explicit bounded observation window; synthetic ground truth is never a field.",
+      "properties": {
+        "affected_entities": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Affected Entities",
+          "type": "array"
+        },
+        "ended_at": {
+          "format": "date-time",
+          "title": "Ended At",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "symptoms": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Symptoms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "affected_entities",
+        "symptoms",
+        "started_at",
+        "ended_at"
+      ],
+      "title": "Incident",
+      "type": "object"
+    },
+    "IncidentContext": {
+      "additionalProperties": false,
+      "description": "The bounded context shared by every hypothesis source.",
+      "properties": {
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "graph": {
+          "$ref": "#/$defs/GraphSnapshot"
+        },
+        "incident": {
+          "$ref": "#/$defs/Incident"
+        },
+        "queries": {
+          "items": {
+            "$ref": "#/$defs/EvidenceQuery"
+          },
+          "title": "Queries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "incident",
+        "graph",
+        "queries"
+      ],
+      "title": "IncidentContext",
+      "type": "object"
+    },
+    "Relationship": {
+      "additionalProperties": false,
+      "description": "A directed observed or declared relationship, not an inferred causal conclusion.",
+      "properties": {
+        "kind": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "source": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "kind"
+      ],
+      "title": "Relationship",
+      "type": "object"
+    },
+    "RunMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_queries": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Evidence Queries",
+          "type": "integer"
+        },
+        "input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model_requests": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Model Requests",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "probes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Probes",
+          "type": "integer"
+        },
+        "tool_attempts": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Tool Attempts",
+          "type": "integer"
+        }
+      },
+      "title": "RunMetrics",
+      "type": "object"
+    },
+    "Suggestion": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "hypothesis_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Hypothesis Id",
+          "type": "string"
+        },
+        "patch": {
+          "anyOf": [
+            {
+              "maxLength": 16000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Patch"
+        },
+        "receipt_ids": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Receipt Ids",
+          "type": "array"
+        },
+        "requires_human_review": {
+          "const": true,
+          "default": true,
+          "title": "Requires Human Review",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "hypothesis_id",
+        "description"
+      ],
+      "title": "Suggestion",
+      "type": "object"
+    },
+    "ToolReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "code_digest": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code Digest"
+        },
+        "digest": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Digest",
+          "type": "string"
+        },
+        "hypothesis_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hypothesis Id"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "operation": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Operation",
+          "type": "string"
+        },
+        "output": {
+          "maxLength": 64000,
+          "title": "Output",
+          "type": "string"
+        },
+        "purpose": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "snapshot_digest": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Digest"
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "error",
+            "denied",
+            "timeout"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "operation",
+        "status",
+        "purpose",
+        "output",
+        "digest"
+      ],
+      "title": "ToolReceipt",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "lumis.dev/incident-report-v1alpha1",
+      "default": "lumis.dev/incident-report-v1alpha1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "assessments": {
+      "items": {
+        "$ref": "#/$defs/HypothesisAssessment"
+      },
+      "title": "Assessments",
+      "type": "array"
+    },
+    "conclusion": {
+      "enum": [
+        "supported_diagnosis",
+        "insufficient_evidence",
+        "requires_human_expert"
+      ],
+      "title": "Conclusion",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/IncidentContext"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "metrics": {
+      "$ref": "#/$defs/RunMetrics"
+    },
+    "receipts": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ToolReceipt"
+      },
+      "title": "Receipts",
+      "type": "array"
+    },
+    "requires_human_review": {
+      "const": true,
+      "default": true,
+      "title": "Requires Human Review",
+      "type": "boolean"
+    },
+    "route": {
+      "enum": [
+        "deterministic",
+        "agent",
+        "human"
+      ],
+      "title": "Route",
+      "type": "string"
+    },
+    "sdk_version": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Sdk Version",
+      "type": "string"
+    },
+    "stop_reason": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Stop Reason",
+      "type": "string"
+    },
+    "suggestions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Suggestion"
+      },
+      "title": "Suggestions",
+      "type": "array"
+    },
+    "truth_state": {
+      "const": "unconfirmed_hypothesis",
+      "default": "unconfirmed_hypothesis",
+      "title": "Truth State",
+      "type": "string"
+    },
+    "unresolved_questions": {
+      "default": [],
+      "items": {
+        "maxLength": 4000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Unresolved Questions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "sdk_version",
+    "context",
+    "findings",
+    "assessments",
+    "route",
+    "conclusion",
+    "stop_reason"
+  ],
+  "title": "IncidentReport",
+  "type": "object"
+}

@@ -3,7 +3,31 @@
 Run these steps from the SDK repository, independently of any consuming application.
 Use Python 3.11, 3.12 or 3.13. Install `uv` through your normal approved development setup.
 
-## 1. Install and inspect
+## Incident workflow and interactive menu
+
+The recommended new command is lumis incident, not the candidate-only investigate baseline:
+
+    lumis incident --project lumis.yaml --incident incident.json \
+      --observations observations.json --store audit/incidents.sqlite
+    # Explicit paid-model permission, only if triage escalates:
+    lumis incident --project lumis.yaml --incident incident.json --use-agent
+    lumis console --project lumis.yaml
+    lumis graph --project lumis.yaml --format terminal
+    lumis graph --project lumis.yaml --format svg --output graph.svg
+    lumis record-resolution --store audit/incidents.sqlite --resolution resolution.json --confirm
+
+incident prints JSON; --store explicitly writes append-only SQLite. console provides a modest
+ASCII menu for doctor, source inspection, graph and incident handling. Paid-agent permission
+defaults to no. Machine-readable commands stay undecorated.
+SVG writes a new file only and refuses overwrite; open it in a browser/image viewer.
+The circular renderer needs no Graphviz/NumPy and caps images at 200 nodes/1000 edges;
+terminal view caps 100/200. Use --entity ID --hops N for smaller neighborhoods.
+Parallel edge labels may overlap; JSON/DOT retain the complete multigraph.
+record-resolution requires an existing incident and explicit human attestation.
+See [resolution fields](incident-investigation.md#reports-and-human-resolution).
+No CLI command applies a fix or promotes a rule.
+
+## 1. Install and inspect baseline commands
 
 ```bash
 uv sync --all-groups

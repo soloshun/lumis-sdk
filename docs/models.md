@@ -4,7 +4,29 @@ OpenRouter is the default **configured** provider. There is no default model ID,
 no automatic model invocation and no cross-provider fallback.
 The SDK also includes native OpenAI, Anthropic and Gemini HTTP adapters.
 
-All four implement the same async `HypothesisModel.generate(context)` boundary and return
+## Recommended tool-using investigator
+
+Install the agent extra for `YamlProject.handle_incident(use_agent=True)` / `lumis incident --use-agent`.
+One Pydantic AI agent uses native OpenRouter/OpenAI Responses/Anthropic/Gemini provider interfaces,
+typed output and inspect/probe tools. Explicit credentials and a tool-capable model ID are required.
+OpenRouter IDs must use upstream-provider/model form. No configuration-time paid requests,
+cross-provider fallback or native SDK transport retries occur.
+OpenRouter routing fallback is disabled and required parameter support requested.
+OpenAI response storage is explicitly disabled; provider retention policy still applies.
+
+Per-run request, tool-attempt, output-token and context/output-character limits are enforced.
+Read [incident investigation](incident-investigation.md) for authority, evidence and privacy
+limits. Importing the core does not import Pydantic AI or HTTP clients.
+The provider factories are tested offline; live function/schema support, privacy, costs and
+model-quality qualification remain separate. No universal "any model" compatibility is claimed.
+
+The wiring follows [Pydantic AI tools](https://pydantic.dev/docs/ai/tools-toolsets/tools/) and
+[OpenAI function calling](https://developers.openai.com/api/docs/guides/function-calling);
+tool authorization and final support remain application-owned.
+
+## Candidate-only baseline adapters
+
+All four baseline adapters implement the async `HypothesisModel.generate(context)` boundary and return
 3–5 locally validated falsifiable candidates. Evaluation and evidence acquisition do not change
 when you switch providers. None gains tool or remediation authority.
 

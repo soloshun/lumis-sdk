@@ -38,3 +38,19 @@ Published distributions and Git history are not deleted.
 
 Old memory/report databases are not automatically migrated into the new investigation store.
 Keep a separate store file and retain older records under their original schema/version.
+
+## Moving from the candidate baseline to the incident agent
+
+The operational graph/query/evidence contracts remain. Put triage signatures in checks rather
+than assuming rule_hypotheses ends an incident. Set terminal/explains_entities only for
+multi-observable signatures that genuinely cover the incident; single-condition findings
+remain nonterminal. Change the primary call to YamlProject.handle_incident(...) and use the
+IncidentReport schema, not the baseline Investigation schema.
+
+Install the agent extra only when using the optional investigator. Review the new
+[tool/code/sandbox boundaries](incident-investigation.md), approve explicit file allowlists,
+keep probes disabled until a dedicated daemon/image is qualified, and opt in explicitly to
+paid calls. Use a separate IncidentStore file/table family; old InvestigationStore records
+are not rewritten. Human resolution records are separate from diagnostic truth.
+
+The baseline investigate API is retained for comparisons, not advertised as a tool-agent loop.

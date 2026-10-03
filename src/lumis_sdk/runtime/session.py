@@ -27,6 +27,11 @@ from lumis_sdk.runtime.project import OperationalProject, load_project
 if TYPE_CHECKING:
     import httpx
 
+    from lumis_sdk.checks import TriageGuard
+    from lumis_sdk.investigation.contracts import IncidentReport
+    from lumis_sdk.runtime.incident_handler import Investigator
+    from lumis_sdk.sandbox.runner import ProbeRunner
+
 
 @dataclass(frozen=True)
 class PreparedProject:
@@ -36,6 +41,56 @@ class PreparedProject:
     base: Path
     graph: OperationalGraph
     discovery: DiscoveryReport
+
+    async def handle_incident(
+        self,
+        incident: Incident,
+        *,
+        observations: tuple[Evidence, ...] | None = None,
+        use_agent: bool = False,
+        investigator: Investigator | None = None,
+        guard: TriageGuard | None = None,
+        runner: ProbeRunner | None = None,
+        client: httpx.AsyncClient | None = None,
+    ) -> IncidentReport:
+        """Context → evidence-backed triage → optional tool-using agent → human review."""
+        from lumis_sdk.runtime.incident_handler import handle_incident
+
+        project = self.config
+        if observations is None and project.observations_file is not None:
+            observations = TypeAdapter(tuple[Evidence, ...]).validate_json(
+                read_document(relative_path(self.base, project.observations_file))
+            )
+        connectors: dict[str, EvidenceConnector] = {
+            "snapshot": SnapshotConnector(observations or ())
+        }
+        if runner is None and project.investigator.sandbox.enabled:
+            from lumis_sdk.sandbox.runner import DockerProbeRunner
+
+            runner = DockerProbeRunner(project.investigator.sandbox)
+        async with http_client(
+            client,
+            required=project.sources.prometheus.enabled,
+            timeout=project.budget.query_timeout_seconds,
+        ) as connection:
+            if project.sources.prometheus.enabled:
+                from lumis_sdk.connectors.prometheus import PrometheusConnector
+
+                assert connection is not None and project.sources.prometheus.endpoint is not None
+                connectors["prometheus"] = PrometheusConnector(
+                    project.sources.prometheus.endpoint, connection
+                )
+            return await handle_incident(
+                project,
+                self.graph,
+                incident,
+                connectors=connectors,
+                base=self.base,
+                use_agent=use_agent,
+                investigator=investigator,
+                guard=guard,
+                runner=runner,
+            )
 
     async def investigate(
         self,
@@ -141,5 +196,27 @@ class YamlProject:
             observations=observations,
             use_model=use_model,
             generation_only=generation_only,
+            client=client,
+        )
+
+    async def handle_incident(
+        self,
+        incident: Incident,
+        *,
+        observations: tuple[Evidence, ...] | None = None,
+        use_agent: bool = False,
+        investigator: Investigator | None = None,
+        guard: TriageGuard | None = None,
+        runner: ProbeRunner | None = None,
+        client: httpx.AsyncClient | None = None,
+    ) -> IncidentReport:
+        prepared = await self.prepare(client=client, at=incident.ended_at)
+        return await prepared.handle_incident(
+            incident,
+            observations=observations,
+            use_agent=use_agent,
+            investigator=investigator,
+            guard=guard,
+            runner=runner,
             client=client,
         )

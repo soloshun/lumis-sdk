@@ -11,6 +11,11 @@ entities are not lost. The runtime scopes a neighborhood for reasoning; drawing 
 
 ## Identity and direction
 
+Export a graph image with `lumis graph --project lumis.yaml --format svg --output graph.svg`.
+Use --format terminal or lumis console for a text view. Python renderers
+`lumis_sdk.graph.render.svg(snapshot)` and `terminal(snapshot)` return strings.
+These dependency-free adapters visualize the same NetworkX graph, not a causal explanation.
+
 - Logical service: `service:<namespace>:<service.name>` from OTLP, labelled Kubernetes resources
   or the explicitly namespaced Prometheus service-graph source.
 - Physical Kubernetes resource: `k8s:<namespace>:<kind>:<name>`. It remains a separate entity.

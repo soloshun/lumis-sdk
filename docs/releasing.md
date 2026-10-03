@@ -24,6 +24,9 @@ Record intentional breaking migration and removed packages.
 Require supported Python tests; generated schemas; lint/type/security/dependency checks;
 wheel and source-archive builds; archive-content checks; independent clean installations;
 offline CLI init/doctor/discover/investigate; explicit API/CLI/YAML limitations.
+Also require incident/menu/SVG and manual-resolution checks, optional-agent import isolation,
+scripted native-provider construction, real Docker probe isolation/cleanup and the
+[sandbox threat-model review](sandbox.md) appropriate to the claimed environment.
 No live application completion is a prerequisite for this standalone framework milestone.
 
 Qualify live optional providers separately before advertising their demonstrated behavior.

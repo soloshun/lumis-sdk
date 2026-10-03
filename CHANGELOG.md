@@ -2,6 +2,20 @@
 
 ## Unreleased — standalone operational-intelligence reset
 
+- Add evidence-backed deterministic triage with terminal/nonterminal signatures, three-state
+  findings, ambiguity/scope sufficiency checks and an optional caller-owned guard.
+- Add one opt-in Pydantic AI investigator with native OpenRouter/OpenAI/Anthropic/Gemini,
+  dynamic inspect/probe tools, per-run budgets and locally validated candidate/suggestion output.
+- Add explicit no-symlink text-file snapshots and fixed read-only Git inspection.
+- Add disabled-by-default digest-pinned resource-limited Docker experiments; no network, host
+  mounts or host-execution fallback. Probe results are degraded, not independent production proof.
+- Add typed incident reports/tool receipts, SQLite incident audit and separate append-only human
+  resolution records. No recovery, patch application or automatic learned-rule promotion.
+- Add incident/record-resolution/interactive-console CLI, SVG/terminal graph rendering, incident
+  API/sandbox documentation, schemas, an executable offline agent notebook and real Docker CI.
+- Bound the public artifact to basic investigation; defer advanced private strategies/enterprise
+  governance. Typed recent-change evidence and live provider/consumer evaluation remain open.
+
 - Align operational graph with the design's Pydantic + NetworkX multigraph; expose bounded
   neighborhoods, independent NetworkX exports and dependency-free DOT inspection.
 - Share YAML-driven discovery/preparation/investigation across Python, notebooks and CLI;
