@@ -18,7 +18,7 @@ from lumis_sdk.core import (
     InvestigationBudget,
     TraceStep,
 )
-from lumis_sdk.core.contracts import StopReason, validate_hypothesis
+from lumis_sdk.core.contracts import StopReason, rejection_reason, validate_hypothesis
 from lumis_sdk.graph import OperationalGraph
 from lumis_sdk.reasoning import HypothesisSource, assess
 from lumis_sdk.security.operational import redact_context
@@ -107,13 +107,28 @@ class InvestigationRuntime:
                         # port's return type and cannot stream forever into the registry.
                         if not isinstance(proposed, tuple) or len(proposed) > 50:
                             raise ValueError("source exceeded candidate bound")
-                        proposed = tuple(
-                            Hypothesis.model_validate(candidate.model_dump())
-                            for candidate in proposed
-                        )
-                        for candidate in proposed:
-                            validate_hypothesis(candidate, context)
-                        for candidate in proposed:
+                        # Judge candidates individually: one invalid candidate no longer
+                        # discards the source's valid ones. Each rejection is traced.
+                        rejections = list(getattr(source, "rejections", ()))
+                        valid = []
+                        for index, candidate in enumerate(proposed):
+                            try:
+                                checked = Hypothesis.model_validate(candidate.model_dump())
+                                validate_hypothesis(checked, context)
+                            except ValueError as exc:
+                                rejections.append(f"candidate {index + 1}: {rejection_reason(exc)}")
+                                continue
+                            valid.append(checked)
+                        for reason in rejections[:10]:
+                            trace.append(
+                                TraceStep(
+                                    kind="source",
+                                    reference=source.name,
+                                    reason=reason,
+                                    status="rejected",
+                                )
+                            )
+                        for candidate in valid:
                             fingerprint = self._fingerprint(candidate)
                             if fingerprint in candidates:
                                 origins[fingerprint].append(source.name)

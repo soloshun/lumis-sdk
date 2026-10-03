@@ -12,7 +12,7 @@ class OpenRouterHypothesisModel(StructuredHypothesisModel):
             self.client,
             "POST",
             "https://openrouter.ai/api/v1/chat/completions",
-            max_bytes=100000,
+            max_bytes=self.max_response_bytes,
             headers={"Authorization": f"Bearer {self._api_key.get_secret_value()}"},
             json={
                 "model": self.model,

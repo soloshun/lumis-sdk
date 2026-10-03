@@ -62,3 +62,9 @@ class ModelHypothesisSource:
 
     async def propose(self, context: IncidentContext) -> tuple[Hypothesis, ...]:
         return await self.model.generate(context)
+
+    @property
+    def rejections(self) -> tuple[str, ...]:
+        """Per-candidate rejection reasons from the last call, when the model reports them."""
+        rejections: tuple[str, ...] = getattr(self.model, "rejections", ())
+        return rejections

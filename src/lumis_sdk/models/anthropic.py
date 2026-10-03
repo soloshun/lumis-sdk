@@ -12,7 +12,7 @@ class AnthropicHypothesisModel(StructuredHypothesisModel):
             self.client,
             "POST",
             "https://api.anthropic.com/v1/messages",
-            max_bytes=100000,
+            max_bytes=self.max_response_bytes,
             headers={
                 "x-api-key": self._api_key.get_secret_value(),
                 "anthropic-version": "2023-06-01",
