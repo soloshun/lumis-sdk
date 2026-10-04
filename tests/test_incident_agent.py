@@ -660,3 +660,19 @@ def test_competing_supported_root_causes_do_not_yield_a_diagnosis(tmp_path):
         )
     )
     assert same.conclusion == "supported_diagnosis"
+
+
+def test_unavailable_investigator_names_the_failure_without_its_message(tmp_path):
+    project, event, facts = estate(tmp_path)
+
+    class ProviderDown(Exception):
+        status_code = 502
+
+    class Failing:
+        async def investigate(self, tools, findings):
+            raise ProviderDown("upstream https://user:secret@example.test failed")
+
+    report = asyncio.run(project.handle_incident(event, observations=facts, investigator=Failing()))
+    assert report.stop_reason == "investigator_rejected_or_unavailable"
+    note = next(q for q in report.unresolved_questions if "Investigator stopped" in q)
+    assert "ProviderDown (HTTP 502)" in note and "secret" not in note

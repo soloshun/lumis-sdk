@@ -178,9 +178,17 @@ async def handle_incident(
                         await tools.collect(query)
     except TimeoutError:
         stop = "deadline_exceeded"
-    except Exception:
+    except Exception as exc:
         stop = "investigator_rejected_or_unavailable"
         output = AgentOutput()  # no unvalidated suggestions; retain already registered candidates
+        # Say what kind of failure ended the run (type and HTTP status only: messages can carry
+        # URLs, payloads or credentials).
+        status = getattr(exc, "status_code", None)
+        notes.append(
+            f"Investigator stopped by {type(exc).__name__}"
+            + (f" (HTTP {status})" if isinstance(status, int) else "")
+            + "; registered candidates and collected evidence are kept."
+        )
     if not findings:
         findings = evaluate_checks(rules, tools.context)
     assessments = tuple(
