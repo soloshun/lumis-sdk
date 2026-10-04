@@ -20,6 +20,17 @@ from lumis_sdk.sandbox.runner import ProbeRunner
 from lumis_sdk.security.redaction import redact_text
 
 
+def root_cause(entity_id: str, context: IncidentContext) -> str:
+    """A resource node that hosts a logical service (e.g. a Kubernetes Deployment) names that
+    service as the root cause; other entities name themselves."""
+    hosted = {
+        edge.target
+        for edge in context.graph.relationships
+        if edge.kind == "hosts" and edge.source == entity_id
+    }
+    return hosted.pop() if len(hosted) == 1 else entity_id
+
+
 class Investigator(Protocol):
     async def investigate(
         self, tools: InvestigationTools, findings: tuple[Finding, ...]
@@ -177,6 +188,15 @@ async def handle_incident(
     )
     viable = tuple(item for item in assessments if item.state != "contradicted")
     supported = bool(viable) and all(item.state == "supported" for item in viable)
+    # Supported candidates that name different root causes are competing explanations: Lumis
+    # does not rank supported candidates, so it must not report one of them as the diagnosis.
+    roots = sorted({root_cause(item.hypothesis.causal_path[0], tools.context) for item in viable})
+    if supported and len(roots) > 1:
+        supported = False
+        notes.append(
+            f"{len(roots)} supported candidates name different root causes ({', '.join(roots)}); "
+            "Lumis does not rank supported candidates, so no single diagnosis is reported."
+        )
     return IncidentReport.model_validate(
         {
             "sdk_version": __version__,
