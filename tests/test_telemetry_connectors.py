@@ -12,7 +12,7 @@ from test_operational_intelligence import fixture
 
 from lumis_sdk.connectors.loki import LokiConnector
 from lumis_sdk.connectors.prefect import PrefectConnector
-from lumis_sdk.connectors.settings import LokiSource, PrefectSource, TempoSource
+from lumis_sdk.connectors.settings import LokiQuery, LokiSource, PrefectSource, TempoSource
 from lumis_sdk.connectors.tempo import TempoConnector
 from lumis_sdk.core import EvidenceQuery
 from lumis_sdk.investigation.contracts import AgentOutput, InspectRequest
@@ -694,3 +694,48 @@ def test_missing_auth_byte_limit_redirect_and_span_budget(monkeypatch):
             query("tempo", trace_id=TRACE, output="spans"),
             trace(),
         )
+
+
+def test_loki_entries_include_only_allowlisted_structured_fields():
+    """OTel logs keep the cause in structured metadata (GridCast: `error`), not the line."""
+    source = LokiSource(enabled=True, endpoint="http://loki.test")
+    at = ns(incident().started_at)
+    payload = {
+        "status": "success",
+        "data": {
+            "resultType": "streams",
+            "result": [
+                {
+                    "stream": {
+                        "service_name": "ingestion",
+                        "error": "ReadTimeout: timed out password=hunter2x",
+                        "dataset": "demand",
+                        "private": "never-export",
+                    },
+                    "values": [[at, "ingestion batch failed"]],
+                },
+                {  # categorized response: metadata in the row, not the stream
+                    "stream": {"service_name": "ingestion"},
+                    "values": [
+                        [at, "ingestion batch failed", {"structuredMetadata": {"error": "503"}}]
+                    ],
+                },
+            ],
+        },
+    }
+    registered = query(
+        "loki", logql='{service_name="ingestion"} |= "failed"', fields="error,dataset"
+    )
+    entries = [
+        json.loads(fact.value) for fact in collect(LokiConnector, source, registered, payload)
+    ]
+    assert entries[0]["error"].startswith("ReadTimeout") and entries[0]["dataset"] == "demand"
+    assert "hunter2x" not in entries[0]["error"] and "private" not in entries[0]
+    assert entries[1]["error"] == "503" and "dataset" not in entries[1]
+    plain = collect(LokiConnector, source, query("loki", logql='{service_name="x"}'), payload)
+    assert set(json.loads(plain[0].value)) == {"timestamp", "message"}
+    for bad in ("a,a", "a b", "1,2,3,4,5,6", "x;y"):
+        with pytest.raises(ValueError):
+            LokiQuery(logql='{service_name="x"}', fields=bad)
+    with pytest.raises(ValueError):
+        LokiQuery(logql='{service_name="x"}', output="count", fields="error")

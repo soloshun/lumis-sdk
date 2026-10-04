@@ -31,6 +31,7 @@ Each change below came from something observed on the live estate, not from a hy
 | 10 | Model-registry fact (scenario E) had to be queried by the cookbook and passed in as a snapshot | No SQL provider | `sources.sql` / `provider: sql`, read-only transaction | c54500e |
 | 11 | Agent's correct answer on F was scored wrong; it put a GitOps file, then a Deployment, at the head of its causal path | The graph has no notion of "this entity changed recently" | Typed change records (below) | d777046 |
 | 12 | Scenario E: two supported candidates with different root causes (pipeline-internal SQL; the model change) were reported as one `supported_diagnosis` | Conclusion only required every viable candidate to be supported; supported candidates are not ranked | Competing supported roots give `insufficient_evidence` with the roots listed; the agent returns causes only (exclusions go to unresolved questions) | this change |
+| 13 | Validation drill K: ingestion error entries read only "ingestion batch failed"; the cause (`ReadTimeout`) was in the log's structured metadata | The Loki connector deliberately dropped all structured metadata | An operator allowlist (`fields`) exports named fields only, bounded and redacted | this change |
 
 Also added in these commits: `models.reasoning`, `PydanticInvestigator.messages` (the run
 transcript, for evaluation) and suppression of pydantic-ai's first-run banner.

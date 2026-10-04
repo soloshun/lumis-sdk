@@ -98,12 +98,28 @@ class PrefectSource(RemoteSource):
 class LokiQuery(Contract):
     logql: Text
     output: Literal["entries", "count"] = "entries"
+    # Comma-separated structured-metadata fields to include in each entry (operator allowlist,
+    # e.g. "error,dataset"). OTel-shipped logs keep the details there, not in the line.
+    fields: Annotated[str, StringConstraints(max_length=300)] = ""
+
+    @property
+    def field_names(self) -> tuple[str, ...]:
+        return tuple(name.strip() for name in self.fields.split(",") if name.strip())
 
     @model_validator(mode="after")
     def validate_selector(self) -> Self:
         # Not a LogQL parser: the server validates syntax. Refuse unscoped selectors locally.
         if not re.search(r'\{[^}]*[A-Za-z_][A-Za-z0-9_]*\s*=\s*"[^"\n]+"', self.logql):
             raise ValueError("Loki requires an exact, nonempty label matcher")
+        names = self.field_names
+        if (
+            len(names) > 5
+            or len(set(names)) != len(names)
+            or any(not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,63}", name) for name in names)
+        ):
+            raise ValueError("Loki fields must be at most 5 distinct structured-metadata names")
+        if names and self.output != "entries":
+            raise ValueError("Loki fields apply to entries output only")
         return self
 
 
