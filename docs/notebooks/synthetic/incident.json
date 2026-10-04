@@ -1,0 +1,7 @@
+{
+  "id": "synthetic-forecast-slowdown",
+  "affected_entities": ["service:demo:forecast"],
+  "symptoms": ["A synthetic forecast request took 1800 ms instead of the illustrative 300 ms baseline."],
+  "started_at": "2026-10-03T12:00:00Z",
+  "ended_at": "2026-10-03T12:10:00Z"
+}

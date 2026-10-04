@@ -1,0 +1,209 @@
+{
+  "prometheus": {
+    "status": "success",
+    "data": {
+      "resultType": "scalar",
+      "result": [
+        1791029400,
+        "8"
+      ]
+    }
+  },
+  "loki": {
+    "status": "success",
+    "data": {
+      "resultType": "streams",
+      "result": [
+        {
+          "stream": {
+            "service_name": "db",
+            "environment": "synthetic"
+          },
+          "values": [
+            [
+              "1791028980000000000",
+              "error: transaction retry"
+            ],
+            [
+              "1791028981000000000",
+              "error: lock timeout"
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "tempo_search": {
+    "traces": [
+      {
+        "traceID": "abcdef0123456789abcdef0123456789",
+        "rootServiceName": "forecast",
+        "rootTraceName": "forecast.request",
+        "startTimeUnixNano": "1791029040000000000",
+        "durationMs": 1800
+      }
+    ]
+  },
+  "tempo_trace": {
+    "batches": [
+      {
+        "resource": {
+          "attributes": [
+            {
+              "key": "service.name",
+              "value": {
+                "stringValue": "forecast"
+              }
+            },
+            {
+              "key": "service.namespace",
+              "value": {
+                "stringValue": "demo"
+              }
+            }
+          ]
+        },
+        "scopeSpans": [
+          {
+            "spans": [
+              {
+                "traceId": "abcdef0123456789abcdef0123456789",
+                "spanId": "abcdef0123456789",
+                "parentSpanId": "",
+                "name": "forecast.request",
+                "startTimeUnixNano": "1791029040000000000",
+                "endTimeUnixNano": "1791029041800000000",
+                "status": {
+                  "code": 2
+                },
+                "attributes": [
+                  {
+                    "key": "private.debug",
+                    "value": {
+                      "stringValue": "do-not-export"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "resource": {
+          "attributes": [
+            {
+              "key": "service.name",
+              "value": {
+                "stringValue": "features"
+              }
+            },
+            {
+              "key": "service.namespace",
+              "value": {
+                "stringValue": "demo"
+              }
+            }
+          ]
+        },
+        "scopeSpans": [
+          {
+            "spans": [
+              {
+                "traceId": "abcdef0123456789abcdef0123456789",
+                "spanId": "fedcba9876543210",
+                "parentSpanId": "abcdef0123456789",
+                "name": "features.load",
+                "startTimeUnixNano": "1791029040100000000",
+                "endTimeUnixNano": "1791029041600000000",
+                "status": {
+                  "code": 2
+                },
+                "attributes": [
+                  {
+                    "key": "private.debug",
+                    "value": {
+                      "stringValue": "do-not-export"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "prefect_flow_runs": [
+    {
+      "id": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "name": "demo-forecast-run",
+      "start_time": "2026-10-03T12:02:00Z",
+      "end_time": "2026-10-03T12:04:00Z",
+      "total_run_time": 120,
+      "state": {
+        "type": "FAILED",
+        "timestamp": "2026-10-03T12:04:00Z"
+      },
+      "parameters": {
+        "api_key": "do-not-export"
+      },
+      "task_inputs": {}
+    }
+  ],
+  "prefect_task_runs": [
+    {
+      "id": "bbbbbbbb-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "flow_run_id": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "name": "ingest",
+      "start_time": "2026-10-03T12:02:00Z",
+      "end_time": "2026-10-03T12:04:00Z",
+      "total_run_time": 40,
+      "state": {
+        "type": "COMPLETED",
+        "timestamp": "2026-10-03T12:04:00Z"
+      },
+      "task_inputs": {}
+    },
+    {
+      "id": "cccccccc-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "flow_run_id": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "name": "build-features",
+      "start_time": "2026-10-03T12:02:00Z",
+      "end_time": "2026-10-03T12:04:00Z",
+      "total_run_time": 70,
+      "state": {
+        "type": "FAILED",
+        "timestamp": "2026-10-03T12:04:00Z"
+      },
+      "task_inputs": {
+        "upstream": [
+          {
+            "input_type": "task_run",
+            "id": "bbbbbbbb-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dddddddd-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "flow_run_id": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "name": "forecast",
+      "start_time": "2026-10-03T12:02:00Z",
+      "end_time": "2026-10-03T12:04:00Z",
+      "total_run_time": 10,
+      "state": {
+        "type": "FAILED",
+        "timestamp": "2026-10-03T12:04:00Z"
+      },
+      "task_inputs": {
+        "upstream": [
+          {
+            "input_type": "task_run",
+            "id": "cccccccc-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+          }
+        ]
+      }
+    }
+  ]
+}

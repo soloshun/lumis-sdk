@@ -5,6 +5,10 @@ lives on the legacy branches, not alongside the current API.
 
 ## Reading order
 
+For one explained offline walkthrough, start with the [synthetic SDK playground](notebooks/sdk-playground.ipynb)
+and its [kernel/setup guide](notebooks/README.md). It combines graphs, all four HTTP connectors,
+deterministic/agent routes, a separate scripted text stream, safety checks and audit records.
+
 For a maintainer review, begin with [PoC review guide](review-guide.md): current status,
 ordered documentation/code entry points, expected local outputs and the first GridCast test gate.
 
