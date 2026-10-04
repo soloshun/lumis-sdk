@@ -17,3 +17,6 @@ build/
 .lumis/
 
 .env
+
+# Maintainer-only tutorial recording scripts (kept locally, not tracked)
+docs/tutorials/phase-1-video-script.md
