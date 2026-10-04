@@ -68,7 +68,7 @@ endpoints, increase limits or select arbitrary Prefect flows. Parameters are str
 
 | Provider | Parameters | Observation |
 | --- | --- | --- |
-| `loki` | `logql`, `output: entries` (default) | Timestamped, redacted log messages |
+| `loki` | `logql`, `output: entries` (default), optional `fields: "error,dataset"` | Timestamped, redacted log messages, plus only the allowlisted structured-metadata fields (up to 5, 600 characters each). OTel-shipped logs keep error details there, not in the line |
 | `loki` | `logql`, `output: count` | Number of returned matching log records |
 | `tempo` | `traceql`, `output: entries` (default) | Selected trace ID/root service/name/duration summaries |
 | `tempo` | `traceql`, `output: duration_ms` | One numeric duration per returned trace |
