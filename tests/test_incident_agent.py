@@ -606,3 +606,57 @@ print(json.dumps({'value': namespace['ready'](False) is False}))
     receipt = next(r for r in report.receipts if r.operation == "probe")
     assert receipt.status == "ok" and receipt.snapshot_digest and receipt.code_digest
     assert (tmp_path / "handler.py").read_text().startswith("def ready")
+
+
+def test_competing_supported_root_causes_do_not_yield_a_diagnosis(tmp_path):
+    """Seen on GridCast E: two supported candidates with different roots were reported as one
+    supported diagnosis. A resource node that hosts the service is the same root."""
+    documents = starter_documents()
+    config = json.loads(documents["lumis.yaml"])
+    config["graph"]["entities"] += [
+        {"id": "service:other", "kind": "service", "name": "other"},
+        {"id": "k8s:demo:deployment:demo", "kind": "kubernetes.deployment", "name": "demo"},
+    ]
+    config["graph"]["relationships"] = [
+        {"source": "service:other", "target": "service:demo", "kind": "serves"},
+        {"source": "k8s:demo:deployment:demo", "target": "service:demo", "kind": "hosts"},
+    ]
+    config["rule_hypotheses"] = []
+    (tmp_path / "lumis.yaml").write_text(json.dumps(config))
+    project = YamlProject.from_file(tmp_path / "lumis.yaml")
+    event = Incident.model_validate_json(documents["incident.json"])
+    facts = tuple(
+        Evidence.model_validate(fact) for fact in json.loads(documents["observations.json"])
+    )
+    base = project.config.checks[0].hypothesis
+
+    class Returns:
+        def __init__(self, *roots):
+            self.roots = roots
+
+        async def investigate(self, tools, findings):
+            return AgentOutput(
+                hypotheses=tuple(
+                    base.model_copy(update={"id": f"h{i}", "causal_path": (root, "service:demo")})
+                    if root != "service:demo"
+                    else base.model_copy(update={"id": f"h{i}"})
+                    for i, root in enumerate(self.roots)
+                )
+            )
+
+    competing = asyncio.run(
+        project.handle_incident(
+            event, observations=facts, investigator=Returns("service:demo", "service:other")
+        )
+    )
+    assert all(item.state == "supported" for item in competing.assessments)
+    assert competing.conclusion == "insufficient_evidence"
+    assert any("different root causes" in note for note in competing.unresolved_questions)
+    same = asyncio.run(
+        project.handle_incident(
+            event,
+            observations=facts,
+            investigator=Returns("service:demo", "k8s:demo:deployment:demo"),
+        )
+    )
+    assert same.conclusion == "supported_diagnosis"

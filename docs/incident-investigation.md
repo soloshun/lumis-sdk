@@ -177,7 +177,10 @@ request/token/tool/query/probe counts. It does not store raw chain-of-thought or
 conversation (callers that need it for evaluation read `PydanticInvestigator.messages`). No global tracing is enabled by Lumis. OpenAI response storage is explicitly
 disabled; this does not override provider retention policies.
 
-supported_diagnosis means checks support a candidate, not confirmed causality. Missing usable
+supported_diagnosis means checks support a candidate, not confirmed causality. It also requires
+the supported candidates to agree on one root cause (a resource node that `hosts` a service
+counts as that service): Lumis does not rank supported candidates, so competing supported
+causes yield insufficient_evidence, with the competing roots listed in unresolved questions. Missing usable
 evidence normally yields insufficient_evidence or requires_human_expert. Provider failures,
 malformed output and deadline exhaustion preserve collected facts/receipts. Native SDK
 transport retries are disabled; aggregate requests/output tokens are bounded. Native SDKs
