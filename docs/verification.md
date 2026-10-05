@@ -53,6 +53,16 @@ service/data-lineage inputs demonstrate the portable boundary; neither imports c
 
 ## Independent distribution smoke
 
+### Live consumer qualification: GridCast (2026-10-03 to 2026-10-05)
+
+The [GridCast cookbook](https://github.com/soloshun/lumis-cookbooks/tree/main/gridcast) ran the SDK against a live estate (kind, Prometheus, Loki, Tempo,
+Prefect, PostgreSQL) with 15 injected failure scenarios, each frozen as one incident and answered
+by deterministic triage, the reference agent and comparison baselines. Every fix the integration
+required is listed in the [integration lessons](design-notes/gridcast-integration-lessons.md).
+Only DeepSeek v4 pro through OpenRouter was evaluated; results are for that model, that estate
+and scenarios written by the same team. The cookbook's research notes give the measurements and
+their threats to validity.
+
 ### Limited live transport smoke (2026-10-03)
 
 Read-only requests against the already-running local GridCast backends verified real Loki log

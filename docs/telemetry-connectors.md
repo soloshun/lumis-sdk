@@ -7,10 +7,9 @@ An explicit incident tells Lumis which graph entities and time window to investi
 
 ## 1. Install the reviewed development SDK
 
-Use the current `dev` checkout with `uv sync --extra http --all-groups`, or install a built
-wheel with `pip install 'lumis-sdk[http] @ file:///absolute/path/to/reviewed.whl'`.
-Agent use additionally requires the `agent` extra and explicit model configuration.
-The restructured architecture has not been published as a new index release.
+Install `pip install "lumis-sdk[http]==0.1.0"`, or use a `dev` checkout with
+`uv sync --extra http --all-groups`. Agent use additionally requires the `agent` extra and
+explicit model configuration.
 
 ## 2. Configure the real endpoints and identities
 

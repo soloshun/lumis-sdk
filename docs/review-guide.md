@@ -16,9 +16,8 @@ Implementation verification included 157 passing tests with real Docker probes; 
 3.12/3.13 offline suites passed 150 tests with seven explicit Docker opt-in skips each.
 All eight PR checks passed. These verify contracts and isolation, not live model accuracy.
 
-The dev architecture is not a new published release. Source metadata remains 0.1.0rc1;
-the intended final experimental release is 0.1.0. Use the reviewed dev commit for testing,
-not an earlier index artifact that happens to have the same version string.
+The experimental release of this architecture is `lumis-sdk==0.1.0`. The older `0.1.0rc1`
+upload belongs to the previous architecture; do not test these docs against it.
 
 ## Review order
 

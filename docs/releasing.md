@@ -13,10 +13,10 @@ Each sprint updates current docs, schemas, tests, roadmap and changelog together
 ## 2. Choose a fresh candidate version
 
 Before publishing this architecture, inspect existing PyPI/TestPyPI releases and tags.
-Never reuse an existing artifact version. The source currently says `0.1.0rc1`; that is not a
-claim that this architecture exists in an index. If rc1 was already uploaded for the previous
-architecture, choose a fresh candidate such as rc2 and update both metadata and
-`src/lumis_sdk/__init__.py`, lockfile and release notes.
+Never reuse an existing artifact version. `0.1.0rc1` was uploaded for the previous
+architecture; `0.1.0` (2026-10-05) is the first release of this one. For the next release,
+update the version in `pyproject.toml`, `src/lumis_sdk/__init__.py`, the lockfile and the
+changelog together.
 Record intentional breaking migration and removed packages.
 
 ## 3. Verify SDK gates independently
