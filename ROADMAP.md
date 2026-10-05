@@ -19,7 +19,7 @@ Goal: inspect an operational estate and test falsifiable explanations without ac
   scoped Kubernetes/OTLP/Prometheus and optional OpenRouter/OpenAI/Anthropic/Gemini.
 - [x] Exit: independent tests and clean-wheel CLI on supported Python; accurate shipped API docs
   and mock-vs-live limits. SDK implementation does not wait for GridCast.
-- [ ] Experimental `0.1.0` publication (separate qualification/release issue #9).
+- [x] Experimental `0.1.0` publication: PyPI and GitHub release `v0.1.0`, 2026-10-05 (#9).
 - [x] Live consumer qualification on one estate and one model: the [GridCast cookbook](https://github.com/soloshun/lumis-cookbooks/tree/main/gridcast)
   (15 injected scenarios, DeepSeek v4 pro through OpenRouter; external issue #96).
 - [ ] Live qualification with other model families (only mocked contracts so far).

@@ -1,0 +1,7 @@
+{
+  "id": "api-001",
+  "affected_entities": ["service:api"],
+  "symptoms": ["Health check failing"],
+  "started_at": "2026-10-05T05:00:00Z",
+  "ended_at": "2026-10-05T05:10:00Z"
+}
