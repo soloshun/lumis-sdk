@@ -52,7 +52,8 @@ New here? Start with [using Lumis on a small project](docs/small-project.md).
 
 ## Start here
 
-Read the [documentation entry point](docs/README.md), then follow the
+The documentation website is **[lumis-sdk.vercel.app/docs](https://lumis-sdk.vercel.app/docs)**.
+In this repository, read the [documentation entry point](docs/README.md), then follow the
 [CLI walkthrough](docs/cli.md) and [YAML reference](docs/configuration.md).
 For a complete review order and integration-readiness checklist, start with the
 [PoC review guide](docs/review-guide.md).
