@@ -5,6 +5,9 @@ lives on the legacy branches, not alongside the current API.
 
 ## Reading order
 
+New to Lumis? Start with [using Lumis on a small project](small-project.md): one service,
+Prometheus and one deterministic check, with a tested example.
+
 For one explained offline walkthrough, start with the [synthetic SDK playground](notebooks/sdk-playground.ipynb)
 and its [kernel/setup guide](notebooks/README.md). It combines graphs, all four HTTP connectors,
 deterministic/agent routes, a separate scripted text stream, safety checks and audit records.

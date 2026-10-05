@@ -34,6 +34,17 @@ facts cannot silently turn into support. Contradiction takes precedence.
 
 ## Package responsibilities
 
+Responsibility layers (who does what; this is not a strict import hierarchy):
+
+```mermaid
+flowchart LR
+    I["Interface<br/>cli · Python API"] --> C["Composition<br/>runtime"]
+    C --> R["Reasoning<br/>checks · investigation ·<br/>reasoning · models · sandbox"]
+    R --> D["Data<br/>connectors · graph"]
+    D --> F["Foundations<br/>core · security"]
+```
+
+
 | Package | Responsibility |
 | --- | --- |
 | `core` | Pydantic contracts and invariants |

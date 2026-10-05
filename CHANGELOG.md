@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Documentation only: a high-level "How Lumis works" diagram in the README, plus diagrams for
+  responsibility layers, graph preparation, triage routing and how a report reaches its
+  conclusion. A [small-project guide](docs/small-project.md) with a tested one-service
+  Prometheus example (`docs/examples/small-project/`). No code or API change.
+
 ## 0.1.0 — 2026-10-05 (experimental, pre-1.0)
 
 First index release of the standalone operational-intelligence architecture. It replaces the
