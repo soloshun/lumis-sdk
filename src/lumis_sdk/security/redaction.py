@@ -10,14 +10,21 @@ _SENSITIVE_VALUE_PATTERN = re.compile(
 )
 _BEARER_PATTERN = re.compile(r"(?i)Bearer\s+[A-Za-z0-9._-]+")
 _EMAIL_PATTERN = re.compile(r"\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b")
-_PHONE_PATTERN = re.compile(r"(?<!\w)(?:\+?\d[\d .()-]{7,}\d)(?!\w)")
+_PHONE_PATTERN = re.compile(r"(?<![\w.])(?:\+?\d[\d .()-]{7,}\d)(?![\w]|\.\d)")
 _US_SSN_PATTERN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 _JWT_PATTERN = re.compile(r"\beyJ[a-zA-Z0-9_-]{8,}\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\b")
 _KNOWN_TOKEN_PATTERN = re.compile(
     r"\b(?:sk-[A-Za-z0-9_-]{16,}|github_pat_[A-Za-z0-9_]{20,}|"
     r"gh[pousr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,})\b"
 )
-_CARD_CANDIDATE_PATTERN = re.compile(r"(?<!\d)(?:\d[ -]?){13,19}(?!\d)")
+# Not part of a decimal number: telemetry fractions (e.g. 1245.4931506849316) must not be read
+# as card numbers.
+_CARD_CANDIDATE_PATTERN = re.compile(r"(?<![\d.])(?:\d[ -]?){13,19}(?![\d]|\.\d)")
+# Telemetry shapes that resemble phone numbers but are measurements, times or addresses.
+_DECIMAL_PATTERN = re.compile(r"^\d+\.\d+$")
+_ISO_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}(?:[ T]\d{2})?$")
+_IPV4_PATTERN = re.compile(r"^(?:\d{1,3}\.){3}\d{1,3}$")
+_PHONE_SEPARATORS = re.compile(r"[ .()-]")
 _SENSITIVE_FIELD_NAME_PATTERN = re.compile(
     r"(?ix)(?:api[_-]?key|access[_-]?token|auth(?:entication)?[_-]?token|"
     r"client[_-]?secret|password|passwd|secret|credential|authorization|database[_-]?url)"
@@ -33,7 +40,7 @@ def redact_text(value: str) -> str:
     redacted = _EMAIL_PATTERN.sub("[REDACTED_EMAIL]", redacted)
     redacted = _US_SSN_PATTERN.sub("[REDACTED_SSN]", redacted)
     redacted = _CARD_CANDIDATE_PATTERN.sub(_redact_card_candidate, redacted)
-    return _PHONE_PATTERN.sub("[REDACTED_PHONE]", redacted)
+    return _PHONE_PATTERN.sub(_redact_phone_candidate, redacted)
 
 
 def redact_value(value: object) -> object:
@@ -52,6 +59,21 @@ def redact_value(value: object) -> object:
             for key, item in value.items()
         }
     return value
+
+
+def _redact_phone_candidate(match: re.Match[str]) -> str:
+    """Phone-shaped: international (+ and 8-15 digits) or at least two digit groups separated
+    like a dialling number. Plain integers, decimals, ISO dates and IPv4 addresses are kept."""
+    text = match.group()
+    if _DECIMAL_PATTERN.match(text) or _ISO_DATE_PATTERN.match(text) or _IPV4_PATTERN.match(text):
+        return text
+    digits = re.sub(r"\D", "", text)
+    groups = [group for group in _PHONE_SEPARATORS.split(text) if group]
+    if text.startswith("+") and 8 <= len(digits) <= 15:
+        return "[REDACTED_PHONE]"
+    if 7 <= len(digits) <= 15 and len(groups) >= 3:
+        return "[REDACTED_PHONE]"
+    return text
 
 
 def _redact_card_candidate(match: re.Match[str]) -> str:

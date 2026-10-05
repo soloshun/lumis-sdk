@@ -1,0 +1,190 @@
+{
+  "$defs": {
+    "Entity": {
+      "additionalProperties": false,
+      "description": "Operational identity; attributes should contain normalized non-secret metadata only.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name"
+      ],
+      "title": "Entity",
+      "type": "object"
+    },
+    "GraphSnapshot": {
+      "additionalProperties": false,
+      "description": "An inspectable graph value with unique identities and valid edge endpoints.",
+      "properties": {
+        "entities": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Entity"
+          },
+          "title": "Entities",
+          "type": "array"
+        },
+        "relationships": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Relationship"
+          },
+          "title": "Relationships",
+          "type": "array"
+        }
+      },
+      "title": "GraphSnapshot",
+      "type": "object"
+    },
+    "Relationship": {
+      "additionalProperties": false,
+      "description": "A directed observed or declared relationship, not an inferred causal conclusion.",
+      "properties": {
+        "kind": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "source": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "kind"
+      ],
+      "title": "Relationship",
+      "type": "object"
+    },
+    "SourceDiscovery": {
+      "additionalProperties": false,
+      "properties": {
+        "entities": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Entities",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "relationships": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Relationships",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "error",
+            "disabled",
+            "not_checked"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "status"
+      ],
+      "title": "SourceDiscovery",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "complete": {
+      "default": true,
+      "title": "Complete",
+      "type": "boolean"
+    },
+    "graph": {
+      "$ref": "#/$defs/GraphSnapshot"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/SourceDiscovery"
+      },
+      "title": "Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "graph",
+    "sources"
+  ],
+  "title": "DiscoveryReport",
+  "type": "object"
+}

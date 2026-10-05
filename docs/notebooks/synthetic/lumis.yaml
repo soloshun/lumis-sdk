@@ -1,0 +1,91 @@
+api_version: lumis.dev/operational-v1alpha1
+project: {name: notebook-demo, environment: synthetic}
+sources:
+  prometheus: {enabled: true, endpoint: 'https://prometheus.synthetic.test'}
+  loki: {enabled: true, endpoint: 'https://loki.synthetic.test', max_results: 10}
+  tempo:
+    enabled: true
+    endpoint: https://tempo.synthetic.test
+    service_namespace: demo
+    discovery_query: '{ resource.service.namespace = "demo" }'
+    max_trace_reads: 5
+    max_results: 10
+  prefect:
+    enabled: true
+    endpoint: https://prefect.synthetic.test/api
+    flow_names: [daily-forecast]
+    discover_topology: true
+    namespace: demo
+graph:
+  entities:
+    - {id: 'service:demo:db', kind: service, name: Database}
+    - {id: 'service:demo:features', kind: service, name: features}
+    - {id: 'service:demo:forecast', kind: service, name: forecast}
+    - {id: 'service:demo:api', kind: service, name: Forecast API}
+    - {id: 'workflow:demo:daily-forecast', kind: workflow, name: daily-forecast}
+  relationships:
+    - {source: 'service:demo:db', target: 'service:demo:features', kind: feeds, provenance: [operator-declared]}
+    - {source: 'service:demo:features', target: 'service:demo:forecast', kind: serves, provenance: [operator-declared]}
+    - {source: 'service:demo:forecast', target: 'service:demo:api', kind: serves, provenance: [operator-declared]}
+    - {source: 'workflow:demo:daily-forecast', target: 'service:demo:features', kind: schedules, provenance: [operator-declared]}
+queries:
+  - id: db-retries
+    provider: prometheus
+    entity_id: service:demo:db
+    key: retry_count
+    description: Database retry count at incident end
+    parameters: {promql: 'sum(demo_db_retries_total{environment="synthetic"})'}
+  - id: db-errors
+    provider: loki
+    entity_id: service:demo:db
+    key: error_log_count
+    description: Matching database error records inside the incident window
+    parameters: {logql: '{service_name="db",environment="synthetic"} |= "error"', output: count}
+  - id: forecast-traces
+    provider: tempo
+    entity_id: service:demo:forecast
+    key: trace_duration_ms
+    description: Matching forecast trace durations, not a population percentile
+    parameters: {traceql: '{ resource.service.name = "forecast" && resource.service.namespace = "demo" }', output: duration_ms}
+  - id: forecast-spans
+    provider: tempo
+    entity_id: service:demo:forecast
+    key: span_summary
+    description: Inspect bounded matching trace spans without knowing their IDs beforehand
+    parameters: {traceql: '{ resource.service.name = "forecast" && resource.service.namespace = "demo" }', output: spans}
+  - id: flow-duration
+    provider: prefect
+    entity_id: workflow:demo:daily-forecast
+    key: run_duration_ms
+    description: Maximum accumulated Prefect runtime of runs started in the incident
+    parameters: {flow_name: daily-forecast, operation: flow_runs, output: max_duration_ms}
+  - id: flow-tasks
+    provider: prefect
+    entity_id: workflow:demo:daily-forecast
+    key: task_summary
+    description: Task states for the explicitly approved synthetic flow run
+    parameters: {flow_name: daily-forecast, operation: task_runs, flow_run_id: aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee, output: entries}
+initial_query_ids: [db-retries, db-errors]
+checks:
+  - id: known-db-retry-signature
+    terminal: true
+    explains_entities: ['service:demo:forecast']
+    hypothesis:
+      id: db-retry-path
+      statement: The operator-approved database retry signature is consistent with the forecast slowdown.
+      causal_path: ['service:demo:db', 'service:demo:features', 'service:demo:forecast']
+      predictions:
+        - {entity_id: 'service:demo:db', key: retry_count, operator: ge, value: 5}
+        - {entity_id: 'service:demo:db', key: error_log_count, operator: ge, value: 1}
+      falsifiers:
+        - {entity_id: 'service:demo:db', key: retry_count, operator: le, value: 2}
+      evidence_needed: [db-retries, db-errors]
+investigator:
+  repositories:
+    - id: demo-source
+      root: approved-source
+      entity_ids: ['service:demo:features']
+      files: [features.py]
+  budget: {request_limit: 10, tool_calls_limit: 10}
+budget: {graph_hops: 4, max_entities: 30, max_queries: 8, max_context_characters: 50000}
+policies: {default_action_mode: read_only}

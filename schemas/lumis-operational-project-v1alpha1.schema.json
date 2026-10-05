@@ -1,0 +1,1445 @@
+{
+  "$defs": {
+    "AgentBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_probes": {
+          "default": 2,
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Probes",
+          "type": "integer"
+        },
+        "max_tool_characters": {
+          "default": 8000,
+          "maximum": 64000,
+          "minimum": 100,
+          "title": "Max Tool Characters",
+          "type": "integer"
+        },
+        "max_total_tool_characters": {
+          "default": 32000,
+          "maximum": 256000,
+          "minimum": 100,
+          "title": "Max Total Tool Characters",
+          "type": "integer"
+        },
+        "output_tokens_limit": {
+          "default": 12000,
+          "maximum": 100000,
+          "minimum": 100,
+          "title": "Output Tokens Limit",
+          "type": "integer"
+        },
+        "request_limit": {
+          "default": 8,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Request Limit",
+          "type": "integer"
+        },
+        "tool_calls_limit": {
+          "default": 10,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Tool Calls Limit",
+          "type": "integer"
+        },
+        "validation_retries": {
+          "default": 2,
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Validation Retries",
+          "type": "integer"
+        }
+      },
+      "title": "AgentBudget",
+      "type": "object"
+    },
+    "ChangeSource": {
+      "additionalProperties": false,
+      "description": "Typed, time-bounded change records: commits to mapped paths and Kubernetes rollouts.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "git": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GitChangeSource"
+          },
+          "maxItems": 10,
+          "title": "Git",
+          "type": "array"
+        },
+        "kubernetes_rollouts": {
+          "default": false,
+          "title": "Kubernetes Rollouts",
+          "type": "boolean"
+        },
+        "lookback_seconds": {
+          "default": 3600,
+          "maximum": 604800,
+          "minimum": 60,
+          "title": "Lookback Seconds",
+          "type": "integer"
+        },
+        "max_records": {
+          "default": 50,
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Max Records",
+          "type": "integer"
+        }
+      },
+      "title": "ChangeSource",
+      "type": "object"
+    },
+    "Check": {
+      "additionalProperties": false,
+      "description": "A testable prediction or falsifier evaluated only against tool observations.",
+      "properties": {
+        "entity_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "eq",
+            "ne",
+            "gt",
+            "ge",
+            "lt",
+            "le"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "entity_id",
+        "key",
+        "operator",
+        "value"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "CodeRepository": {
+      "additionalProperties": false,
+      "properties": {
+        "entity_ids": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Entity Ids",
+          "type": "array"
+        },
+        "files": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Files",
+          "type": "array"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "include_commit_subjects": {
+          "default": false,
+          "title": "Include Commit Subjects",
+          "type": "boolean"
+        },
+        "root": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "root",
+        "entity_ids",
+        "files"
+      ],
+      "title": "CodeRepository",
+      "type": "object"
+    },
+    "DiagnosticRule": {
+      "additionalProperties": false,
+      "properties": {
+        "explains_entities": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Explains Entities",
+          "type": "array"
+        },
+        "hypothesis": {
+          "$ref": "#/$defs/Hypothesis"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "terminal": {
+          "default": false,
+          "title": "Terminal",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "hypothesis"
+      ],
+      "title": "DiagnosticRule",
+      "type": "object"
+    },
+    "DiscoveryBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_entities": {
+          "default": 5000,
+          "maximum": 50000,
+          "minimum": 1,
+          "title": "Max Entities",
+          "type": "integer"
+        },
+        "max_relationships": {
+          "default": 10000,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Max Relationships",
+          "type": "integer"
+        },
+        "max_response_bytes": {
+          "default": 2000000,
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Max Response Bytes",
+          "type": "integer"
+        },
+        "max_service_graph_series": {
+          "default": 1000,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Max Service Graph Series",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "maximum": 120,
+          "title": "Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "title": "DiscoveryBudget",
+      "type": "object"
+    },
+    "Entity": {
+      "additionalProperties": false,
+      "description": "Operational identity; attributes should contain normalized non-secret metadata only.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name"
+      ],
+      "title": "Entity",
+      "type": "object"
+    },
+    "EvidenceQuery": {
+      "additionalProperties": false,
+      "description": "An operator-registered observation. A model may request its ID, never invent its query.",
+      "properties": {
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "entity_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "provider": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "entity_id",
+        "key",
+        "description"
+      ],
+      "title": "EvidenceQuery",
+      "type": "object"
+    },
+    "GitChangeSource": {
+      "additionalProperties": false,
+      "description": "One repository whose commits are changes to the entities its paths configure.",
+      "properties": {
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "paths": {
+          "additionalProperties": {
+            "items": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "propertyNames": {
+            "maxLength": 256,
+            "minLength": 1
+          },
+          "title": "Paths",
+          "type": "object"
+        },
+        "root": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Root",
+          "type": "string"
+        },
+        "scopes": {
+          "additionalProperties": {
+            "items": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxProperties": 200,
+          "propertyNames": {
+            "maxLength": 256,
+            "minLength": 1
+          },
+          "title": "Scopes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "root",
+        "paths"
+      ],
+      "title": "GitChangeSource",
+      "type": "object"
+    },
+    "GraphSnapshot": {
+      "additionalProperties": false,
+      "description": "An inspectable graph value with unique identities and valid edge endpoints.",
+      "properties": {
+        "entities": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Entity"
+          },
+          "title": "Entities",
+          "type": "array"
+        },
+        "relationships": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Relationship"
+          },
+          "title": "Relationships",
+          "type": "array"
+        }
+      },
+      "title": "GraphSnapshot",
+      "type": "object"
+    },
+    "Hypothesis": {
+      "additionalProperties": false,
+      "description": "A candidate explanation, never a confirmed root cause or permission to act.",
+      "properties": {
+        "causal_path": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Causal Path",
+          "type": "array"
+        },
+        "evidence_needed": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Evidence Needed",
+          "type": "array"
+        },
+        "falsifiers": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Falsifiers",
+          "type": "array"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "predictions": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Predictions",
+          "type": "array"
+        },
+        "statement": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "statement",
+        "causal_path",
+        "predictions",
+        "evidence_needed",
+        "falsifiers"
+      ],
+      "title": "Hypothesis",
+      "type": "object"
+    },
+    "IdentitySettings": {
+      "additionalProperties": false,
+      "properties": {
+        "aliases": {
+          "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "propertyNames": {
+            "maxLength": 256,
+            "minLength": 1
+          },
+          "title": "Aliases",
+          "type": "object"
+        }
+      },
+      "title": "IdentitySettings",
+      "type": "object"
+    },
+    "InvestigationBudget": {
+      "additionalProperties": false,
+      "description": "Hard limits for one run, including deterministic and model sources.",
+      "properties": {
+        "graph_hops": {
+          "default": 3,
+          "maximum": 20,
+          "minimum": 0,
+          "title": "Graph Hops",
+          "type": "integer"
+        },
+        "max_context_characters": {
+          "default": 20000,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Max Context Characters",
+          "type": "integer"
+        },
+        "max_entities": {
+          "default": 100,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Max Entities",
+          "type": "integer"
+        },
+        "max_hypotheses": {
+          "default": 5,
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Max Hypotheses",
+          "type": "integer"
+        },
+        "max_model_output_tokens": {
+          "default": 3000,
+          "maximum": 32000,
+          "minimum": 1,
+          "title": "Max Model Output Tokens",
+          "type": "integer"
+        },
+        "max_queries": {
+          "default": 8,
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Max Queries",
+          "type": "integer"
+        },
+        "query_timeout_seconds": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "maximum": 300,
+          "title": "Query Timeout Seconds",
+          "type": "number"
+        },
+        "source_timeout_seconds": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "maximum": 300,
+          "title": "Source Timeout Seconds",
+          "type": "number"
+        },
+        "total_timeout_seconds": {
+          "default": 120,
+          "exclusiveMinimum": 0,
+          "maximum": 3600,
+          "title": "Total Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "title": "InvestigationBudget",
+      "type": "object"
+    },
+    "InvestigatorSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "budget": {
+          "$ref": "#/$defs/AgentBudget"
+        },
+        "repositories": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CodeRepository"
+          },
+          "maxItems": 10,
+          "title": "Repositories",
+          "type": "array"
+        },
+        "sandbox": {
+          "$ref": "#/$defs/SandboxPolicy"
+        }
+      },
+      "title": "InvestigatorSettings",
+      "type": "object"
+    },
+    "KubernetesSource": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "namespace": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Namespace"
+        }
+      },
+      "title": "KubernetesSource",
+      "type": "object"
+    },
+    "LokiSource": {
+      "additionalProperties": false,
+      "description": "Read-only log queries; no ingestion, tailing or deletion.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "headers_env": {
+          "additionalProperties": {
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "Authorization",
+              "X-Scope-OrgID"
+            ]
+          },
+          "title": "Headers Env",
+          "type": "object"
+        },
+        "max_requests": {
+          "default": 32,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "max_response_bytes": {
+          "default": 1000000,
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Max Response Bytes",
+          "type": "integer"
+        },
+        "max_results": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        }
+      },
+      "title": "LokiSource",
+      "type": "object"
+    },
+    "ModelSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key_env": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z][A-Z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Key Env"
+        },
+        "model": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "provider": {
+          "default": "openrouter",
+          "enum": [
+            "openrouter",
+            "openai",
+            "anthropic",
+            "gemini"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "reasoning": {
+          "anyOf": [
+            {
+              "enum": [
+                "minimal",
+                "low",
+                "medium",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reasoning"
+        }
+      },
+      "required": [
+        "model"
+      ],
+      "title": "ModelSettings",
+      "type": "object"
+    },
+    "OpenTelemetrySource": {
+      "additionalProperties": false,
+      "description": "Normalize an OTLP JSON export; this is not a live OTLP receiver.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "export_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Export File"
+        }
+      },
+      "title": "OpenTelemetrySource",
+      "type": "object"
+    },
+    "Policies": {
+      "additionalProperties": false,
+      "description": "The current kernel cannot execute actions, regardless of model confidence.",
+      "properties": {
+        "default_action_mode": {
+          "const": "read_only",
+          "default": "read_only",
+          "title": "Default Action Mode",
+          "type": "string"
+        }
+      },
+      "title": "Policies",
+      "type": "object"
+    },
+    "PrefectSource": {
+      "additionalProperties": false,
+      "properties": {
+        "discover_topology": {
+          "default": false,
+          "title": "Discover Topology",
+          "type": "boolean"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "flow_names": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "title": "Flow Names",
+          "type": "array"
+        },
+        "headers_env": {
+          "additionalProperties": {
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "Authorization",
+              "X-Scope-OrgID"
+            ]
+          },
+          "title": "Headers Env",
+          "type": "object"
+        },
+        "lookback_seconds": {
+          "default": 3600,
+          "maximum": 86400,
+          "minimum": 1,
+          "title": "Lookback Seconds",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 32,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "max_response_bytes": {
+          "default": 1000000,
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Max Response Bytes",
+          "type": "integer"
+        },
+        "max_results": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        },
+        "namespace": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Namespace"
+        }
+      },
+      "title": "PrefectSource",
+      "type": "object"
+    },
+    "ProjectIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "environment": {
+          "default": "local",
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Environment",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ProjectIdentity",
+      "type": "object"
+    },
+    "PrometheusSource": {
+      "additionalProperties": false,
+      "properties": {
+        "discover_service_graph": {
+          "default": false,
+          "title": "Discover Service Graph",
+          "type": "boolean"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "service_graph_query": {
+          "default": "sum by (client, server) (rate(traces_service_graph_request_total[5m]))",
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Service Graph Query",
+          "type": "string"
+        },
+        "service_namespace": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Service Namespace"
+        }
+      },
+      "title": "PrometheusSource",
+      "type": "object"
+    },
+    "Relationship": {
+      "additionalProperties": false,
+      "description": "A directed observed or declared relationship, not an inferred causal conclusion.",
+      "properties": {
+        "kind": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "source": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "kind"
+      ],
+      "title": "Relationship",
+      "type": "object"
+    },
+    "SandboxPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "cpus": {
+          "default": 0.5,
+          "exclusiveMinimum": 0,
+          "maximum": 2,
+          "title": "Cpus",
+          "type": "number"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9./:_-]*@sha256:[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image"
+        },
+        "max_output_bytes": {
+          "default": 8000,
+          "maximum": 64000,
+          "minimum": 100,
+          "title": "Max Output Bytes",
+          "type": "integer"
+        },
+        "memory_mb": {
+          "default": 128,
+          "maximum": 512,
+          "minimum": 64,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "pids": {
+          "default": 32,
+          "maximum": 64,
+          "minimum": 8,
+          "title": "Pids",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "title": "SandboxPolicy",
+      "type": "object"
+    },
+    "Sources": {
+      "additionalProperties": false,
+      "properties": {
+        "changes": {
+          "$ref": "#/$defs/ChangeSource"
+        },
+        "kubernetes": {
+          "$ref": "#/$defs/KubernetesSource"
+        },
+        "loki": {
+          "$ref": "#/$defs/LokiSource"
+        },
+        "opentelemetry": {
+          "$ref": "#/$defs/OpenTelemetrySource"
+        },
+        "prefect": {
+          "$ref": "#/$defs/PrefectSource"
+        },
+        "prometheus": {
+          "$ref": "#/$defs/PrometheusSource"
+        },
+        "sql": {
+          "$ref": "#/$defs/SqlSource"
+        },
+        "tempo": {
+          "$ref": "#/$defs/TempoSource"
+        },
+        "topology": {
+          "$ref": "#/$defs/TopologySource"
+        }
+      },
+      "title": "Sources",
+      "type": "object"
+    },
+    "SqlSource": {
+      "additionalProperties": false,
+      "description": "One PostgreSQL database, read through operator-registered scalar queries only.\n\nThe connection string comes from the environment (`dsn_env`), never from configuration.\nEvery query runs in a read-only transaction with a statement timeout; use a read-only role\nas well, because the transaction mode is a guard, not a permission boundary.",
+      "properties": {
+        "connect_timeout_seconds": {
+          "default": 5,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Connect Timeout Seconds",
+          "type": "integer"
+        },
+        "dsn_env": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z][A-Z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dsn Env"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "max_requests": {
+          "default": 32,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "statement_timeout_ms": {
+          "default": 5000,
+          "maximum": 60000,
+          "minimum": 100,
+          "title": "Statement Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "title": "SqlSource",
+      "type": "object"
+    },
+    "TempoSource": {
+      "additionalProperties": false,
+      "properties": {
+        "discover_trace_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "Discover Trace Ids",
+          "type": "array"
+        },
+        "discovery_query": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Discovery Query"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "headers_env": {
+          "additionalProperties": {
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "Authorization",
+              "X-Scope-OrgID"
+            ]
+          },
+          "title": "Headers Env",
+          "type": "object"
+        },
+        "lookback_seconds": {
+          "default": 3600,
+          "maximum": 86400,
+          "minimum": 1,
+          "title": "Lookback Seconds",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 32,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "max_response_bytes": {
+          "default": 1000000,
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Max Response Bytes",
+          "type": "integer"
+        },
+        "max_results": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        },
+        "max_spans": {
+          "default": 1000,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Max Spans",
+          "type": "integer"
+        },
+        "max_trace_reads": {
+          "default": 5,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Trace Reads",
+          "type": "integer"
+        },
+        "service_namespace": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Service Namespace"
+        }
+      },
+      "title": "TempoSource",
+      "type": "object"
+    },
+    "TopologySource": {
+      "additionalProperties": false,
+      "description": "An external normalized graph snapshot, never executable adapter code.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "file_path": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Path"
+        }
+      },
+      "title": "TopologySource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "lumis.dev/operational-v1alpha1",
+      "default": "lumis.dev/operational-v1alpha1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "budget": {
+      "$ref": "#/$defs/InvestigationBudget"
+    },
+    "checks": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DiagnosticRule"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "discovery": {
+      "$ref": "#/$defs/DiscoveryBudget"
+    },
+    "graph": {
+      "$ref": "#/$defs/GraphSnapshot"
+    },
+    "identity": {
+      "$ref": "#/$defs/IdentitySettings"
+    },
+    "initial_query_ids": {
+      "default": [],
+      "items": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Initial Query Ids",
+      "type": "array"
+    },
+    "investigator": {
+      "$ref": "#/$defs/InvestigatorSettings"
+    },
+    "models": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelSettings"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "observations_file": {
+      "anyOf": [
+        {
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Observations File"
+    },
+    "policies": {
+      "$ref": "#/$defs/Policies"
+    },
+    "project": {
+      "$ref": "#/$defs/ProjectIdentity"
+    },
+    "queries": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EvidenceQuery"
+      },
+      "title": "Queries",
+      "type": "array"
+    },
+    "rule_hypotheses": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Hypothesis"
+      },
+      "title": "Rule Hypotheses",
+      "type": "array"
+    },
+    "sources": {
+      "$ref": "#/$defs/Sources"
+    }
+  },
+  "required": [
+    "project"
+  ],
+  "title": "OperationalProject",
+  "type": "object"
+}

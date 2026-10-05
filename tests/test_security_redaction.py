@@ -44,3 +44,23 @@ def test_redaction_handles_nested_tool_results() -> None:
         "api_key": "[REDACTED_SECRET]",
         "items": ["password=[REDACTED_SECRET]"],
     }
+
+
+def test_redaction_keeps_telemetry_numbers_dates_and_addresses() -> None:
+    """Measurements must reach the investigator intact (found on a live GridCast estate)."""
+    for text in (
+        "rows_scanned 116245.83746",
+        '"value": 1245.4931506849316',
+        "ts 1791032878.856",
+        "p95 0.09501834908088541",
+        "date 2026-10-03",
+        "at 2026-10-03T14:18:25Z",
+        "client 172.20.0.3 port 5432",
+        "count 1791032878",
+    ):
+        assert redact_text(text) == text
+
+
+def test_redaction_still_masks_phone_shapes() -> None:
+    for text in ("+44 20 7946 0958", "(415) 555-2671", "415.555.2671", "+14155552671"):
+        assert "[REDACTED_PHONE]" in redact_text(f"call {text} now")

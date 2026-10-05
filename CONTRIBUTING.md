@@ -1,56 +1,39 @@
 # Contributing to Lumis SDK
 
-Thanks for contributing. Lumis SDK is a pre-alpha, safety-focused open-source framework and research companion. Small, reviewable, well-tested changes are preferred.
+Lumis is experimental, vendor-neutral operational-intelligence software.
+Small, reviewable changes with tests and accurate documentation are welcome.
 
-## Before you contribute
+## Responsibility and provenance
 
-- Discuss substantial changes in an issue before investing in a pull request.
-- Use only original code, public documentation, and synthetic or public data.
-- Never submit credentials, private logs, customer information, employer/client code, runbooks, or architecture material.
-- Keep the current release focused on diagnosis, recommendations, and guarded-recovery contracts; production remediation is out of scope.
+Discuss substantial changes in an issue first. Use original code, public references and
+synthetic/public data. Do not contribute private logs, customer information, credentials,
+employer/client code or confidential architecture.
 
-## Contributor provenance
+Every commit needs a Developer Certificate of Origin 1.1 sign-off (`git commit -s`):
+you have the right to submit the work under Apache-2.0.
 
-By submitting a contribution, you certify the Developer Certificate of Origin 1.1 statement that
-you have the right to submit the work under this project's Apache-2.0 license. Add a `Signed-off-by`
-trailer to every commit using `git commit -s`. The sign-off is a provenance declaration, not a
-copyright assignment.
+AI-assisted contributions are allowed. The human contributor must understand and explain the
+work, verify correctness and security, respect licensing/provenance and privacy, follow the
+architecture, and run the required checks. AI output is not proof that code is safe or correct.
+Briefly disclose material AI assistance in the PR. Maintainers may request origins and reject
+work that cannot be explained, verified or legally contributed.
 
-AI-assisted contributions are welcome. Contributors may use coding assistants, language models,
-or other AI tools for code, tests, documentation, examples, and review. The human contributor
-remains fully responsible for the submitted result: they must understand it, verify it, follow the
-architecture and safety boundaries, run the required checks, remove secrets/private data, and
-have the legal right to contribute every part under Apache-2.0. AI output is not evidence that a
-change is correct, secure, original, or compatible.
+## Current architecture
 
-Briefly disclose material AI assistance in the pull-request description so reviewers understand
-the provenance and review context. Do not submit generated, copied, employer-owned, or
-model-assisted material that you cannot explain and defend. Maintainers may ask for the origin of
-substantial code, fixtures, documentation, or data and may close a contribution when provenance
-or human understanding cannot be established. Existing commits are not retroactively invalidated
-by this policy; enforcement begins when this policy is merged.
+Read [architecture](docs/architecture.md) and [Python API](docs/python-api.md).
+Core contracts are vendor-neutral. Sources propose the same falsifiable hypotheses.
+The runtime owns evidence testing, scope and budgets. Models have no action authority.
+Connect external applications through telemetry/ports; never import their ground truth.
 
-## Architecture boundaries
+There is one active architecture. Do not restore removed legacy namespaces, plugin discovery,
+cookbooks or old schemas as compatibility shims. Historical reproduction belongs on a legacy
+checkout. Application recipes belong in the separate Lumis cookbooks project.
+Optional provider dependencies must not become core requirements.
 
-- Put vendor-neutral models and invariants in `lumis_sdk.domain`.
-- Put orchestration in `lumis_sdk.application` and abstract dependencies behind `lumis_sdk.ports`.
-- Put SQLite, Markdown, deterministic engines, and future provider implementations in `lumis_sdk.adapters`.
-- Keep provider SDKs, synthetic scenarios, prompts, runbooks, and project rules out of the domain.
-- Prefer separate packages for substantial vendor adapters. Optional dependencies must not become core requirements.
-- Treat configuration, serialized records, CLI output, and public Python imports as versioned contracts. Document future transitions rather than silently breaking them.
-
-## Documentation and public claims
-
-- Treat [`docs/LUMIS_SDK_REFERENCE.md`](docs/LUMIS_SDK_REFERENCE.md) as the canonical narrative for the framework.
-- Keep the README accurate, task-oriented, and consistent with the core reference when public behavior changes.
-- Distinguish implemented functionality from lifecycle contracts, cookbook demonstrations, and roadmap ideas. Do not describe a future connector, autonomous action, or hosted product as present functionality.
-- Keep project-specific logs, rules, runbooks, and playbooks in a cookbook or consuming project; do not move scenario-specific material into `src/lumis_sdk`.
-- “Diagnosis-as-Code” names the current structured, evidence-grounded capability. “Healing-as-Code” is the longer-term guarded-recovery direction; do not describe it as implemented until its policy, approval, execution, and verification mechanisms exist and are tested.
-
-## Local setup
+## Setup and checks
 
 ```bash
-uv sync --all-groups
+uv sync --locked --all-groups
 uv run ruff format --check .
 uv run ruff check .
 uv run mypy src
@@ -59,33 +42,18 @@ uv run pytest
 uv build
 ```
 
-## Pull requests
+See [verification](docs/verification.md) for security, dependency and clean-install gates.
 
-- Branch from `dev` and open feature/fix pull requests back into `dev`. `main` is promoted from
-  `dev` through a release pull request. See the
-  [maintainer runbook](docs/contributing/maintainer-runbook.md).
-- Keep the pull request focused and explain the user-visible behavior.
-- Add or update tests for code changes.
-- Update documentation and examples when behavior changes.
-- Add an entry under `CHANGELOG.md` when behavior, configuration, safety posture, or a public interface changes.
-- Do not add secrets to commits, fixtures, screenshots, or issue text.
+## PR workflow
 
-Changes that add action execution, widen filesystem/network authority, alter approval semantics, or weaken evidence boundaries require a design discussion and explicit threat-model updates before implementation.
+1. Branch from current `dev`; target feature/fix PRs back to `dev`.
+2. Explain portable adopter need, public API/configuration impact and safety/privacy boundaries.
+3. Add tests, current documentation, schemas if needed and an unreleased changelog entry.
+4. Sign off commits, disclose material AI use and require automated checks before merge.
+5. Promote `dev` to `main` by a separate release PR; publishing is an explicitly authorized step.
+   Follow [release runbook](docs/releasing.md).
 
-We welcome contributions to code, examples, cookbook recipes, and documentation. Changes to homepage messaging, branding, roadmap, sponsorship links, or product positioning are controlled by maintainers and may require prior discussion.
-
-## Roadmap contribution intake
-
-The [phased roadmap](ROADMAP.md) keeps future phases documentation-only until maintainers approve
-one sprint. Before proposing a roadmap capability:
-
-1. show a standalone or second-product use case rather than a Lumis-only requirement;
-2. classify the work as core, official optional package, community package, example, or
-   product-only;
-3. identify authority, privacy, compatibility, dependency, maintenance, and migration impact;
-4. provide synthetic/public fixtures and an offline verification plan; and
-5. explain which existing port or contract is reused before proposing a new one.
-
-Contributions may include written tutorials and reproducible video scripts. Every video must have
-a versioned written equivalent so users can learn and verify the example without relying on an
-external platform.
+Do not claim a live integration, measured model quality or production readiness from mocks.
+Capabilities require a portable use case, authority/privacy/dependency assessment and offline
+verification plan. Changes widening network/filesystem authority or adding execution need a
+design discussion and threat-model update before implementation.

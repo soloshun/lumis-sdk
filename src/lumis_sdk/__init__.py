@@ -1,8 +1,7 @@
-"""Lumis SDK: deterministic-first primitives for guarded incident recovery.
+"""Experimental, standalone evidence-grounded operational intelligence.
 
-Most applications should import domain contracts from :mod:`lumis_sdk.domain`,
-compose use cases from :mod:`lumis_sdk.application`, and implement or select
-interfaces from :mod:`lumis_sdk.ports`.
+Compose validated core contracts, graph scopes, hypothesis sources and read-only runtime.
+No consuming application or remediation executor is required or imported.
 """
 
-__version__ = "0.1.0rc1"
+__version__ = "0.1.0"

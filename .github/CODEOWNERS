@@ -1,8 +1,8 @@
 * @soloshun
 
 /.github/ @soloshun
-/src/lumis_sdk/domain/ @soloshun
-/src/lumis_sdk/ports/ @soloshun
+/src/lumis_sdk/core/ @soloshun
+/src/lumis_sdk/runtime/ @soloshun
 /src/lumis_sdk/security/ @soloshun
 /schemas/ @soloshun
 /SECURITY.md @soloshun

@@ -1,108 +1,136 @@
-# Lumis SDK phased roadmap
+# Operational-intelligence roadmap
 
-Date: 2026-07-17
+Lumis is an independent, experimental SDK. Applications integrate the framework; they do not
+control its development schedule. Target release: `0.1.0` (pre-1.0). Old sprints are superseded
+and preserved on the [legacy branch](https://github.com/soloshun/lumis-sdk/tree/legacy/pre-operational-intelligence-2026-10-02).
 
-Lumis SDK is an Apache-2.0, vendor-agnostic Python framework for building evidence-grounded,
-guarded incident-response and pipeline-recovery systems. The roadmap develops reusable contracts,
-reference adapters, optional packages, test utilities, and relatable examples without turning the
-SDK into the hosted Lumis product or granting ambient production authority.
+Checked items mean implemented and independently tested in the `dev` architecture, **not**
+published or production-qualified. Unchecked items remain required work, not implicit support.
+Each OI milestone is a sprint-sized slice; phases may contain incremental sub-sprints.
 
-The project is an experimental implementation companion to
-[arXiv:2608.01955](https://arxiv.org/abs/2608.01955). The paper's explicit learning feedback path
-is scheduled incrementally: repeated verified episodes may create reviewable deterministic-rule
-candidates, but frequency alone never confirms truth or activates a rule.
+## Phase A — standalone read-only foundation
 
-## Roadmap documents
+Goal: inspect an operational estate and test falsifiable explanations without action authority.
 
-1. [`docs/roadmap/phase-1-trustworthy-python-foundation.md`](docs/roadmap/phase-1-trustworthy-python-foundation.md)
-   covers Sprints 0–6: the delivered deterministic foundation and the final stable-contract,
-   security, documentation, adoption, and `0.1.0` readiness sprint.
-2. [`docs/roadmap/phase-2-model-prompt-and-bounded-agents.md`](docs/roadmap/phase-2-model-prompt-and-bounded-agents.md)
-   covers Sprints 7–11: provider-neutral model routing, prompt packages, evidence planning,
-   read-only tools, loop guards, grounding, and evaluation gates.
-3. [`docs/roadmap/phase-3-intelligence-memory-and-integrations.md`](docs/roadmap/phase-3-intelligence-memory-and-integrations.md)
-   covers Sprints 12–17: correlation, lineage, recurrence-aware rule candidates, rule analytics,
-   memory quality, semantic retrieval, and demand-led observability, data, orchestration, cloud,
-   and delivery integrations.
-4. [`docs/roadmap/phase-4-guarded-recovery-and-ecosystem.md`](docs/roadmap/phase-4-guarded-recovery-and-ecosystem.md)
-   covers Sprints 18–23: side-effect-aware plugin contracts, executor/verifier protocols, signing,
-   policy conformance, migrations, cross-language schemas, education, and ecosystem maturity.
+- [x] **OI-0: clean architecture reset.** Current graph/evidence/reasoning contracts only;
+  no obsolete framework, cookbooks or plugins; fresh CLI/YAML/API documentation and legacy branches.
+- [x] **OI-1: independently verifiable kernel.** Scoped topology; interchangeable rule/memory/model
+  candidates; bounded observation acquisition; deterministic assessment and abstention; audit store;
+  scoped Kubernetes/OTLP/Prometheus and optional OpenRouter/OpenAI/Anthropic/Gemini.
+- [x] Exit: independent tests and clean-wheel CLI on supported Python; accurate shipped API docs
+  and mock-vs-live limits. SDK implementation does not wait for GridCast.
+- [ ] Experimental `0.1.0` publication (separate qualification/release issue #9).
+- [x] Live consumer qualification on one estate and one model: the [GridCast cookbook](https://github.com/soloshun/lumis-cookbooks/tree/main/gridcast)
+  (15 injected scenarios, DeepSeek v4 pro through OpenRouter; external issue #96).
+- [ ] Live qualification with other model families (only mocked contracts so far).
 
-An internal backend-authored candidate review was used as design input. The public
-[`candidate mapping`](docs/roadmap/candidate-capability-mapping.md) records how each generally
-useful proposal was independently classified and sequenced without exposing or depending on
-private product documentation.
+## Phase B — evidence depth and extensibility
 
-## Phase model
+Goal: improve reusable external observations and bounded investigation, not add product coupling.
 
-| Phase | Sprints | Outcome | Exit condition |
-| --- | --- | --- | --- |
-| Phase 1 — trustworthy Python foundation | 0–6 | Stable, secure, documented Python contracts and independently usable reference paths | Phase 1 gates met; external evidence recorded; pre-1.0 `0.1.0` release approved |
-| Phase 2 — model, prompt, and bounded agents | 7–11 | Replayable provider-neutral reasoning and read-only evidence planning with hard budgets | Multiple adapters pass offline conformance; evaluation gates prevent unsafe promotion |
-| Phase 3 — intelligence, memory, and integrations | 12–17 | Explainable cross-system context, quality-aware memory, and useful optional integration packages | Measured standalone value across several domains without mandatory vendor dependencies |
-| Phase 4 — guarded recovery and ecosystem | 18–23 | Portable recovery protocols and a mature multi-language-friendly ecosystem with no default executor | Protocol/security review, multiple independent implementations, and documented `2.0` decision |
+- [ ] **OI-2: connector contracts and identity enrichment.**
+  - [x] **OI-2a: YAML-led discovery and graph integration.** Pydantic + NetworkX multigraph;
+    bounded neighborhoods/DOT export; shared Python/CLI prepare-and-investigate composition.
+  - [x] Query/candidate IDs bind after enabled discovery; unresolved IDs fail before investigation.
+  - [x] Per-source statuses, fail-closed partial discovery, cancellation and aggregate budgets.
+  - [x] Explicit aliases, Kubernetes resource/logical-service links and external topology JSON.
+  - [x] Existing Prometheus service-graph metric → topology, with explicit namespace and bounds.
+  - [x] Two independent portable graph inputs, mocked HTTP contracts and runnable offline notebook.
+  - [ ] **OI-2b: Git/recent-change evidence.**
+    - [x] Typed time-bounded change records (`sources.changes`): Git commits on operator-mapped
+      paths and Kubernetes rollouts, read-only, exposed as evidence and `inspect(changes)`.
+    - [ ] Implemented `recent_changes_affecting` semantics and remote Git sources.
+  - [ ] Reusable adapter conformance kit: capabilities, query provenance, limits and failure cases.
+  - [x] **OI-2c: data/orchestration observations.** Scoped Prefect flow/task filters and observed
+    workflow/task dependency topology, independent fixtures, least privilege and documented limits.
+  - [x] Loki/Tempo read-only evidence adapters with endpoint-backed registered queries and bounded
+    Tempo trace discovery; authenticated YAML/runtime/agent integration and failure-case tests.
+  - [x] Live Loki/Tempo/Prefect access in an external consumer (GridCast); evidence quality was
+    measured there for one model only.
+- [ ] **OI-3: stronger seek loop and evaluation.** Query-selection baselines, explicit uncertainty,
+  multi-source contradictions, budget/performance measurements and withheld-evidence scenarios.
+  Evaluate proposed hypotheses against synthetic/public incident corpora.
+- [ ] Exit: two independent integrations or reproducible contract fixtures, documented operational
+  limits, no hidden ground-truth access, and comparable measured baselines.
 
-Phase numbers describe capability maturity. They do not imply separate services, a hosted account,
-or a commitment to implement every named integration in core.
+OI-2a provides the first fixtures; the adapter kit, change evidence and measured baselines remain.
+The continuation adds an explicit public artifact slice before broader evidence/learning work:
 
-## Working agreement
+- [x] **OI-A1: evidence-backed deterministic sandwich.** Three-state findings, nonterminal
+  signatures, multi-observable terminal sufficiency, ambiguity/scope checks and caller guard.
+- [x] **OI-A2: basic single investigator.** Pydantic AI native providers, dynamic inspect/probe
+  tool families, approved graph/query/code/Git scope, budgets, typed output and mechanical assessment.
+- [x] **OI-A3: diagnostic experiments and audit.** Opt-in resource-limited Docker, copied
+  source only, degraded probe evidence, receipts/digests, immutable SQLite reports/manual resolutions.
+- [x] **OI-A4: usable public package surface.** CLI incident/menu/SVG, API/YAML/sandbox
+  documentation, schemas and executable offline agent notebook.
+- [ ] **OI-A5: artifact evaluation.** Versioned independent/live scenarios, provider qualification,
+  diagnosis/abstention/cost measurements and external cookbook evidence.
 
-- Core remains deterministic-first, local-first, model-optional, vendor-neutral, and useful with
-  no plugins installed.
-- A provider, framework, protocol, database extension, cloud, or heavy dependency belongs in an
-  optional package behind a stable port.
-- SaaS tenancy, hosted secrets, billing, entitlements, UI ownership, managed infrastructure,
-  enterprise administration, and commercial operations remain in Lumis—not the SDK.
-- Models may classify, rank, plan evidence, and suggest allowlisted playbooks. They may not verify
-  recovery, manufacture confirmed truth, create arbitrary commands, or grant execution authority.
-- Recovery protocols remain allowlisted, policy-bound, attributable, idempotent, bounded,
-  reversible where possible, independently verified, and fail-closed.
-- Every behavior-changing sprint updates API/reference documentation, schemas where applicable,
-  at least one runnable example, changelog/upgrade notes, and the documentation-site source queue.
-- Tutorial video work is tracked as a release deliverable: each phase gets an overview and each
-  major adoption path gets a reproducible script, repository revision, and written equivalent.
-- TypeScript begins with language-neutral JSON Schema and conformance fixtures. A native runtime
-  starts only after an RFC proves value beyond generated types and avoids semantic drift.
+OI-A1–A4 implement the basic investigation proof of concept. Advanced governance and orchestration
+are not implemented yet and are deferred until after PoC evaluation.
+OI-2b is partly done: typed change records ship; `recent_changes_affecting` semantics and the
+conformance kit remain. Next is broader evaluation or the rest of OI-2b, never automatic recovery.
 
-## Definition of done
+## Phase C — reusable memory and controlled learning
 
-A sprint is complete only when:
+Not implemented yet. Deferred until after the current PoC has been evaluated.
 
-1. public contracts and safety invariants are explicit;
-2. implementation is vendor-neutral or isolated in an optional package;
-3. deterministic unit, contract, integration, hostile-input, and replay tests pass as relevant;
-4. compatibility, migration, authority, and failure behavior are documented;
-5. runnable synthetic/public examples demonstrate the capability without paid keys in CI;
-6. checked schemas and testkit fixtures are current;
-7. security review, dependency audit, SAST, distributions, and clean installs pass;
-8. API docs, cookbook docs, changelog, roadmap status, and video script queue are updated;
-9. GitHub issues and project items link the accepted implementation evidence; and
-10. implemented behavior is not overstated as autonomous recovery or production efficacy.
+Goal: reuse prior incidents without mistaking repetition for truth.
 
-## Issue promotion workflow
+- [ ] **OI-4: retrieval and precedent.** Versioned investigation retrieval, provenance, tenant/context
+  separation, invalidation and revalidation of retrieved candidates.
+- [ ] **OI-5: incident-to-rule promotion.** Candidate patterns from repeated incidents; explicit minimum
+  examples, evidence/quality requirements, falsifier review, human approval, versioning and rollback.
+  “Happened five times” alone is insufficient to create a trusted deterministic rule.
+- [ ] Exit: promotion/withdrawal tests, contradictory recurrence checks, reproducible quality and
+  cost measurements; no automatic operational authority.
 
-1. Keep future phases documentation-only until the maintainer approves the phase.
-2. Re-check the latest SDK and plugin releases before accepting a candidate.
-3. Validate every candidate against one standalone or second-product use case.
-4. Classify it as core, official optional package, community package, example, or product-only.
-5. Approve one sprint at a time and create only that sprint's implementation issues/project items.
-6. Branch from `dev`, implement and document, merge through a reviewed PR to `dev`, then qualify a
-   separate `dev` → `main` release.
-7. Publish core and optional packages independently through trusted publishing and verify public
-   clean installation before closing release issues.
+## Phase D — independently governed proposals and verification
 
-## Current status
+Not implemented yet. Deferred until after PoC evaluation. Only tentative diagnostic suggestions
+and separate human attestations are implemented now; policy-controlled execution and recovery
+are not available.
 
-| Sprint | Status | Released outcome | Tracking |
-| --- | --- | --- | --- |
-| 0 — maintainer baseline | Complete | Structured deterministic rules and open-source CI (`0.0.2`) | #1 |
-| 1 — evidence and reporting | Complete | Bounded evidence, JSON reports, doctor checks, stable testkit (`0.0.3`/`0.0.4`) | #4, #19 |
-| 2 — plugin SDK | Complete | Governed discovery, manifests, compatibility and authority checks (`0.0.6`) | #5 |
-| 3 — durable memory and connectors | Complete | PostgreSQL memory, webhook normalization, HTTP JSON evidence (`0.0.7`) | #2, #6 |
-| 4 — policy and playbook proposals | Complete | Evidence-linked, approval-aware, non-executing proposals (`0.0.8`) | #7, #47, #48 |
-| 5 — verification and learning | Complete | Explicit verification truth, transparent retrieval, replay evaluation (`0.0.8`) | #8, #49, #50 |
-| 6 — trustworthy Python foundation | In progress | Stable contracts, security/release hardening, adoption evidence, and `0.1.0` qualification | #9 |
+Goal: introduce safe proposal boundaries only after diagnosis has measurable quality.
 
-Earlier roadmap labels such as `v0.4` and `v0.5` identify capability milestones, not Python
-package versions. Sprint 6 is explicitly targeted to package release `0.1.0`; a future decision
-after Sprint 7 may consider the path toward `1.0.0`.
+- [ ] **OI-6: typed proposals and independent policy.** Allow/deny scopes, risk, human approval,
+  immutable decision record and authority separated from model/source confidence.
+- [ ] **OI-7: bounded verification and artifact qualification.** Explicit success/failure/inconclusive
+  criteria, before/after evidence, reproducible experiment package and rollback contracts.
+  A real executor requires a separate approved threat-model/design review.
+- [ ] Exit: independent policy cannot be bypassed by model output; replayable verification evidence;
+  clear research/production boundary. Consider 1.0 only after explicit API/release review.
+
+These are planned capabilities, not an executor commitment.
+
+## Cookbook integration readiness
+
+Goal: a cookbook declares approved source/query/candidate YAML, supplies an incident, and calls
+`YamlProject.from_file(...).handle_incident(...)` without application-specific runtime assembly.
+
+- [x] Shared YAML composition; no GridCast imports or hidden ground-truth access.
+- [x] Offline replay without network/model credentials or an external repository.
+- [x] Bounded, inspectable operational graph and declared dataset/job lineage.
+- [x] Mocked read-only Kubernetes/OTLP and Prometheus topology/evidence contracts.
+- [x] API/YAML/CLI documentation and runnable notebook match the shipped interfaces.
+- [x] Conservative triage, basic tool-agent contract, isolated probes and human-review audit.
+- [x] Qualify real cookbook endpoints, telemetry coverage, identities, namespaces and RBAC (GridCast).
+- [ ] Validate live model schema support, privacy, cost, candidate quality and missing-data behavior
+  across model families (done for DeepSeek v4 pro on GridCast only).
+- [ ] Add/qualify remaining adapters before claiming all GridCast fault/scenario families work.
+
+The first read-only Kubernetes/Prometheus slice is ready for **integration testing**, not a claim
+that every cookbook works with arbitrary telemetry and no configuration. Missing providers are
+tracked above. See [integration matrix](docs/integrations.md) and [verification](docs/verification.md).
+
+## Documentation and external examples in every sprint
+
+Every sprint updates architecture decisions, Python API, CLI/YAML, schemas, migration/release
+notes, safety limits and verification instructions. Add cookbook scenarios in the separate
+Lumis cookbooks project, not in core. Written equivalents accompany future demonstration videos.
+
+GridCast is the first external consumer qualification track. Its telemetry/live-model evidence
+can inform priorities and reveal bugs, but is not a gate for framework implementation.
+Future connectors, providers and language clients are incremental, evidence-led work, not claims
+of current support. Issues/project board must preserve this SDK/consumer distinction.
