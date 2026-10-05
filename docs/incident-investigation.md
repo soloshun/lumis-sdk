@@ -29,6 +29,15 @@ A signature may end triage only when:
 4. It covers every affected entity, and all other in-scope signatures are contradicted.
 5. Any caller-owned TriageGuard.allows(rule, context) also accepts.
 
+```mermaid
+flowchart TD
+    F["Each check → finding:<br/>match · no_match · unknown"] --> T{"Terminal check<br/>sufficient?<br/>(rules 1–5)"}
+    T -->|yes| D["supported_diagnosis<br/>(no model, no code read)"]
+    T -->|no| A{"Investigator<br/>enabled?"}
+    A -->|yes| I["Investigator runs with findings<br/>and collected evidence as leads"]
+    A -->|no| H["requires_human_expert<br/>(findings and evidence attached)"]
+```
+
 Two observables are a conservative minimum, **not statistical independence or causal proof**.
 Operators must choose appropriate evidence and may add a stricter guard. For example, an
 observed OOM termination can be nonterminal: it explains the termination but does not establish
@@ -186,6 +195,20 @@ malformed output and deadline exhaustion preserve collected facts/receipts. Nati
 transport retries are disabled; aggregate requests/output tokens are bounded. Native SDKs
 manage provider response buffers, not a custom byte-limited transport; qualify resource/privacy
 behavior before deployment.
+
+```mermaid
+flowchart TD
+    C["Candidate hypotheses<br/>(rules and investigator)"] --> V{"Valid?<br/>graph IDs, registered queries,<br/>known receipts"}
+    V -->|no| U["Dropped; reason listed in<br/>unresolved_questions"]
+    V -->|yes| M["Mechanical assessment against<br/>collected facts"]
+    M --> S["supported"]
+    M --> X["contradicted"]
+    M --> R["unresolved<br/>(missing, conflicting or degraded facts)"]
+    S --> O{"Supported candidates agree<br/>on one root cause?"}
+    O -->|yes| SD["supported_diagnosis"]
+    O -->|no| IE["insufficient_evidence<br/>competing roots listed"]
+    X & R --> N["no diagnosis from this candidate<br/>(insufficient_evidence or<br/>requires_human_expert overall)"]
+```
 
 IncidentStore.save(report) atomically saves immutable incident/evidence/receipt rows in SQLite.
 Reusing an incident ID fails rather than overwriting it. Use a new incident ID for another run.

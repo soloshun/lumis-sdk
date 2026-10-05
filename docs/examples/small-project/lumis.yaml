@@ -1,0 +1,56 @@
+# A minimal Lumis project: one service, Prometheus, one deterministic check.
+# Guide: docs/small-project.md. Validate with `lumis doctor --project lumis.yaml`.
+api_version: lumis.dev/operational-v1alpha1
+project:
+  name: my-api
+  environment: local
+
+sources:
+  prometheus:
+    enabled: true
+    endpoint: http://localhost:9090
+
+policies:
+  default_action_mode: read_only
+
+graph:
+  entities:
+    - id: service:api
+      kind: service
+      name: API
+  relationships: []
+
+queries:
+  - id: api-up
+    provider: prometheus
+    entity_id: service:api
+    key: up
+    description: Was the API scrape target up at the end of the incident?
+    parameters:
+      promql: 'min(up{job="api"})'
+  # A second, independent signal that also reports a real 0 when the API is down: an HTTP
+  # probe from the blackbox exporter. (A request rate would not: when the process is down it has
+  # no new samples, the query returns nothing, and Lumis records "unknown", never 0.)
+  - id: api-probe
+    provider: prometheus
+    entity_id: service:api
+    key: probe_success
+    description: Did the external HTTP health probe succeed?
+    parameters:
+      promql: 'min(probe_success{job="blackbox-api"})'
+
+checks:
+  - id: api-down
+    terminal: true
+    explains_entities: [service:api]
+    hypothesis:
+      id: api-unavailable
+      statement: The API is down; both its scrape target and an external HTTP probe fail.
+      causal_path: [service:api]
+      evidence_needed: [api-up, api-probe]
+      predictions:
+        - {entity_id: "service:api", key: up, operator: eq, value: 0}
+        - {entity_id: "service:api", key: probe_success, operator: eq, value: 0}
+      falsifiers:
+        - {entity_id: "service:api", key: up, operator: eq, value: 1}
+        - {entity_id: "service:api", key: probe_success, operator: eq, value: 1}

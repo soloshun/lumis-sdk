@@ -9,6 +9,47 @@ one optional tool-using agent. It inspects scoped graph, telemetry and approved 
 test hypotheses in an explicitly enabled diagnostic sandbox. Lumis assigns evidence support;
 supported does not mean causally proven or confirmed.
 
+## How Lumis works
+
+```mermaid
+flowchart TD
+    CFG["lumis.yaml<br/>sources · graph · registered queries<br/>checks · allowlist · budgets"]
+    INC["Incident<br/>affected entities + time window"]
+    SRC[("Your telemetry, read-only<br/>Prometheus · Loki · Tempo · Prefect<br/>Kubernetes · SQL · Git")]
+    subgraph SDK["Lumis SDK"]
+        PREP["1 · Prepare<br/>discover the operational graph,<br/>scope it to the incident"]
+        TRI["2 · Deterministic triage<br/>checks tested against facts<br/>from registered queries"]
+        AG["3 · Investigator (optional)<br/>proposes falsifiable hypotheses;<br/>asks for evidence by query ID,<br/>reads change records and allowlisted code"]
+        AS["4 · Mechanical assessment<br/>predictions and falsifiers<br/>vs. facts Lumis collected itself"]
+        REP["Report<br/>supported_diagnosis ·<br/>insufficient_evidence ·<br/>requires_human_expert"]
+    end
+    HUM(("A person<br/>reviews and decides"))
+    DB[("SQLite audit +<br/>human resolutions")]
+    CFG --> PREP
+    INC --> PREP
+    SRC -.->|read-only| PREP
+    SRC -.->|read-only| TRI
+    SRC -.->|read-only| AG
+    PREP --> TRI
+    TRI -->|"a terminal check is sufficient<br/>(no model call)"| REP
+    TRI -->|"no sufficient check,<br/>agent enabled"| AG
+    TRI -->|"agent not enabled"| REP
+    AG --> AS --> REP
+    REP --> HUM
+    REP -.-> DB
+```
+
+- **Checks first.** Known failures are matched deterministically. A check concludes only when it
+  is marked terminal and at least two independent facts support it. Otherwise it becomes a lead.
+- **The model proposes; evidence decides.** The investigator cannot write queries, read outside
+  the allowlist or change anything. Every hypothesis it proposes is checked against facts Lumis
+  fetched itself.
+- **One cause or no conclusion.** A diagnosis is reported only when the supported hypotheses
+  agree on one root cause. Missing data stays "unknown", never "healthy".
+- **People decide.** Lumis reports and suggests. There is no remediation executor.
+
+New here? Start with [using Lumis on a small project](docs/small-project.md).
+
 ## Start here
 
 Read the [documentation entry point](docs/README.md), then follow the

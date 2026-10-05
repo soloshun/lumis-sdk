@@ -9,6 +9,20 @@ Graphviz or plotting package is required.
 supports directed parallel edges, so `feeds` and `observed_dependency` between the same two
 entities are not lost. The runtime scopes a neighborhood for reasoning; drawing the graph is optional.
 
+## How the graph is prepared
+
+```mermaid
+flowchart TB
+    Y["Declared graph<br/>(lumis.yaml)"] --> B
+    T["External topology<br/>JSON"] --> B
+    K["Kubernetes<br/>resources + app labels"] --> B
+    P["Prometheus<br/>service-graph metric"] --> B
+    W["Prefect / Tempo<br/>workflow and trace topology"] --> B
+    B["Discovery + identity binding<br/>aliases, namespaces, fail closed on conflicts"] --> G["Operational graph<br/>NetworkX MultiDiGraph"]
+    G --> S["Incident scope<br/>neighbourhood of the affected entities<br/>within hop and entity budgets"]
+    S --> R["Triage and investigator<br/>see only this scope"]
+```
+
 ## Identity and direction
 
 Export a graph image with `lumis graph --project lumis.yaml --format svg --output graph.svg`.
