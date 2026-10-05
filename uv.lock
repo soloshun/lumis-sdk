@@ -817,7 +817,7 @@ wheels = [
 
 [[package]]
 name = "lumis-sdk"
-version = "0.1.0rc1"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "networkx", version = "3.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },

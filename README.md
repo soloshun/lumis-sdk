@@ -16,7 +16,14 @@ Read the [documentation entry point](docs/README.md), then follow the
 For a complete review order and integration-readiness checklist, start with the
 [PoC review guide](docs/review-guide.md).
 
-For this unreleased development architecture, install from the checkout:
+Install the experimental release (Python 3.11+). The `http` extra adds the telemetry
+connectors, `agent` the optional investigator and `sql` the read-only SQL provider:
+
+```bash
+pip install "lumis-sdk[http,agent]==0.1.0"
+```
+
+To work from a checkout instead:
 
 ```bash
 uv sync --all-groups
@@ -73,9 +80,8 @@ See [integration boundaries](docs/integrations.md).
 ## Development and history
 
 Changes branch from `dev` and return by reviewed PR. `main` promotion and package publication
-are separate release steps; this cleanup does not publish a package.
-The metadata currently remains `0.1.0rc1`; the target final pre-1.0 release is `0.1.0`.
-It must not be presented as an already published version of this new architecture.
+are separate release steps. `0.1.0` is the first index release of this architecture; the older
+`0.1.0rc1` upload is the previous architecture and should not be used with these docs.
 
 Superseded APIs, cookbooks and documentation are absent from the active tree and preserved on
 [legacy/pre-operational-intelligence-2026-10-02](https://github.com/soloshun/lumis-sdk/tree/legacy/pre-operational-intelligence-2026-10-02).

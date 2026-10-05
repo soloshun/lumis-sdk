@@ -20,7 +20,9 @@ Goal: inspect an operational estate and test falsifiable explanations without ac
 - [x] Exit: independent tests and clean-wheel CLI on supported Python; accurate shipped API docs
   and mock-vs-live limits. SDK implementation does not wait for GridCast.
 - [ ] Experimental `0.1.0` publication (separate qualification/release issue #9).
-- [ ] Live consumer qualification (external issue #96; not an SDK implementation gate).
+- [x] Live consumer qualification on one estate and one model: the [GridCast cookbook](https://github.com/soloshun/lumis-cookbooks/tree/main/gridcast)
+  (15 injected scenarios, DeepSeek v4 pro through OpenRouter; external issue #96).
+- [ ] Live qualification with other model families (only mocked contracts so far).
 
 ## Phase B — evidence depth and extensibility
 
@@ -34,14 +36,17 @@ Goal: improve reusable external observations and bounded investigation, not add 
   - [x] Explicit aliases, Kubernetes resource/logical-service links and external topology JSON.
   - [x] Existing Prometheus service-graph metric → topology, with explicit namespace and bounds.
   - [x] Two independent portable graph inputs, mocked HTTP contracts and runnable offline notebook.
-  - [ ] **OI-2b: Git/recent-change evidence.** Typed time-bounded change records, repository/commit
-    identity, safe read-only access and implemented `recent_changes_affecting` semantics.
+  - [ ] **OI-2b: Git/recent-change evidence.**
+    - [x] Typed time-bounded change records (`sources.changes`): Git commits on operator-mapped
+      paths and Kubernetes rollouts, read-only, exposed as evidence and `inspect(changes)`.
+    - [ ] Implemented `recent_changes_affecting` semantics and remote Git sources.
   - [ ] Reusable adapter conformance kit: capabilities, query provenance, limits and failure cases.
   - [x] **OI-2c: data/orchestration observations.** Scoped Prefect flow/task filters and observed
     workflow/task dependency topology, independent fixtures, least privilege and documented limits.
   - [x] Loki/Tempo read-only evidence adapters with endpoint-backed registered queries and bounded
     Tempo trace discovery; authenticated YAML/runtime/agent integration and failure-case tests.
-  - [ ] Live Loki/Tempo/Prefect access and evidence-quality qualification in external consumers.
+  - [x] Live Loki/Tempo/Prefect access in an external consumer (GridCast); evidence quality was
+    measured there for one model only.
 - [ ] **OI-3: stronger seek loop and evaluation.** Query-selection baselines, explicit uncertainty,
   multi-source contradictions, budget/performance measurements and withheld-evidence scenarios.
   Evaluate proposed hypotheses against synthetic/public incident corpora.
@@ -64,8 +69,8 @@ The continuation adds an explicit public artifact slice before broader evidence/
 
 OI-A1–A4 implement the basic investigation proof of concept. Advanced governance and orchestration
 are not implemented yet and are deferred until after PoC evaluation.
-OI-2b remains open: basic Git inspect tools do not finish typed change records.
-Next is evidence/evaluation qualification or OI-2b, never automatic recovery.
+OI-2b is partly done: typed change records ship; `recent_changes_affecting` semantics and the
+conformance kit remain. Next is broader evaluation or the rest of OI-2b, never automatic recovery.
 
 ## Phase C — reusable memory and controlled learning
 
@@ -110,8 +115,9 @@ Goal: a cookbook declares approved source/query/candidate YAML, supplies an inci
 - [x] Mocked read-only Kubernetes/OTLP and Prometheus topology/evidence contracts.
 - [x] API/YAML/CLI documentation and runnable notebook match the shipped interfaces.
 - [x] Conservative triage, basic tool-agent contract, isolated probes and human-review audit.
-- [ ] Qualify real cookbook endpoints, telemetry coverage, identities, namespaces and RBAC.
-- [ ] Validate live model schema support, privacy, cost, candidate quality and missing-data behavior.
+- [x] Qualify real cookbook endpoints, telemetry coverage, identities, namespaces and RBAC (GridCast).
+- [ ] Validate live model schema support, privacy, cost, candidate quality and missing-data behavior
+  across model families (done for DeepSeek v4 pro on GridCast only).
 - [ ] Add/qualify remaining adapters before claiming all GridCast fault/scenario families work.
 
 The first read-only Kubernetes/Prometheus slice is ready for **integration testing**, not a claim
