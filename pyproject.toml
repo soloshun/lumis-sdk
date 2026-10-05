@@ -38,7 +38,7 @@ agent = ["httpx>=0.28,<1", "httpx2>=2.13,<3", "pydantic-ai-slim[openrouter,opena
 
 [project.urls]
 Homepage = "https://github.com/soloshun/lumis-sdk"
-Documentation = "https://github.com/soloshun/lumis-sdk/blob/dev/docs/README.md"
+Documentation = "https://lumis-sdk.vercel.app/docs"
 Repository = "https://github.com/soloshun/lumis-sdk"
 Issues = "https://github.com/soloshun/lumis-sdk/issues"
 
