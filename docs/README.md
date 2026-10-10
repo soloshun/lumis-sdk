@@ -14,6 +14,7 @@ deterministic/agent routes, a separate scripted text stream, safety checks and a
 
 For a maintainer review, begin with [PoC review guide](review-guide.md): current status,
 ordered documentation/code entry points, expected local outputs and the first GridCast test gate.
+Track candidate small fixes separately in the [PoC maintenance notes](maintenance/poc-review-notes.md).
 
 1. [Architecture](architecture.md): what the SDK does, package boundaries and safety model.
    Then [incident investigation](incident-investigation.md) for the recommended deterministic →
