@@ -15,9 +15,36 @@ if TYPE_CHECKING:
 async def configured_investigator(
     settings: ModelSettings, *, timeout: float, retries: int = 2
 ) -> AsyncIterator["Investigator"]:
-    import httpx2
-
     from lumis_sdk.investigation.agent import PydanticInvestigator
+
+    if settings.provider == "bedrock":
+        import boto3  # type: ignore[import-untyped]
+        from botocore.config import Config  # type: ignore[import-untyped]
+        from pydantic_ai.models.bedrock import BedrockConverseModel
+        from pydantic_ai.providers.bedrock import BedrockProvider
+
+        # No keys in YAML, no SDK retry/fallback. Standard AWS credential-chain resolution.
+        client = boto3.Session(region_name=settings.aws_region).client(
+            "bedrock-runtime",
+            config=Config(
+                connect_timeout=timeout,
+                read_timeout=timeout,
+                retries={"total_max_attempts": 1, "mode": "standard"},
+                ignore_configured_endpoint_urls=True,
+            ),
+        )
+        try:
+            yield PydanticInvestigator(
+                BedrockConverseModel(
+                    settings.model, provider=BedrockProvider(bedrock_client=client)
+                ),
+                retries=retries,
+            )
+        finally:
+            client.close()
+        return
+
+    import httpx2
 
     key = os.environ.get(settings.credential_env)
     if not key:
@@ -70,15 +97,22 @@ async def configured_investigator(
                     )
         elif settings.provider == "anthropic":
             from anthropic import AsyncAnthropic
-            from pydantic_ai.models.anthropic import AnthropicModel
+            from pydantic_ai.models.anthropic import AnthropicModel, AnthropicModelSettings
             from pydantic_ai.providers.anthropic import AnthropicProvider
 
             async with AsyncAnthropic(api_key=key, max_retries=0, http_client=http) as anthropic:
+                cached = AnthropicModelSettings()
+                if settings.reasoning is not None:
+                    cached["thinking"] = settings.reasoning
+                if settings.cache_instructions is not None:
+                    cached["anthropic_cache_instructions"] = settings.cache_instructions
+                if settings.cache_tool_definitions is not None:
+                    cached["anthropic_cache_tool_definitions"] = settings.cache_tool_definitions
                 yield PydanticInvestigator(
                     AnthropicModel(
                         settings.model, provider=AnthropicProvider(anthropic_client=anthropic)
                     ),
-                    model_settings=thinking,
+                    model_settings=cached,
                     retries=retries,
                 )
         else:

@@ -7,6 +7,7 @@ lives on the legacy branches, not alongside the current API.
 
 New to Lumis? Start with [using Lumis on a small project](small-project.md): one service,
 Prometheus and one deterministic check, with a tested example.
+Keep the [glossary](glossary.md) handy for contracts, evidence quality and plain result names.
 
 For one explained offline walkthrough, start with the [synthetic SDK playground](notebooks/sdk-playground.ipynb)
 and its [kernel/setup guide](notebooks/README.md). It combines graphs, all four HTTP connectors,
@@ -15,6 +16,8 @@ deterministic/agent routes, a separate scripted text stream, safety checks and a
 For a maintainer review, begin with [PoC review guide](review-guide.md): current status,
 ordered documentation/code entry points, expected local outputs and the first GridCast test gate.
 Track candidate small fixes separately in the [PoC maintenance notes](maintenance/poc-review-notes.md).
+See the [11 October maintenance review handoff](maintenance/verification-2026-10-11.md) for
+implemented fixes, reproducible checks and pending live qualification.
 
 1. [Architecture](architecture.md): what the SDK does, package boundaries and safety model.
    Then [incident investigation](incident-investigation.md) for the recommended deterministic →
@@ -25,7 +28,8 @@ Track candidate small fixes separately in the [PoC maintenance notes](maintenanc
 4. [Python API](python-api.md): compose the same runtime independently of the CLI.
    Start with the [offline notebook](notebooks/operational-graph.ipynb) and [graph/lineage guide](graph.md)
    to inspect NetworkX topology and test YAML-led investigation.
-5. [Model providers](models.md): OpenRouter default, native OpenAI/Anthropic/Gemini wrappers.
+5. [Model providers](models.md): OpenRouter default, native OpenAI/Anthropic/Gemini and optional
+   Pydantic AI Bedrock investigator.
 6. [Integration boundaries](integrations.md): connect any application through external data.
    Follow [Loki/Tempo/Prefect setup](telemetry-connectors.md) for real read-only endpoints and
    registered observation queries; begin from the [complete example](examples/telemetry-project.yaml).

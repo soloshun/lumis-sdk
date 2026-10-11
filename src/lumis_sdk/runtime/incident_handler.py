@@ -10,6 +10,7 @@ from typing import Protocol
 from lumis_sdk import __version__
 from lumis_sdk.checks import TriageGuard, evaluate_checks, sufficient_finding
 from lumis_sdk.core import Incident, IncidentContext
+from lumis_sdk.core.warnings import hypothesis_warnings
 from lumis_sdk.graph import OperationalGraph
 from lumis_sdk.investigation.contracts import AgentOutput, Finding, IncidentReport
 from lumis_sdk.investigation.tools import InvestigationTools, InvestigatorStopped
@@ -117,6 +118,11 @@ async def handle_incident(
                     conclusion="supported_diagnosis",
                     stop_reason="sufficient_terminal_signature",
                     metrics=tools.metrics(),
+                    warnings=tuple(
+                        redact_text(warning)
+                        for rule in rules
+                        for warning in hypothesis_warnings(rule.hypothesis)
+                    ),
                 )
             try:
                 if investigator is not None:
@@ -225,5 +231,10 @@ async def handle_incident(
             else "insufficient_evidence",
             "stop_reason": stop,
             "metrics": tools.metrics(),
+            "warnings": tuple(
+                redact_text(warning)
+                for candidate in (*(rule.hypothesis for rule in rules), *tools.candidates.values())
+                for warning in hypothesis_warnings(candidate)
+            ),
         }
     )

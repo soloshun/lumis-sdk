@@ -8,7 +8,8 @@ The SDK also includes native OpenAI, Anthropic and Gemini HTTP adapters.
 
 Install the agent extra for `YamlProject.handle_incident(use_agent=True)` / `lumis incident --use-agent`.
 One Pydantic AI agent uses native OpenRouter/OpenAI Responses/Anthropic/Gemini provider interfaces,
-typed output and inspect/probe tools. Explicit credentials and a tool-capable model ID are required.
+with an optional Bedrock Converse integration, typed output and named inspection/probe tools.
+Explicit credentials and a tool-capable model ID are required.
 OpenRouter IDs must use upstream-provider/model form. No configuration-time paid requests,
 cross-provider fallback or native SDK transport retries occur.
 OpenRouter routing fallback is disabled and required parameter support requested.
@@ -113,3 +114,73 @@ Native formats were checked against
 and [Gemini Structured Outputs](https://ai.google.dev/gemini-api/docs/generate-content/structured-output).
 Provider APIs/model availability may change. Tests use mocked HTTP responses; no live-provider
 quality, account eligibility or production qualification is claimed.
+
+## AWS Bedrock investigator
+
+Install `pip install 'lumis-sdk[agent,bedrock]'`. The investigator uses Pydantic AI's
+[`BedrockConverseModel` and `BedrockProvider`](https://pydantic.dev/docs/ai/models/bedrock/),
+not a separate hand-written inference adapter. The SDK supplies an owned boto3 client only
+to enforce transport timeouts, one transport attempt and cleanup.
+
+```yaml
+models:
+  provider: bedrock
+  model: YOUR_CONVERSE_TOOL_CAPABLE_MODEL_OR_INFERENCE_PROFILE_ID
+  aws_region: us-east-1
+```
+
+Credentials come from AWS's standard credential chain: for example an authenticated local
+profile selected with `AWS_PROFILE`, or an execution role. No AWS keys belong in YAML.
+`api_key_env`, `reasoning` and Anthropic-only cache settings are rejected for this provider.
+`aws_region` is optional if the region is supplied by AWS configuration.
+Credential resolution may use AWS credential services; it does not invoke a model.
+`lumis doctor` checks the optional dependency without probing AWS credentials or model access.
+Bedrock is supported by `handle_incident(use_agent=True)` / `investigate_incident`, not the
+older candidate-only `investigate(use_model=True)` path.
+
+Live qualification is operator-controlled and can incur charges:
+
+1. Authenticate through your usual AWS profile/role; confirm the account and region.
+2. Verify access to a Converse-compatible, tool-capable model or inference profile. Grant only
+   the required Bedrock invocation permissions; cross-region profiles need destination access.
+3. Run `lumis doctor --project lumis.yaml`, then a synthetic, non-sensitive incident with
+   `lumis incident --project lumis.yaml --incident incident.json --use-agent --format markdown`.
+4. Check the saved JSON report's stop reason, bounded request/token counts, receipts and cited
+   evidence. Repeat with missing evidence and a no-fault control; neither may become confirmation.
+5. Record the model/profile ID, region, SDK version, cost and outcome. Offline construction
+   tests alone do not qualify live schema support, IAM, model quality or production use.
+
+## Stable prompt prefix and Anthropic caching
+
+Agent instructions, tool definitions and the scoped catalog are stable within a run. New tool
+results are appended after the initial incident context; changing incidents/catalogs may invalidate
+the prefix. Provider caching is an explicit opt-in, not a guaranteed saving:
+
+```yaml
+models:
+  provider: anthropic
+  model: YOUR_TOOL_CAPABLE_MODEL_ID
+  cache_instructions: 5m
+  cache_tool_definitions: true
+```
+
+The settings map to Pydantic AI's `anthropic_cache_instructions` and
+`anthropic_cache_tool_definitions`; each accepts `true`, `false`, `5m` or `1h`.
+Other providers reject these settings rather than silently ignoring them.
+The report records provider-reported `cache_read_tokens` and `cache_write_tokens` (zero if absent).
+`report.metrics.cache_read_share` is cached-read tokens divided by input tokens, or zero when the
+denominator is zero; it is a Python convenience property, not an additional JSON field.
+Model-specific cache minimums, TTL, billing and provider support must be checked before a live run.
+Offline tests validate wiring and accounting, not cache hit rates or cost reductions.
+
+## Integration adoption
+
+Prefer Pydantic AI's model/provider integrations for the tool-using investigator. Additional
+providers under consideration are Groq, Mistral, Cohere, xAI, Hugging Face and Cerebras.
+They are **not yet selectable in SDK YAML**: each needs an optional dependency, explicit credential
+handling, bounded transport ownership, offline wire/tool tests and separate live qualification.
+Installing a Pydantic AI extra alone does not constitute SDK support.
+
+MCP tool servers and DBOS workflow execution are separate integration proposals, not model
+providers. They are not enabled by this maintenance work; remote tool authority and durable
+execution need their own design and safety review. The SDK remains independently installable.

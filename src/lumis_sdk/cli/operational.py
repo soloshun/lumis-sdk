@@ -66,7 +66,12 @@ def doctor(
             not os.environ.get(variable) for variable in source.headers_env.values()
         ):
             warnings.append(f"Configured {name} source credential is absent.")
-    if config.models and not os.environ.get(config.models.credential_env):
+    if config.models and config.models.provider == "bedrock":
+        if not importlib.util.find_spec("boto3"):
+            warnings.append(
+                "Bedrock requires lumis-sdk[bedrock]; AWS credentials checked only at opt-in."
+            )
+    elif config.models and not os.environ.get(config.models.credential_env):
         warnings.append(
             "Configured model credential is absent; offline investigation remains available."
         )

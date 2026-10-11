@@ -35,6 +35,7 @@ dependencies = [
 http = ["httpx>=0.28,<1"]
 sql = ["psycopg[binary]>=3.2,<4"]
 agent = ["httpx>=0.28,<1", "httpx2>=2.13,<3", "pydantic-ai-slim[openrouter,openai,anthropic,google]>=2.54,<3"]
+bedrock = ["boto3>=1.34,<2", "pydantic-ai-slim[bedrock]>=2.54,<3"]
 
 [project.urls]
 Homepage = "https://github.com/soloshun/lumis-sdk"
@@ -47,6 +48,7 @@ lumis = "lumis_sdk.cli:main"
 
 [dependency-groups]
 dev = [
+  "boto3>=1.34,<2",
   "bandit>=1.8,<2",
   "mypy>=1.14,<3",
   "pytest>=9.0.3,<10",

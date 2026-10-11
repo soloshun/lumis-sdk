@@ -112,6 +112,8 @@ class PreparedProject:
                 runner=runner,
             )
 
+    investigate_incident = handle_incident
+
     async def investigate(
         self,
         incident: Incident,
@@ -144,6 +146,10 @@ class PreparedProject:
             if use_model:
                 if project.models is None:
                     raise ValueError("explicit model configuration required")
+                if project.models.provider == "bedrock":
+                    raise ValueError(
+                        "Bedrock supports handle_incident(use_agent=True), not the baseline"
+                    )
                 from lumis_sdk.models.factory import create_hypothesis_model
 
                 assert connection is not None
@@ -236,3 +242,5 @@ class YamlProject:
             runner=runner,
             client=client,
         )
+
+    investigate_incident = handle_incident

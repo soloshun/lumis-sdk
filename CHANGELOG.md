@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Classify inspection failures safely, preserve cached query failures without retries, and expose
+  full-versus-visible receipt digests, truncation and provisional candidate assessments.
+- Add named agent tools with a first-prompt catalog, bounded candidate rounds, purpose-first
+  timing instructions, advisory numeric overlap warnings and provider cache usage accounting.
+- Add cited, escaped Markdown reports (`report.markdown()` and CLI `--format markdown`), plain
+  display labels and `investigate_incident` aliases without changing existing enum/API behavior.
+- Add optional Pydantic AI Bedrock Converse support using AWS credential-chain authentication;
+  retain optional native providers and expose opt-in Anthropic prompt-cache settings.
+- Clarify observation windows, graph validation limits, upfront query budgets and public contracts.
+  Live provider/cache/model-quality qualification remains separate from offline verification.
+
+## Unreleased
+
 - Documentation only: a high-level "How Lumis works" diagram in the README, plus diagrams for
   responsibility layers, graph preparation, triage routing and how a report reaches its
   conclusion. A [small-project guide](docs/small-project.md) with a tested one-service

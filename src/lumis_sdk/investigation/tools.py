@@ -12,16 +12,19 @@ from typing import Any
 from lumis_sdk.connectors.code import CodeSnapshot
 from lumis_sdk.core import Evidence, EvidenceQuery, Hypothesis, IncidentContext, InvestigationBudget
 from lumis_sdk.core.contracts import validate_hypothesis
+from lumis_sdk.core.warnings import hypothesis_warnings
 from lumis_sdk.graph import OperationalGraph
 from lumis_sdk.investigation.config import InvestigatorSettings
 from lumis_sdk.investigation.contracts import (
     AgentOutput,
+    CandidateState,
     InspectRequest,
     ProbeSpec,
     RunMetrics,
     Suggestion,
     ToolReceipt,
 )
+from lumis_sdk.reasoning import assess
 from lumis_sdk.runtime.investigation import EvidenceConnector
 from lumis_sdk.sandbox.runner import ProbeRunner, code_digest
 from lumis_sdk.security.operational import redact_context
@@ -30,6 +33,18 @@ from lumis_sdk.security.redaction import redact_text
 
 class ToolBudgetExceeded(ValueError):
     pass
+
+
+class InvalidInspection(ValueError):
+    """Malformed operation arguments, without echoing model-supplied values."""
+
+
+class InspectionDenied(ValueError):
+    """An operation exceeds the operator's registered authority."""
+
+
+class ProposalLimit(ValueError):
+    """Stable SDK-owned proposal refusal returned to the model, never a source exception."""
 
 
 class InvestigatorStopped(RuntimeError):
@@ -65,7 +80,9 @@ class InvestigationTools:
         self.settings, self.budget, self.base, self.runner = settings, budget, base, runner
         self.receipts: list[ToolReceipt] = []
         self.candidates: dict[str, Hypothesis] = {}
+        self.assessed_candidates: set[str] = set()
         self.tried: set[str] = set()
+        self.query_outcomes: dict[str, ToolReceipt] = {}
         self.attempts = self.probes = self.output_characters = 0
         self.model_usage: dict[str, int] = {}
         self.snapshots: dict[str, CodeSnapshot] = {}
@@ -91,15 +108,46 @@ class InvestigationTools:
         hypothesis_id: str | None = None,
         code_hash: str | None = None,
         snapshot_hash: str | None = None,
+        reason_code: str | None = None,
+        cached_from: str | None = None,
+        warnings: tuple[str, ...] = (),
     ) -> ToolReceipt:
         # git.log: structural SHAs/timestamps are validated; opt-in subjects are redacted upstream.
         safe = output if operation == "git.log" else redact_text(output)
         digest = hashlib.sha256(safe.encode()).hexdigest()
+        original_characters = len(safe)
         remaining = max(0, self.settings.budget.max_total_tool_characters - self.output_characters)
         bound = min(self.settings.budget.max_tool_characters, remaining)
+        states = (
+            tuple(
+                CandidateState(
+                    hypothesis_id=item.hypothesis.id,
+                    state=item.state,
+                    supporting_evidence_ids=item.supporting_evidence_ids,
+                    contradicting_evidence_ids=item.contradicting_evidence_ids,
+                    missing_check_count=len(item.missing_checks),
+                )
+                for candidate in self.candidates.values()
+                for item in (assess(candidate, self.context, ("agent",)),)
+            )
+            if operation in {"evidence", "hypothesis.register", "probe"}
+            else ()
+        )
+        state_characters = sum(len(item.model_dump_json()) for item in states)
+        states_truncated = state_characters > bound // 2
+        if states_truncated:
+            states = ()
+            state_characters = 0
+        bound -= state_characters
+        safe_warnings = tuple(redact_text(warning) for warning in warnings)
+        warning_characters = sum(len(warning) for warning in safe_warnings)
+        if warning_characters > bound // 2:
+            safe_warnings = ()
+            warning_characters = 0
+        bound -= warning_characters
         if len(safe) > bound:
             safe = safe[: max(0, bound - 16)] + " [truncated]" if bound >= 16 else ""
-        self.output_characters += len(safe)
+        self.output_characters += len(safe) + state_characters + warning_characters
         receipt = ToolReceipt.model_validate(
             {
                 "id": f"tool-{len(self.receipts) + 1}",
@@ -111,6 +159,14 @@ class InvestigationTools:
                 "hypothesis_id": hypothesis_id,
                 "code_digest": code_hash,
                 "snapshot_digest": snapshot_hash,
+                "reason_code": reason_code,
+                "truncated": original_characters > bound,
+                "original_characters": original_characters,
+                "output_digest": hashlib.sha256(safe.encode()).hexdigest(),
+                "cached_from": cached_from,
+                "warnings": safe_warnings,
+                "assessments": states,
+                "assessments_truncated": states_truncated,
             }
         )
         self.receipts.append(receipt)
@@ -133,7 +189,7 @@ class InvestigationTools:
             raise ValueError("change records are not enabled")
         ids = {entity.id for entity in self.context.graph.entities}
         if target is not None and target not in ids:
-            raise ValueError("change target is outside incident scope")
+            raise InspectionDenied("change target is outside incident scope")
         records, truncated = await connector.records(
             until=self.context.incident.ended_at,
             entity_ids=(target,) if target else tuple(sorted(ids)),
@@ -158,7 +214,7 @@ class InvestigationTools:
         )
         ids = {entity.id for entity in self.context.graph.entities}
         if repository is None or not set(repository.entity_ids) <= ids:
-            raise ValueError("repository is unregistered or outside incident scope")
+            raise InspectionDenied("repository is unregistered or outside incident scope")
         if repository.id not in self.snapshots:
             self.snapshots[repository.id] = CodeSnapshot(repository, self.base)
         return self.snapshots[repository.id]
@@ -175,12 +231,32 @@ class InvestigationTools:
                 "revised hypothesis requires a new ID; existing probe bindings are immutable"
             )
         if previous is None and len(self.candidates) + pending >= self.budget.max_hypotheses:
-            raise ValueError("hypothesis budget exhausted")
+            raise ProposalLimit("hypothesis budget exhausted; test existing candidates and report.")
+        if previous is None:
+            limits = self.settings.budget
+            count = len(self.candidates) + pending
+            if count >= limits.initial_candidates + limits.followup_candidates:
+                raise ProposalLimit("Proposal limit reached; test existing candidates and report.")
+            first_round = tuple(self.candidates)[: limits.initial_candidates]
+            if count >= limits.initial_candidates and (
+                len(first_round) < limits.initial_candidates
+                or not set(first_round) <= self.assessed_candidates
+            ):
+                raise ProposalLimit("Assess the initial candidates before proposing a follow-up.")
         return candidate
 
     def register(self, hypothesis: Hypothesis) -> None:
         candidate = self._admissible(hypothesis)
         self.candidates[candidate.id] = candidate
+        self._mark_assessed()
+
+    def _mark_assessed(self) -> None:
+        """Follow-up needs attempts for every requested observation, even if unavailable."""
+        self.assessed_candidates.update(
+            candidate.id
+            for candidate in self.candidates.values()
+            if set(candidate.evidence_needed) <= self.tried
+        )
 
     def acceptance_problems(self, output: AgentOutput) -> list[str]:
         """Every reason the final output would be (partly) rejected, without registering anything.
@@ -228,17 +304,25 @@ class InvestigationTools:
                 "Registered observation query",
                 "Query unavailable or requires probe",
                 status="denied",
+                reason_code="access_denied",
             )
-        if query_id in self.tried:
-            cached_facts = [
-                item.model_dump(mode="json")
-                for item in self.context.evidence
-                if item.query_id == query_id
-            ]
-            return self._receipt("evidence", query.description, json.dumps(cached_facts))
+        if query_id in self.query_outcomes:
+            previous = self.query_outcomes[query_id]
+            return self._receipt(
+                "evidence",
+                query.description,
+                previous.output,
+                status=previous.status,
+                reason_code=previous.reason_code,
+                cached_from=previous.id,
+            )
         if len(self.tried) >= self.budget.max_queries:
             return self._receipt(
-                "evidence", query.description, "Evidence query budget exhausted", status="denied"
+                "evidence",
+                query.description,
+                "Evidence query budget exhausted",
+                status="denied",
+                reason_code="query_budget",
             )
         self.tried.add(query_id)
         try:
@@ -260,7 +344,7 @@ class InvestigationTools:
             )
             self._check_context(context)
             self.context = context
-            return self._receipt(
+            receipt = self._receipt(
                 "evidence",
                 query.description,
                 json.dumps(
@@ -272,13 +356,24 @@ class InvestigationTools:
                 ),
             )
         except TimeoutError:
-            return self._receipt(
-                "evidence", query.description, "Observation deadline exceeded", status="timeout"
+            receipt = self._receipt(
+                "evidence",
+                query.description,
+                "Observation deadline exceeded",
+                status="timeout",
+                reason_code="deadline_exceeded",
             )
         except Exception:
-            return self._receipt(
-                "evidence", query.description, "No usable observation", status="error"
+            receipt = self._receipt(
+                "evidence",
+                query.description,
+                "No usable observation",
+                status="error",
+                reason_code="source_unavailable",
             )
+        self.query_outcomes[query_id] = receipt
+        self._mark_assessed()
+        return receipt
 
     async def inspect(self, request: InspectRequest) -> ToolReceipt:
         async with self._lock:
@@ -291,49 +386,79 @@ class InvestigationTools:
                     "Read-only inspection",
                     "Inspection deadline exceeded",
                     status="timeout",
+                    reason_code="deadline_exceeded",
+                )
+            except (InvalidInspection, InspectionDenied) as exc:
+                return self._receipt(
+                    request.operation,
+                    "Read-only inspection",
+                    "Invalid inspection request"
+                    if isinstance(exc, InvalidInspection)
+                    else "Inspection outside approved scope",
+                    status="denied",
+                    reason_code="invalid_request"
+                    if isinstance(exc, InvalidInspection)
+                    else "access_denied",
                 )
             except Exception:
                 return self._receipt(
                     request.operation,
                     "Read-only inspection",
-                    "Inspection denied, unavailable or invalid",
-                    status="denied",
+                    "Inspection source unavailable",
+                    status="error",
+                    reason_code="source_unavailable",
                 )
 
     async def _inspect(self, request: InspectRequest) -> ToolReceipt:
+        required = {
+            "graph": ("target",),
+            "evidence": ("query_id",),
+            "hypothesis.register": ("hypothesis",),
+            "code.read": ("target", "path"),
+            "code.search": ("target", "text"),
+            "git.log": ("target",),
+            "git.diff": ("target", "base_commit", "head_commit"),
+        }
+        if any(getattr(request, key) is None for key in required.get(request.operation, ())):
+            raise InvalidInspection("missing required arguments")
         if request.operation == "catalog":
-            ids = {entity.id for entity in self.context.graph.entities}
-            catalog: dict[str, Any] = {
-                "operations": ["catalog", "graph", "evidence", "hypothesis.register"],
-                "queries": [query.model_dump(mode="json") for query in self.context.queries],
-                "repositories": [
-                    {"id": repo.id, "files": repo.files}
-                    for repo in self.settings.repositories
-                    if set(repo.entity_ids) <= ids
-                ],
-                "probe_enabled": self.runner is not None,
-            }
-            if catalog["repositories"]:
-                catalog["operations"] += ["code.read", "code.search", "git.log", "git.diff"]
-            if "changes" in self.connectors:
-                catalog["operations"].append("changes")
-            return self._receipt("catalog", "Available bounded tools", json.dumps(catalog))
+            return self._receipt("catalog", "Available bounded tools", self.catalog_json())
         if request.operation == "evidence" and request.query_id:
             return await self.collect(request.query_id)
         if request.operation == "hypothesis.register" and request.hypothesis:
-            self.register(request.hypothesis)
+            try:
+                self.register(request.hypothesis)
+            except ProposalLimit as exc:
+                return self._receipt(
+                    request.operation,
+                    "Register a falsifiable candidate",
+                    str(exc),
+                    status="denied",
+                    reason_code="proposal_limit",
+                )
+            except ValueError as exc:
+                raise InvalidInspection("invalid hypothesis") from exc
             return self._receipt(
                 request.operation,
                 "Register a falsifiable candidate",
                 request.hypothesis.model_dump_json(),
+                warnings=hypothesis_warnings(self.candidates[request.hypothesis.id]),
             )
         if request.operation == "changes":
             return await self._changes(request.target)
         if request.operation == "graph" and request.target:
+            if request.target not in {entity.id for entity in self.context.graph.entities}:
+                raise InspectionDenied("graph target outside scope")
             graph = OperationalGraph(self.context.graph).dependencies_within(
                 request.target, hops=1, max_entities=self.budget.max_entities
             )
             return self._receipt("graph", "Incident neighborhood", graph.model_dump_json())
+        if request.operation == "code.read":
+            repository = next(
+                (r for r in self.settings.repositories if r.id == request.target), None
+            )
+            if repository is None or request.path not in repository.files:
+                raise InspectionDenied("file is not allowlisted")
         snapshot = self._snapshot(request.target)
         if request.operation == "code.read" and request.path:
             output = snapshot.read(request.path)
@@ -348,13 +473,37 @@ class InvestigationTools:
                 head_commit=request.head_commit,
             )
         else:
-            raise ValueError("invalid tool request")
+            raise InvalidInspection("invalid tool request")
         return self._receipt(
             request.operation,
             "Allowlisted repository inspection",
             output,
             snapshot_hash=snapshot.digest,
         )
+
+    def catalog_json(self) -> str:
+        """Stable scoped catalog; reading it for the first prompt does not spend tool attempts."""
+        ids = {entity.id for entity in self.context.graph.entities}
+        catalog: dict[str, Any] = {
+            "operations": ["catalog", "graph", "evidence", "hypothesis.register"],
+            "queries": [query.model_dump(mode="json") for query in self.context.queries],
+            "repositories": [
+                {"id": repo.id, "files": repo.files}
+                for repo in self.settings.repositories
+                if set(repo.entity_ids) <= ids
+            ],
+            "probe_enabled": self.runner is not None,
+            "candidate_limits": {
+                "initial": self.settings.budget.initial_candidates,
+                "followup": self.settings.budget.followup_candidates,
+                "total": self.budget.max_hypotheses,
+            },
+        }
+        if catalog["repositories"]:
+            catalog["operations"] += ["code.read", "code.search", "git.log", "git.diff"]
+        if "changes" in self.connectors:
+            catalog["operations"].append("changes")
+        return redact_text(json.dumps(catalog, sort_keys=True))
 
     async def probe(self, spec: ProbeSpec) -> ToolReceipt:
         async with self._lock:
@@ -387,6 +536,7 @@ class InvestigationTools:
                     snapshot_hash = snapshot.digest
                 self.probes += 1
                 self.tried.add(query.id)
+                self._mark_assessed()
                 async with asyncio.timeout(self.budget.query_timeout_seconds):
                     value = await self.runner.run(spec, files)
                 fact = Evidence(

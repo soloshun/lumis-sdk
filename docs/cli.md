@@ -25,6 +25,11 @@ terminal view caps 100/200. Use --entity ID --hops N for smaller neighborhoods.
 Parallel edge labels may overlap; JSON/DOT retain the complete multigraph.
 record-resolution requires an existing incident and explicit human attestation.
 See [resolution fields](incident-investigation.md#reports-and-human-resolution).
+
+Use `lumis incident --project lumis.yaml --incident incident.json --format markdown` for a
+readable report with evidence and receipt citations. JSON remains the default; use it for
+structured evaluation or audit storage. Markdown labels suggestions as tentative and does not
+apply or display proposed patches. Both formats require human review.
 No CLI command applies a fix or promotes a rule.
 
 ## 1. Install and inspect baseline commands

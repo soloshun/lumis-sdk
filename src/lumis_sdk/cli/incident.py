@@ -21,8 +21,11 @@ def incident(
         False, "--use-agent", help="Allow bounded paid agent calls only if triage escalates."
     ),
     store: Path | None = typer.Option(None, "--store", help="Append-only SQLite audit sink."),
+    format: str = typer.Option("json", "--format", help="json or markdown (cited human report)."),
 ) -> None:
     """Triage and optional tool-using investigation; never execute recovery."""
+    if format not in {"json", "markdown"}:
+        raise typer.BadParameter("format must be json or markdown")
     try:
         configured = YamlProject.from_file(project)
         incident = Incident.model_validate_json(read_document(event))
@@ -40,7 +43,7 @@ def incident(
         raise typer.BadParameter(
             "Incident handling failed; check configuration, source access and schema references."
         ) from error
-    typer.echo(result.model_dump_json(indent=2))
+    typer.echo(result.markdown() if format == "markdown" else result.model_dump_json(indent=2))
 
 
 def record_resolution(
@@ -90,7 +93,12 @@ def console(
                 facts = Path(facts_text) if facts_text else None
                 allow = typer.confirm("Allow paid agent calls if triage escalates?", default=False)
                 incident(
-                    project=project, event=event, observations=facts, use_agent=allow, store=None
+                    project=project,
+                    event=event,
+                    observations=facts,
+                    use_agent=allow,
+                    store=None,
+                    format="markdown",
                 )
             else:
                 view.print("Choose 1, 2, 3, 4 or q.")

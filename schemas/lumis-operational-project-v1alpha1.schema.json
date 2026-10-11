@@ -3,6 +3,20 @@
     "AgentBudget": {
       "additionalProperties": false,
       "properties": {
+        "followup_candidates": {
+          "default": 3,
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Followup Candidates",
+          "type": "integer"
+        },
+        "initial_candidates": {
+          "default": 5,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Initial Candidates",
+          "type": "integer"
+        },
         "max_probes": {
           "default": 2,
           "maximum": 10,
@@ -764,6 +778,58 @@
           "default": null,
           "title": "Api Key Env"
         },
+        "aws_region": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Aws Region"
+        },
+        "cache_instructions": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "enum": [
+                "5m",
+                "1h"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Instructions"
+        },
+        "cache_tool_definitions": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "enum": [
+                "5m",
+                "1h"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Tool Definitions"
+        },
         "model": {
           "maxLength": 256,
           "minLength": 1,
@@ -776,7 +842,8 @@
             "openrouter",
             "openai",
             "anthropic",
-            "gemini"
+            "gemini",
+            "bedrock"
           ],
           "title": "Provider",
           "type": "string"

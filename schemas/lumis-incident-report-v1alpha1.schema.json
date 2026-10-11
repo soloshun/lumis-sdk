@@ -1,5 +1,58 @@
 {
   "$defs": {
+    "CandidateState": {
+      "additionalProperties": false,
+      "description": "A bounded mechanical state update, never model reasoning or a probability.",
+      "properties": {
+        "contradicting_evidence_ids": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Contradicting Evidence Ids",
+          "type": "array"
+        },
+        "hypothesis_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Hypothesis Id",
+          "type": "string"
+        },
+        "missing_check_count": {
+          "minimum": 0,
+          "title": "Missing Check Count",
+          "type": "integer"
+        },
+        "state": {
+          "enum": [
+            "supported",
+            "contradicted",
+            "unresolved"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "supporting_evidence_ids": {
+          "default": [],
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Supporting Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "hypothesis_id",
+        "state",
+        "missing_check_count"
+      ],
+      "title": "CandidateState",
+      "type": "object"
+    },
     "Check": {
       "additionalProperties": false,
       "description": "A testable prediction or falsifier evaluated only against tool observations.",
@@ -560,6 +613,18 @@
     "RunMetrics": {
       "additionalProperties": false,
       "properties": {
+        "cache_read_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Cache Read Tokens",
+          "type": "integer"
+        },
+        "cache_write_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Cache Write Tokens",
+          "type": "integer"
+        },
         "evidence_queries": {
           "default": 0,
           "minimum": 0,
@@ -664,7 +729,35 @@
     },
     "ToolReceipt": {
       "additionalProperties": false,
+      "description": "Digest identifies full safe UTF-8 output before truncation, not model visibility.",
       "properties": {
+        "assessments": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CandidateState"
+          },
+          "title": "Assessments",
+          "type": "array"
+        },
+        "assessments_truncated": {
+          "default": false,
+          "title": "Assessments Truncated",
+          "type": "boolean"
+        },
+        "cached_from": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cached From"
+        },
         "code_digest": {
           "anyOf": [
             {
@@ -711,16 +804,57 @@
           "title": "Operation",
           "type": "string"
         },
+        "original_characters": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Original Characters"
+        },
         "output": {
           "maxLength": 64000,
           "title": "Output",
           "type": "string"
+        },
+        "output_digest": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Digest"
         },
         "purpose": {
           "maxLength": 4000,
           "minLength": 1,
           "title": "Purpose",
           "type": "string"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
         },
         "snapshot_digest": {
           "anyOf": [
@@ -745,6 +879,21 @@
           ],
           "title": "Status",
           "type": "string"
+        },
+        "truncated": {
+          "default": false,
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
         }
       },
       "required": [
@@ -853,6 +1002,16 @@
         "type": "string"
       },
       "title": "Unresolved Questions",
+      "type": "array"
+    },
+    "warnings": {
+      "default": [],
+      "items": {
+        "maxLength": 4000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Warnings",
       "type": "array"
     }
   },

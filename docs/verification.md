@@ -41,6 +41,10 @@ structured output, budget exhaustion, repair of rejected output and malformed to
 per-candidate acceptance, malformed claims, triage escalation, source failure,
 scoped code/Git, immutable candidate/probe bindings and separate manual resolution persistence.
 Both notebooks execute offline. Scripted responses test protocol, not model quality.
+The maintenance regressions also cover safe inspection reason codes, cached failures, digest
+visibility, bounded provisional states, named tools, proposal refusals, numeric overlap warnings,
+provider cache usage and a stubbed Pydantic AI Bedrock Converse request. The playground's four
+Markdown reports have checked-in snapshots; no live cache savings or model accuracy is inferred.
 Opt-in real Docker tests cover no network/credential forwarding, unprivileged execution,
 read-only root, copied source, invalid/non-finite/oversized output and timeout/cancellation cleanup.
 See [sandbox qualification](sandbox.md). CI runs these against a preloaded pinned image.

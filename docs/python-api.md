@@ -13,6 +13,13 @@ Use `YamlProject.handle_incident(...)` for evidence-backed triage, optional agen
 mechanical reports and human review. Read the [incident API/config/storage walkthrough](incident-investigation.md)
 and executable [agent notebook](notebooks/incident-agent.ipynb).
 
+`investigate_incident(...)` is an alias for `handle_incident(...)` on both `YamlProject` and
+`PreparedProject`; the existing lower-level `investigate(...)` API is unchanged.
+`Incident.started_at` and `ended_at` delimit the **observation window**, not measured fault
+onset or resolution. A caller-selected lookback is an investigation choice. Every `Evidence`
+observation timestamp must be within the window; underlying change events may be older.
+Use `report.markdown()` for a cited, unconfirmed human-review account without another model call.
+
 The candidate-only investigate API below remains a comparison baseline; use_model is not a
 tool-using agent loop.
 
@@ -116,13 +123,19 @@ Retrieval/rule-learning is not automatic; old candidates are revalidated and ret
 
 `EvidenceConnector` implements async `collect(query, incident) -> tuple[Evidence, ...]`.
 Register the connector by provider name and its allowed catalog queries with the runtime.
-The Python protocol supports additional caller-defined providers; the CLI configuration deliberately
-accepts only the shipped snapshot and Prometheus providers.
+The Python protocol supports additional caller-defined providers. The validated YAML/CLI allowlist
+is `snapshot`, `prometheus`, `loki`, `tempo`, `prefect`, `sql`, `changes` and `probe`, each subject
+to its source/query checks. HTTP sources require the `http` extra and explicit enablement;
+SQL requires the `sql` extra and an approved read-only query. Changes require enabled,
+operator-mapped change sources. Probes require an enabled isolated sandbox and are not triage
+evidence. Nothing is enabled merely by naming a provider. See [configuration](configuration.md),
+[telemetry/changes](telemetry-connectors.md) and [sandbox](sandbox.md).
 Implement read-only, bounded, least-privilege access; never evaluate model-generated commands.
 
 `OperationalGraph` exposes `upstream_of`, `downstream_of`, `dependencies_within`
 and `scope`. Declare direction and provenance explicitly. Scope is bounded and cycle-safe.
-Recent-change semantic queries and a persistent graph backend are not current APIs.
+Recent-change semantic queries are documented in [telemetry connectors](telemetry-connectors.md).
+A persistent graph backend is not a current API.
 
 ## Result contracts
 

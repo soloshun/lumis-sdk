@@ -49,6 +49,9 @@ flowchart TD
 - **People decide.** Lumis reports and suggests. There is no remediation executor.
 
 New here? Start with [using Lumis on a small project](docs/small-project.md).
+The [glossary](docs/glossary.md) explains the public contracts and result states.
+An incident's `started_at`/`ended_at` are an **observation window**, not fault onset/recovery.
+The evidence timestamp must lie inside it; the chosen lookback is not a measured cause start.
 
 ## Start here
 
@@ -102,7 +105,8 @@ Start with the [incident API guide](docs/incident-investigation.md) and
 - Opt-in resource-limited Docker experiments; never host execution or production-fix verification.
 - JSON/DOT/SVG/terminal graph exports, interactive CLI, SQLite incident audit and manual resolutions.
 - Optional Prometheus observations and opt-in model candidates/agents: OpenRouter (default),
-  native OpenAI, Anthropic and Gemini. See [model configuration](docs/models.md).
+  native OpenAI, Anthropic and Gemini, plus an optional Pydantic AI Bedrock investigator.
+  See [model configuration](docs/models.md).
 - YAML-backed Loki logs, Tempo trace search/spans and Prefect flow/task observations, plus
   scoped Tempo/Prefect topology. See the [connector setup guide](docs/telemetry-connectors.md).
 
