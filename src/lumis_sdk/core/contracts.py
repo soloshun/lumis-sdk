@@ -202,6 +202,14 @@ class HypothesisAssessment(Contract):
     contradicting_evidence_ids: tuple[Identifier, ...] = ()
     missing_checks: tuple[Check, ...] = ()
 
+    @property
+    def display_state(self) -> str:
+        return {
+            "supported": "supported (not confirmed)",
+            "contradicted": "ruled out",
+            "unresolved": "can't tell",
+        }[self.state]
+
 
 class TraceStep(Contract):
     """A reproducible audit event without wall-clock timing or provider exception details."""

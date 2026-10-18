@@ -12,6 +12,11 @@ from xml.etree import ElementTree
 import pytest
 
 
+def _assert_report_snapshot(report, name):
+    expected = Path(__file__).parent / "fixtures" / "reports" / f"{name}.md"
+    assert report.markdown() == expected.read_text()
+
+
 @pytest.mark.parametrize("name", ["operational-graph", "incident-agent", "sdk-playground"])
 def test_operational_graph_notebook_runs_all_cells(tmp_path, monkeypatch, name):
     drawings = []
@@ -70,6 +75,8 @@ def test_operational_graph_notebook_runs_all_cells(tmp_path, monkeypatch, name):
             assert len(namespace["stream_chunks"]) >= 2
             assert len(drawings) == 4  # Estate, neighborhood, candidate path and latency chart.
             assert len(namespace["estate"].entities) == 9
+            for scenario in ("deterministic", "agent", "capped", "failure"):
+                _assert_report_snapshot(namespace[f"{scenario}_report"], scenario)
             assert {row["host"] for row in namespace["http_calls"]} == {
                 "prometheus.synthetic.test",
                 "loki.synthetic.test",

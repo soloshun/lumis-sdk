@@ -10,7 +10,8 @@ sufficient terminal signature or one bounded investigator → mechanical assessm
 human-review report → optional audit storage → separately recorded human resolution.
 
 The public investigator uses Pydantic AI, not LangGraph or a multi-agent scheduler. It has two
-tool families, inspect and probe. Applications can replace it through the Investigator
+named read-only tools and an optional probe. Legacy `inspect` remains callable for compatibility.
+Applications can replace it through the Investigator
 protocol without changing evidence validation. The default configured provider is OpenRouter;
 native OpenAI, Anthropic and Gemini are also available. No model runs unless explicitly enabled
 or injected by the caller.
@@ -49,7 +50,10 @@ Terminal triage does not instantiate a provider, read code or run a sandbox.
 
 ### Tools and investigation
 
-The agent discovers available operations with inspect(operation="catalog").
+The first prompt includes the scoped operator-owned catalog, so no catalog tool call is required.
+Named tools are `evidence_query`, `graph_neighbourhood`, `changes`, `code_read`, `code_search`,
+`git_log`, `git_diff`, `register_hypothesis` and `probe`. They use the same broker, scope,
+allowlists and budgets as legacy `inspect(operation=...)`; they add no authority.
 Only these operations are supported:
 
 | Operation | Authority |
@@ -156,6 +160,8 @@ The existing project, topology, source, query and incident contracts remain. Add
         max_tool_characters: 8000
         max_total_tool_characters: 32000
         validation_retries: 2
+        initial_candidates: 5
+        followup_candidates: 3
       repositories:
         - id: application
           root: ./approved-source
@@ -174,16 +180,64 @@ a query with provider: probe, target entity/key and description. A candidate mus
 query. Probes cannot be triage evidence. See the [sandbox procedure](sandbox.md).
 
 The existing budget limits graph/context/query/candidate sizes and query/source/total deadlines.
+Before rules run, Lumis collects the de-duplicated union of `initial_query_ids`, then each
+in-scope rule's `evidence_needed` in configuration order (first occurrence wins). These are
+code-selected connector reads, not model tool calls, and count against `max_queries`, including
+failed reads. Two rules sharing `health` cause one fetch. Size `max_queries` for that union plus
+new agent observations; a smaller budget leaves unread checks unknown, not false.
+
+Catalog validation checks graph entity membership and registered query coverage for each
+prediction/falsifier. It does not check connected edges or direction between consecutive
+`causal_path` entries: a path `[db, api]` can validate when both entities exist even without a
+db→api edge. `supported` means all usable predictions passed and no falsifier passed; missing,
+degraded or conflicting checks remain unresolved. It is not proof of the proposed mechanism.
+Overlapping numeric predictions/falsifiers produce authoring warnings, not rejection; mechanical
+assessment is unchanged and contradiction still dominates.
+
+After registration/evidence/probe receipts, `assessments` give provisional mechanical states
+and supporting/ruling-out evidence IDs. They are bounded by the tool character budget;
+`assessments_truncated` identifies omitted states. The final report remains authoritative.
+`initial_candidates` (default 5, max 5) and `followup_candidates` (default 3, max 3) limit
+proposal rounds. A follow-up requires the first round to have been assessed against requested
+observations: every requested query must have been attempted (failed reads still mean unknown).
+`budget.max_hypotheses` remains the hard total cap (default 5); set it to 8 if
+you explicitly want the full 5+3 allowance. Duplicate identical IDs do not consume slots;
+revisions require new IDs. Refusals ask the model to test existing candidates and report.
+These are proposal guards, not guaranteed model cooperation; hard request/tool/token limits remain.
 Triage and agent share the evidence-query budget. Repeated queries use cached evidence; failed
 observations are not silently retried. All tool attempts, including denied calls, consume the
 broker budget. Each run has independent state.
+
+Repeated observation requests identify `cached_from` and preserve `error`/`timeout` outcomes
+without another read. A successful empty observation remains `ok` with `[]`, never an invented
+zero. Inspection `reason_code` distinguishes `invalid_request`, `access_denied`,
+`source_unavailable`, `deadline_exceeded`, `query_budget` and `proposal_limit`; raw provider
+exceptions, credentials and URLs are never copied into receipts.
+
+Receipt `digest` is SHA-256 of the full safe/redacted UTF-8 output **before character truncation**.
+Validated structural `git.log` metadata is already sanitized upstream and is preserved verbatim.
+`output_digest` hashes the actually returned `output`; `original_characters` and `truncated`
+expose visibility. An exhausted output budget can yield an empty string with `truncated: true`.
+Neither digest proves the model saw all hashed text. Cached receipts hash their cached visible
+text; use `cached_from` to inspect the original receipt and its full-output digest.
+
+The reference agent keeps instructions, tool definitions and its initial catalog/context bundle
+stable during one run; results append to the conversation. Anthropic cache options and
+`cache_read_tokens`/`cache_write_tokens` metrics are described in [models](models.md).
+`metrics.cache_read_share` is read tokens divided by input tokens (zero for no input); live
+savings depend on the model, prefix length, TTL and provider. No fixed cache-hit rate is promised.
 
 ## Reports and human resolution
 
 IncidentReport contains context, triage findings, mechanically evaluated candidates, redacted
 tool receipts, tentative suggestions, unresolved questions, route, stop reason and
 request/token/tool/query/probe counts. It does not store raw chain-of-thought or the full provider
-conversation (callers that need it for evaluation read `PydanticInvestigator.messages`). No global tracing is enabled by Lumis. OpenAI response storage is explicitly
+conversation. `report.markdown()` and `lumis incident ... --format markdown` give a deterministic
+human-readable account with evidence/receipt links, ruled-out candidates, missing checks and
+tentative suggestions. Rendering makes no model call and does not promote confirmation.
+The default CLI format remains JSON; untrusted text is escaped, not treated as HTML/links.
+Callers that need the provider conversation for evaluation read `PydanticInvestigator.messages`.
+No global tracing is enabled by Lumis. OpenAI response storage is explicitly
 disabled; this does not override provider retention policies.
 
 supported_diagnosis means checks support a candidate, not confirmed causality. It also requires

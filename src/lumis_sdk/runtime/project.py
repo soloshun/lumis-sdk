@@ -156,15 +156,36 @@ class Sources(Contract):
 
 
 class ModelSettings(Contract):
-    provider: Literal["openrouter", "openai", "anthropic", "gemini"] = "openrouter"
+    provider: Literal["openrouter", "openai", "anthropic", "gemini", "bedrock"] = "openrouter"
     model: Identifier
     api_key_env: Annotated[str, StringConstraints(pattern=r"^[A-Z][A-Z0-9_]*$")] | None = None
     # Provider reasoning effort for the reference agent; None leaves the provider default.
     reasoning: Literal["minimal", "low", "medium", "high"] | None = None
+    cache_instructions: StrictBool | Literal["5m", "1h"] | None = None
+    cache_tool_definitions: StrictBool | Literal["5m", "1h"] | None = None
+    aws_region: Identifier | None = None
+
+    @model_validator(mode="after")
+    def validate_provider_options(self) -> Self:
+        if self.provider != "anthropic" and (
+            self.cache_instructions is not None or self.cache_tool_definitions is not None
+        ):
+            raise ValueError("explicit prompt-cache options currently require Anthropic")
+        if self.provider != "bedrock" and self.aws_region is not None:
+            raise ValueError("aws_region requires Bedrock")
+        if self.provider == "bedrock" and (
+            self.api_key_env is not None or self.reasoning is not None
+        ):
+            raise ValueError(
+                "Bedrock uses the AWS credential chain; API-key/reasoning options unsupported"
+            )
+        return self
 
     @property
     def credential_env(self) -> str:
         """Provider-specific default, never silently use another provider's key."""
+        if self.provider == "bedrock":
+            raise ValueError("Bedrock uses the AWS credential chain, not an API-key variable")
         return (
             self.api_key_env
             or {

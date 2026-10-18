@@ -86,7 +86,7 @@ Validate any edited file with `lumis doctor --project FILE`.
 | `identity.aliases` | Explicit raw ID → canonical ID mapping; no chains/cycles or guessed name joins |
 | `discovery` | Separate estate discovery time/entity/edge/series/response bounds |
 | `observations_file` | Optional normalized evidence JSON array, relative to YAML directory |
-| `models` | Optional provider/model/key-variable configuration; OpenRouter default, also OpenAI/Anthropic/Gemini |
+| `models` | Optional provider/model configuration; OpenRouter default, also OpenAI/Anthropic/Gemini and optional Bedrock investigator |
 | `policies.default_action_mode` | Only `read_only` is supported; no action execution exists |
 | `graph.entities` | Unique operational id/kind/name, string metadata attributes, provenance IDs |
 | `graph.relationships` | Source/target/kind/provenance, endpoints must exist |
@@ -245,6 +245,9 @@ schema support and quality remain operator responsibilities.
 ## Incident and observations
 
 `incident.json` contains `id`, `affected_entities`, `symptoms`, `started_at`, `ended_at`.
+The last two fields define the **observation window**: the caller's lookback boundary and
+observation cutoff, not measured fault onset and recovery. Evidence observation timestamps
+must fall within this window. Keep the field names unchanged in 0.1.x.
 `observations.json` is an array of `Evidence` records: `id`, `query_id`, `entity_id`,
 `key`, scalar `value`, `observed_at`, `source`, `retrieval_method`, optional `quality`
 (`observed` or `degraded`). Values and check types must agree.

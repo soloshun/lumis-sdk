@@ -32,6 +32,14 @@ class Finding(Contract):
     terminal: StrictBool
     assessment: HypothesisAssessment
 
+    @property
+    def display_status(self) -> str:
+        return {
+            "match": "matched",
+            "no_match": "did not match (ruled out)",
+            "unknown": "can't tell",
+        }[self.status]
+
 
 class AgentBudget(Contract):
     request_limit: int = Field(default=8, ge=1, le=30)
@@ -43,6 +51,8 @@ class AgentBudget(Contract):
     # Malformed tool arguments or a rejected final answer are returned to the model this many
     # times (the validation error is the retry message); attempts still count toward the budgets.
     validation_retries: int = Field(default=2, ge=0, le=5)
+    initial_candidates: int = Field(default=5, ge=1, le=5)
+    followup_candidates: int = Field(default=3, ge=0, le=3)
 
 
 class InspectRequest(Contract):
@@ -74,7 +84,19 @@ class ProbeSpec(Contract):
     repository: Identifier | None = None
 
 
+class CandidateState(Contract):
+    """A bounded mechanical state update, never model reasoning or a probability."""
+
+    hypothesis_id: Identifier
+    state: Literal["supported", "contradicted", "unresolved"]
+    supporting_evidence_ids: tuple[Identifier, ...] = ()
+    contradicting_evidence_ids: tuple[Identifier, ...] = ()
+    missing_check_count: int = Field(ge=0)
+
+
 class ToolReceipt(Contract):
+    """Digest identifies full safe UTF-8 output before truncation, not model visibility."""
+
     id: Identifier
     operation: Identifier
     status: Literal["ok", "error", "denied", "timeout"]
@@ -84,6 +106,14 @@ class ToolReceipt(Contract):
     hypothesis_id: Identifier | None = None
     code_digest: Identifier | None = None
     snapshot_digest: Identifier | None = None
+    reason_code: Identifier | None = None
+    truncated: StrictBool = False
+    output_digest: Identifier | None = None
+    original_characters: int | None = Field(default=None, ge=0)
+    cached_from: Identifier | None = None
+    warnings: tuple[Text, ...] = ()
+    assessments: tuple[CandidateState, ...] = ()
+    assessments_truncated: StrictBool = False
 
 
 class Suggestion(Contract):
@@ -107,6 +137,13 @@ class RunMetrics(Contract):
     model_requests: int = Field(default=0, ge=0)
     input_tokens: int = Field(default=0, ge=0)
     output_tokens: int = Field(default=0, ge=0)
+    cache_read_tokens: int = Field(default=0, ge=0)
+    cache_write_tokens: int = Field(default=0, ge=0)
+
+    @property
+    def cache_read_share(self) -> float:
+        return self.cache_read_tokens / self.input_tokens if self.input_tokens else 0.0
+
     tool_attempts: int = Field(default=0, ge=0)
     evidence_queries: int = Field(default=0, ge=0)
     probes: int = Field(default=0, ge=0)
@@ -129,6 +166,13 @@ class IncidentReport(Contract):
     metrics: RunMetrics = Field(default_factory=RunMetrics)
     truth_state: Literal["unconfirmed_hypothesis"] = "unconfirmed_hypothesis"
     requires_human_review: Literal[True] = True
+    warnings: tuple[Text, ...] = ()
+
+    def markdown(self) -> str:
+        """Render a cited, unconfirmed human-review account; never a second model call."""
+        from lumis_sdk.investigation.render import report_markdown
+
+        return report_markdown(self)
 
     @model_validator(mode="after")
     def validate_links(self) -> Self:
@@ -146,6 +190,19 @@ class IncidentReport(Contract):
                 <= evidence_ids
             ):
                 raise ValueError("unknown assessment evidence")
+        prior_receipts: set[str] = set()
+        for receipt in self.receipts:
+            if receipt.cached_from is not None and receipt.cached_from not in prior_receipts:
+                raise ValueError("cached receipt must reference an earlier receipt")
+            for state in receipt.assessments:
+                if state.hypothesis_id not in hypotheses:
+                    raise ValueError("unknown provisional hypothesis")
+                if (
+                    not set((*state.supporting_evidence_ids, *state.contradicting_evidence_ids))
+                    <= evidence_ids
+                ):
+                    raise ValueError("unknown provisional evidence")
+            prior_receipts.add(receipt.id)
         for suggestion in self.suggestions:
             if suggestion.hypothesis_id not in hypotheses:
                 raise ValueError("unknown suggestion hypothesis")
